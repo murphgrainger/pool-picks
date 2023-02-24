@@ -10,7 +10,6 @@ const BookmarkLinkMutation = gql`
     bookmarkLink(id: $id) {
       title
       url
-      imageUrl
       category
       description
     }
@@ -56,7 +55,6 @@ const Link = ({ link }: InferGetServerSidePropsType<typeof getServerSideProps>) 
           )}
         </button>
         <h1>{link.title}</h1>
-        <img src={link.imageUrl} className="shadow-lg rounded-lg" />
         <p>{link.description}</p>
         <a className="text-blue-500" href={`${link.url}`}>
           {link.url}
@@ -79,7 +77,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       title: true,
       category: true,
       url: true,
-      imageUrl: true,
       description: true,
     },
   });

@@ -10,7 +10,6 @@ const FavoritesQuery = gql`
         title
         id
         url
-        imageUrl
         description
         category
       }
@@ -40,7 +39,6 @@ const Favorites = () => {
                   title={link.title}
                   description={link.description}
                   category={link.category}
-                  imageUrl={link.imageUrl}
                   url={link.url}
                   id={link.id}
                 />

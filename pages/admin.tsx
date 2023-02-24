@@ -11,15 +11,13 @@ type FormValues = {
   url: string;
   category: string;
   description: string;
-  image: FileList;
 }
 
 const CreateLinkMutation = gql`
-  mutation($title: String!, $url: String!, $imageUrl: String!, $category: String!, $description: String!) {
-    createLink(title: $title, url: $url, imageUrl: $imageUrl, category: $category, description: $description) {
+  mutation($title: String!, $url: String!, $category: String!, $description: String!) {
+    createLink(title: $title, url: $url, category: $category, description: $description) {
       title
       url
-      imageUrl
       category
       description
     }
@@ -34,38 +32,9 @@ const Admin = () => {
     formState: { errors },
   } = useForm<FormValues>()
 
-  // Upload photo function
-  const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length <= 0) return
-    const file = e.target.files[0]
-    const filename = encodeURIComponent(file.name)
-    const res = await fetch(`/api/upload-image?file=${filename}`)
-    const data = await res.json()
-    const formData = new FormData()
-
-    // @ts-ignore
-    Object.entries({ ...data.fields, file }).forEach(([key, value]) => {
-      // @ts-ignore
-      formData.append(key, value)
-    })
-
-    toast.promise(
-      fetch(data.url, {
-        method: 'POST',
-        body: formData,
-      }),
-      {
-        loading: 'Uploading...',
-        success: 'Image successfully uploaded!🎉',
-        error: `Upload failed 😥 Please try again ${error}`,
-      },
-    )
-  }
-
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    const { title, url, category, description, image } = data
-    const imageUrl = `https://${process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${image[0]?.name}`
-    const variables = { title, url, category, description, imageUrl }
+    const { title, url, category, description } = data
+    const variables = { title, url, category, description }
     try {
       toast.promise(createLink({ variables }), {
         loading: 'Creating new link..',
@@ -120,16 +89,6 @@ const Admin = () => {
             name="category"
             type="text"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-        </label>
-        <label className="block">
-          <span className="text-gray-700">Upload a .png or .jpg image (max 1MB).</span>
-          <input
-            {...register('image', { required: true })}
-            onChange={uploadPhoto}
-            type="file"
-            accept="image/png, image/jpeg"
-            name="image"
           />
         </label>
 

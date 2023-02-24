@@ -7,7 +7,6 @@ builder.prismaObject('Link', {
     title: t.exposeString('title'),
     url: t.exposeString('url'),
     description: t.exposeString('description'),
-    imageUrl: t.exposeString('imageUrl'),
     category: t.exposeString('category'),
     users: t.relation('users')
   }),
@@ -48,11 +47,10 @@ builder.mutationField('createLink', (t) =>
       title: t.arg.string({ required: true }),
       description: t.arg.string({ required: true }),
       url: t.arg.string({ required: true }),
-      imageUrl: t.arg.string({ required: true }),
       category: t.arg.string({ required: true }),
     },
     resolve: async (query, _parent, args, ctx) => {
-      const { title, description, url, imageUrl, category } = args
+      const { title, description, url, category } = args
 
       if (!(await ctx).user) {
         throw new Error("You have to be logged in to perform this action")
@@ -74,7 +72,6 @@ builder.mutationField('createLink', (t) =>
           title,
           description,
           url,
-          imageUrl,
           category,
         }
       })
@@ -90,7 +87,6 @@ builder.mutationField('updateLink', (t) =>
       title: t.arg.string(),
       description: t.arg.string(),
       url: t.arg.string(),
-      imageUrl: t.arg.string(),
       category: t.arg.string(),
     },
     resolve: async (query, _parent, args, _ctx) =>
@@ -102,7 +98,6 @@ builder.mutationField('updateLink', (t) =>
         data: {
           title: args.title ? args.title : undefined,
           url: args.url ? args.url : undefined,
-          imageUrl: args.imageUrl ? args.imageUrl : undefined,
           category: args.category ? args.category : undefined,
           description: args.description ? args.description : undefined,
         }
