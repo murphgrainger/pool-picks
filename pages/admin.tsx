@@ -7,25 +7,23 @@ import type { GetServerSideProps } from 'next'
 import { getSession } from '@auth0/nextjs-auth0'
 
 type FormValues = {
-  title: string;
-  url: string;
-  category: string;
-  description: string;
+  name: string;
+  sport: string;
+  par: string;
 }
 
-const CreateLinkMutation = gql`
-  mutation($title: String!, $url: String!, $category: String!, $description: String!) {
-    createLink(title: $title, url: $url, category: $category, description: $description) {
-      title
-      url
-      category
-      description
+const CreateTournamentMutation = gql`
+  mutation($name: String!, $sport: String!, $par: Int) {
+    createTournament(name: $name, sport: $sport, par: $par) {
+      name
+      sport
+      par
     }
   }
 `
 
 const Admin = () => {
-  const [createLink, { data, loading, error }] = useMutation(CreateLinkMutation)
+  const [createTournament, { data, loading, error }] = useMutation(CreateTournamentMutation)
   const {
     register,
     handleSubmit,
@@ -33,12 +31,13 @@ const Admin = () => {
   } = useForm<FormValues>()
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    const { title, url, category, description } = data
-    const variables = { title, url, category, description }
+    const { name, sport, par } = data
+    const variables = { name, sport, par: parseInt(par, 10) }
+    console.log(variables)
     try {
-      toast.promise(createLink({ variables }), {
-        loading: 'Creating new link..',
-        success: 'Link successfully created!🎉',
+      toast.promise(createTournament({ variables }), {
+        loading: 'Creating new tournament..',
+        success: 'Tournament successfully created!🎉',
         error: `Something went wrong 😥 Please try again -  ${error}`,
       })
     } catch (error) {
@@ -47,47 +46,37 @@ const Admin = () => {
   }
 
   return (
-    <div className="container mx-auto max-w-md py-12">
+    <div className="container mx-auto max-w-md p-3">
       <Toaster />
-      <h1 className="text-3xl font-medium my-5">Create a new link</h1>
       <form className="grid grid-cols-1 gap-y-6 shadow-lg p-8 rounded-lg" onSubmit={handleSubmit(onSubmit)}>
+      <h1 className="text-3xl font-medium my-5">Create a Tournament</h1>
         <label className="block">
-          <span className="text-gray-700">Title</span>
+          <span className="text-gray-700">Name</span>
           <input
-            placeholder="Title"
-            {...register('title', { required: true })}
-            name="title"
+            placeholder="name"
+            {...register('name', { required: true })}
+            name="name"
             type="text"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         </label>
         <label className="block">
-          <span className="text-gray-700">Description</span>
+          <span className="text-gray-700">Sport</span>
           <input
-            placeholder="Description"
-            {...register('description', { required: true })}
-            name="description"
+            placeholder="Golf"
+            {...register('sport', { required: true })}
+            name="sport"
             type="text"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         </label>
         <label className="block">
-          <span className="text-gray-700">Url</span>
+          <span className="text-gray-700">Par</span>
           <input
-            placeholder="https://example.com"
-            {...register('url', { required: true })}
-            name="url"
-            type="text"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-        </label>
-        <label className="block">
-          <span className="text-gray-700">Category</span>
-          <input
-            placeholder="Name"
-            {...register('category', { required: true })}
-            name="category"
-            type="text"
+            {...register('par')}
+            name="par"
+            type="number"
+            inputMode='numeric'
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         </label>
@@ -110,7 +99,7 @@ const Admin = () => {
               Creating...
             </span>
           ) : (
-            <span>Create Link</span>
+            <span>Create Tournament</span>
           )}
         </button>
       </form>

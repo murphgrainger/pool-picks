@@ -3,16 +3,12 @@ import React from 'react';
 interface Props {
   name: string;
   par: number | null;
-  cut: number | null;
-  status: string;
   id: number;
 }
 
 export const Tournament: React.FC<Props> = ({
   name,
   par,
-  cut,
-  status,
   id,
 }) => {
   return (

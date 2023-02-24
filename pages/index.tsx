@@ -33,17 +33,8 @@ function Home() {
   const { data, loading, error, fetchMore } = useQuery(AllTournamentsQuery, {
     variables: { first: 3 },
   });
+  console.log(data.tournaments.edges)
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center">
-        To view the tournaments you need to{' '}
-        <Link href="/api/auth/login" className=" block bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0">
-          Login
-        </Link>
-      </div>
-    );
-  }
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
@@ -52,27 +43,31 @@ function Home() {
 
   return (
     <div>
-      <Head>
-        <title>Pool Picks</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <div className="container mx-auto max-w-5xl my-20 flex flex-wrap items-center flex-col">
       <h1 className="text-center">Welcome to Pool Picks</h1>
+      <p className="text-center p-2">This app allows you to create pools for tournaments and invite friends and families to win the pool.</p>
       <div>
+      {!user && (
+          <Link href="/api/auth/login" className="inline-flex items-center mt-10"><button>Login to Start</button></Link>
+          )}
       {user && (
         <div className="flex flex-col justify-center items-center flex-wrap">
          <Link href="/admin"><button>Create Tournament</button></Link>
         </div>
           )}
       </div>
-      { data?.tournaments.length &&
+      { data?.tournaments?.edges &&
         (
-        <div>
+        <div className="w-full">
           <div className="flex flex-col p-4 w-full">
             <h3>Tournaments</h3>
             {data?.tournaments.edges.map(({ node }: { node: Node }) => (
               <Link href={`/tournament/${node.id}`}>
-                <Tournament {...node}              
+                <Tournament
+                  key={node.id}
+                  id={node.id}
+                  name={node.name}
+                  par={node.par}          
                   />
               </Link>
             ))}
@@ -95,13 +90,6 @@ function Home() {
             >
               more
             </button>) 
-          }
-          { data?.tournaments.length &&
-            (
-              <p className="my-10 text-center font-medium">
-                You've reached the end!{" "}
-              </p>
-            )
           }
         </div>
         )}

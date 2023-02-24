@@ -56,7 +56,7 @@ builder.mutationField('createTournament', (t) =>
       sport: t.arg.string({ required: true }),
       par: t.arg.int(),
       cut: t.arg.int(),
-      status: t.arg.string({ required: true }),
+      status: t.arg.string(),
       start_date: t.arg({ type: "Date" }),
     },
     resolve: async (query, _parent, args, ctx) => {
@@ -83,7 +83,6 @@ builder.mutationField('createTournament', (t) =>
             sport, 
             par, 
             cut, 
-            status, 
             start_date
         }
       })
