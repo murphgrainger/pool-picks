@@ -5,7 +5,11 @@ builder.prismaObject('Athlete', {
         id: t.exposeID('id'),
         first_name: t.exposeString('first_name'),
         last_name: t.exposeString('last_name'),
-    }),
+        full_name: t.exposeString('full_name'),
+        ranking: t.exposeInt('ranking', { nullable: true, }),
+        external_id: t.exposeInt('external_id', { nullable: true, }),
+
+      }),
 })
 
 builder.queryField('athletes', (t) =>
@@ -40,11 +44,12 @@ builder.mutationField('createAthlete', (t) =>
     args: {
       first_name: t.arg.string({ required: true }),
       last_name: t.arg.string({ required: true }),
+      full_name: t.arg.string({ required: true }),
       ranking: t.arg.int(),
       external_id: t.arg.int()
     },
     resolve: async (query, _parent, args, ctx) => {
-      const { first_name, last_name } = args
+      const { first_name, last_name, full_name, ranking, external_id } = args
 
       if (!(await ctx).user) {
         throw new Error("You have to be logged in to perform this action")
@@ -63,7 +68,10 @@ builder.mutationField('createAthlete', (t) =>
           ...query,
           data: {
               first_name,
-              last_name
+              last_name,
+              full_name,
+              ranking,
+              external_id
           }
         })
     }

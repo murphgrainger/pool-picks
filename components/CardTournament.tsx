@@ -6,7 +6,7 @@ interface Props {
   id: number;
 }
 
-export const Tournament: React.FC<Props> = ({
+export const CardTournament: React.FC<Props> = ({
   name,
   par,
   id,
