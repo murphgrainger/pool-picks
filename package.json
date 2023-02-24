@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "vercel-build": "npx prisma generate --data-proxy && next build"
+    "vercel-build": "npx prisma generate && next build"
   },
   "dependencies": {
     "@apollo/client": "3.7.4",
