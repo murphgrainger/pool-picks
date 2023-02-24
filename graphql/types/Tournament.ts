@@ -75,17 +75,16 @@ builder.mutationField('createTournament', (t) =>
       if (!user || user.role !== "ADMIN") {
         throw new Error("You don have permission ot perform this action")
       }
-
-      return await prisma.tournament.create({
-        ...query,
-        data: {
-            name, 
-            sport, 
-            par, 
-            cut, 
-            start_date
-        }
-      })
+        return await prisma.tournament.create({
+          ...query,
+          data: {
+              name, 
+              sport, 
+              par, 
+              cut, 
+              start_date
+          }
+        })
     }
   })
 )

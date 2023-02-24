@@ -28,18 +28,19 @@ const Admin = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset
   } = useForm<FormValues>()
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     const { name, sport, par } = data
     const variables = { name, sport, par: parseInt(par, 10) }
-    console.log(variables)
     try {
       toast.promise(createTournament({ variables }), {
         loading: 'Creating new tournament..',
         success: 'Tournament successfully created!🎉',
         error: `Something went wrong 😥 Please try again -  ${error}`,
       })
+      reset()
     } catch (error) {
       console.error(error)
     }
@@ -53,7 +54,7 @@ const Admin = () => {
         <label className="block">
           <span className="text-gray-700">Name</span>
           <input
-            placeholder="name"
+            placeholder="i.e. PGA Championship"
             {...register('name', { required: true })}
             name="name"
             type="text"

@@ -16,7 +16,6 @@ const Header = () => {
               <Link href="/api/auth/logout" className="inline-flex items-center">
                 <button>Logout</button>
               </Link>
-              <img alt="profile" className="rounded-full w-12 h-12" src={user.picture ? user.picture : ''} />
             </div>
           ) : (
             <Link href="/api/auth/login" className="inline-flex items-center">

@@ -16,6 +16,7 @@ const AllTournamentsQuery = gql`
       edges {
         cursor
         node {
+          id
           name
           sport
           start_date
@@ -33,8 +34,7 @@ function Home() {
   const { data, loading, error, fetchMore } = useQuery(AllTournamentsQuery, {
     variables: { first: 3 },
   });
-  console.log(data.tournaments.edges)
-
+  console.log(data?.tournaments?.edges)
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
@@ -47,9 +47,6 @@ function Home() {
       <h1 className="text-center">Welcome to Pool Picks</h1>
       <p className="text-center p-2">This app allows you to create pools for tournaments and invite friends and families to win the pool.</p>
       <div>
-      {!user && (
-          <Link href="/api/auth/login" className="inline-flex items-center mt-10"><button>Login to Start</button></Link>
-          )}
       {user && (
         <div className="flex flex-col justify-center items-center flex-wrap">
          <Link href="/admin"><button>Create Tournament</button></Link>
@@ -71,26 +68,26 @@ function Home() {
                   />
               </Link>
             ))}
+            { hasNextPage && (
+              <button
+                className="px-4 py-2 bg-black text-white rounded my-10"
+                onClick={() => {
+                  fetchMore({
+                    variables: { after: endCursor },
+                    updateQuery: (prevResult, { fetchMoreResult }) => {
+                      fetchMoreResult.tournaments.edges = [
+                        ...prevResult.tournaments.edges,
+                        ...fetchMoreResult.tournaments.edges,
+                      ];
+                      return fetchMoreResult;
+                    },
+                  });
+                }}
+              >
+                more
+              </button>) 
+            }
           </div>
-          { hasNextPage && (
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded my-10"
-              onClick={() => {
-                fetchMore({
-                  variables: { after: endCursor },
-                  updateQuery: (prevResult, { fetchMoreResult }) => {
-                    fetchMoreResult.tournaments.edges = [
-                      ...prevResult.tournaments.edges,
-                      ...fetchMoreResult.tournaments.edges,
-                    ];
-                    return fetchMoreResult;
-                  },
-                });
-              }}
-            >
-              more
-            </button>) 
-          }
         </div>
         )}
       </div>
