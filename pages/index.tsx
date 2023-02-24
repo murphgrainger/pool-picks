@@ -1,14 +1,14 @@
 // /pages/index.tsx
 import Head from "next/head";
 import { gql, useQuery, useMutation } from "@apollo/client";
-import { AwesomeLink } from "../components/AwesomeLink";
-import type { Link as Node } from "@prisma/client";
+import { Tournament } from "../components/Tournament";
+import type { Tournament as Node } from "@prisma/client";
 import Link from "next/link";
 import { useUser } from "@auth0/nextjs-auth0/client";
 
-const AllLinksQuery = gql`
-  query allLinksQuery($first: Int, $after: ID) {
-    links(first: $first, after: $after) {
+const AllTournamentsQuery = gql`
+  query allTournamentsQuery($first: Int, $after: ID) {
+    tournaments(first: $first, after: $after) {
       pageInfo {
         endCursor
         hasNextPage
@@ -16,11 +16,12 @@ const AllLinksQuery = gql`
       edges {
         cursor
         node {
-          url
-          title
-          category
-          description
-          id
+          name
+          sport
+          start_date
+          par
+          cut
+          status
         }
       }
     }
@@ -29,14 +30,14 @@ const AllLinksQuery = gql`
 
 function Home() {
   const { user } = useUser()
-  const { data, loading, error, fetchMore } = useQuery(AllLinksQuery, {
+  const { data, loading, error, fetchMore } = useQuery(AllTournamentsQuery, {
     variables: { first: 3 },
   });
 
   if (!user) {
     return (
       <div className="flex items-center justify-center">
-        To view the awesome links you need to{' '}
+        To view the tournaments you need to{' '}
         <Link href="/api/auth/login" className=" block bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0">
           Login
         </Link>
@@ -47,26 +48,29 @@ function Home() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
 
-  const { endCursor, hasNextPage } = data?.links.pageInfo;
+  const { endCursor, hasNextPage } = data?.tournaments.pageInfo;
 
   return (
     <div>
       <Head>
-        <title>Awesome Links</title>
+        <title>Pool Picks</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="container mx-auto max-w-5xl my-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {data?.links.edges.map(({ node }: { node: Node }) => (
-            <Link href={`/link/${node.id}`}>
-              <AwesomeLink
-                key={node.id}
-                title={node.title}
-                category={node.category}
-                url={node.url}
-                id={node.id}
-                description={node.description}
-              />
+      <div className="container mx-auto max-w-5xl my-20 flex flex-wrap items-center flex-col">
+      <h1 className="text-center">Welcome to Pool Picks</h1>
+      <div>
+      {user && (
+        <div className="flex flex-col justify-center items-center flex-wrap">
+         <Link href="/admin"><button>Create Tournament</button></Link>
+        </div>
+          )}
+      </div>
+        <div className="flex flex-col p-4 w-full">
+          <h3>Tournaments</h3>
+          {data?.tournaments.edges.map(({ node }: { node: Node }) => (
+            <Link href={`/tournament/${node.id}`}>
+              <Tournament {...node}              
+                />
             </Link>
           ))}
         </div>
@@ -77,9 +81,9 @@ function Home() {
               fetchMore({
                 variables: { after: endCursor },
                 updateQuery: (prevResult, { fetchMoreResult }) => {
-                  fetchMoreResult.links.edges = [
-                    ...prevResult.links.edges,
-                    ...fetchMoreResult.links.edges,
+                  fetchMoreResult.tournaments.edges = [
+                    ...prevResult.tournaments.edges,
+                    ...fetchMoreResult.tournaments.edges,
                   ];
                   return fetchMoreResult;
                 },

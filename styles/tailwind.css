@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+h1 {
+    font-size: 30px;
+    font-weight: 500;
+    margin: 1em 0;
+}
+
+h2 {
+    font-size: 22px;
+    font-weight: 500;
+}
+
+h3 {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 1em 0;
+}
+
+button {
+    background: black;
+    color: white;
+    padding: 1em 2em;
+    outline: none;
+    border-radius: 10px;
+    margin: 3px;
+}
