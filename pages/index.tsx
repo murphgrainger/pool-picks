@@ -65,37 +65,45 @@ function Home() {
         </div>
           )}
       </div>
-        <div className="flex flex-col p-4 w-full">
-          <h3>Tournaments</h3>
-          {data?.tournaments.edges.map(({ node }: { node: Node }) => (
-            <Link href={`/tournament/${node.id}`}>
-              <Tournament {...node}              
-                />
-            </Link>
-          ))}
+      { data?.tournaments.length &&
+        (
+        <div>
+          <div className="flex flex-col p-4 w-full">
+            <h3>Tournaments</h3>
+            {data?.tournaments.edges.map(({ node }: { node: Node }) => (
+              <Link href={`/tournament/${node.id}`}>
+                <Tournament {...node}              
+                  />
+              </Link>
+            ))}
+          </div>
+          { hasNextPage && (
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded my-10"
+              onClick={() => {
+                fetchMore({
+                  variables: { after: endCursor },
+                  updateQuery: (prevResult, { fetchMoreResult }) => {
+                    fetchMoreResult.tournaments.edges = [
+                      ...prevResult.tournaments.edges,
+                      ...fetchMoreResult.tournaments.edges,
+                    ];
+                    return fetchMoreResult;
+                  },
+                });
+              }}
+            >
+              more
+            </button>) 
+          }
+          { data?.tournaments.length &&
+            (
+              <p className="my-10 text-center font-medium">
+                You've reached the end!{" "}
+              </p>
+            )
+          }
         </div>
-        {hasNextPage ? (
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded my-10"
-            onClick={() => {
-              fetchMore({
-                variables: { after: endCursor },
-                updateQuery: (prevResult, { fetchMoreResult }) => {
-                  fetchMoreResult.tournaments.edges = [
-                    ...prevResult.tournaments.edges,
-                    ...fetchMoreResult.tournaments.edges,
-                  ];
-                  return fetchMoreResult;
-                },
-              });
-            }}
-          >
-            more
-          </button>
-        ) : (
-          <p className="my-10 text-center font-medium">
-            You've reached the end!{" "}
-          </p>
         )}
       </div>
     </div>
