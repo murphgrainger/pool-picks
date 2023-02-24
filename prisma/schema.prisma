@@ -38,13 +38,25 @@ model Link {
 }
 
 model Tournament {
-  id          Int      @id @default(autoincrement())
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  name        String  @unique
+  id          Int       @id @default(autoincrement())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  name        String    @unique
   sport       String
   start_date  DateTime? @db.Date
   par         Int?
   cut         Int?
-  status      String @default("Pending")
+  status      String     @default("Pending")
+}
+
+
+model Athlete {
+  id          Int       @id @default(autoincrement())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  sport       String    @default("Golf")
+  first_name  String
+  last_name   String
+  ranking     Int?
+  external_id Int?
 }

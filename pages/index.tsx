@@ -44,15 +44,13 @@ function Home() {
   return (
     <div>
       <div className="container mx-auto max-w-5xl my-20 flex flex-wrap items-center flex-col">
-      <h1 className="text-center">Welcome to Pool Picks</h1>
-      <p className="text-center p-2">This app allows you to create pools for tournaments and invite friends and families to win the pool.</p>
-      <div>
-      {user && (
-        <div className="flex flex-col justify-center items-center flex-wrap">
-         <Link href="/admin"><button>Create Tournament</button></Link>
+        <div>
+        {user && (
+          <div className="flex flex-col justify-center items-center flex-wrap">
+          <Link href="/admin"><button>Create Tournament</button></Link>
+          </div>
+            )}
         </div>
-          )}
-      </div>
       { data?.tournaments?.edges &&
         (
         <div className="w-full">
