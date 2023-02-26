@@ -25,7 +25,6 @@ function Home() {
         </div>
         <div className="w-full">
           <div className="flex flex-col p-4 w-full">
-            <AthleteList/>
             <TournamentList/>
           </div>
         </div>

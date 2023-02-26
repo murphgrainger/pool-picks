@@ -4,7 +4,7 @@ builder.prismaObject('Tournament', {
   fields: (t) => ({
     id: t.exposeID('id'),
     name: t.exposeString('name'),
-    sport: t.exposeString('course'),
+    course: t.exposeString('course'),
     city: t.exposeString('city'),
     region: t.exposeString('region'),
     status: t.exposeString('status'),

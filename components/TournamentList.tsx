@@ -17,8 +17,13 @@ const AllTournamentsQuery = gql`
         cursor
         node {
           id
-          name
-        }
+          name, 
+          course,
+          city,
+          region,
+          start_date,
+          end_date
+    }
       }
     }
   }
@@ -29,6 +34,8 @@ const TournamentList = () => {
     const { data, loading, error, fetchMore } = useQuery(AllTournamentsQuery, {
     variables: { first: 3 },
     });
+
+    console.log(data?.tournaments)
     
 
   if (loading) return <p className="text-center">Loading...</p>;
@@ -38,13 +45,18 @@ const TournamentList = () => {
 
   return (
     <div>
-      <h3>Tournaments</h3>
+      <h3>Upcoming Tournaments</h3>
         {data?.tournaments.edges.map(({ node }: { node: Node }) => (
             <Link href={`/tournament/${node.id}`} key={node.id}>
             <CardTournament
                 key={node.id}
                 id={node.id}
-                name={node.name}       
+                name={node.name}
+                course={node.course}
+                city={node.city}
+                region={node.region}
+                start_date={node.start_date}
+                end_date={node.end_date}
                 />
             </Link>
         ))}
