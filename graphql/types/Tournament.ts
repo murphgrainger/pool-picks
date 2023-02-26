@@ -4,20 +4,14 @@ builder.prismaObject('Tournament', {
   fields: (t) => ({
     id: t.exposeID('id'),
     name: t.exposeString('name'),
-    sport: t.exposeString('sport'),
-    par: t.exposeInt('par', { nullable: true, }),
-    cut: t.exposeInt('cut', { nullable: true, }),
+    sport: t.exposeString('course'),
+    city: t.exposeString('city'),
+    region: t.exposeString('region'),
     status: t.exposeString('status'),
-    start_date: t.expose("start_date", {
-        type: "Date",
-         nullable: true
-      }),
-    created_at: t.expose("created_at", {
-    type: "Date",
-    }),
-    updated_at: t.expose("updated_at", {
-    type: "Date",
-    }),
+    start_date: t.expose("start_date", { type: "Date" }),
+    end_date: t.expose("end_date", { type: "Date" }),
+    created_at: t.expose("created_at", { type: "Date" }),
+    updated_at: t.expose("updated_at", { type: "Date" }),
   }),
 })
 
@@ -53,14 +47,14 @@ builder.mutationField('createTournament', (t) =>
     type: 'Tournament',
     args: {
       name: t.arg.string({ required: true }),
-      sport: t.arg.string({ required: true }),
-      par: t.arg.int(),
-      cut: t.arg.int(),
-      status: t.arg.string(),
-      start_date: t.arg({ type: "Date" }),
+      course: t.arg.string({ required: true }),
+      city: t.arg.string({ required: true }),
+      region: t.arg.string({ required: true }),
+      start_date: t.arg({ type: "Date", required: true }),
+      end_date: t.arg({ type: "Date", required: true }),
     },
     resolve: async (query, _parent, args, ctx) => {
-      const { name, sport, par, cut, status, start_date } = args
+      const { name, course, city, region, start_date, end_date } = args
 
       if (!(await ctx).user) {
         throw new Error("You have to be logged in to perform this action")
@@ -79,10 +73,11 @@ builder.mutationField('createTournament', (t) =>
           ...query,
           data: {
               name, 
-              sport, 
-              par, 
-              cut, 
-              start_date
+              course,
+              city,
+              region,
+              start_date,
+              end_date
           }
         })
     }

@@ -10,7 +10,6 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
       <div className="prose container mx-auto px-8">
         <h1>{tournament.name}</h1>
         <p>2023</p>
-        <p>Par: {tournament.par}</p>
       </div>
     </div>
   );
@@ -28,7 +27,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     select: {
       id: true,
       name: true,
-      par: true
     },
   });
 

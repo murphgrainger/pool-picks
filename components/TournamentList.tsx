@@ -18,11 +18,6 @@ const AllTournamentsQuery = gql`
         node {
           id
           name
-          sport
-          start_date
-          par
-          cut
-          status
         }
       }
     }
@@ -49,8 +44,7 @@ const TournamentList = () => {
             <CardTournament
                 key={node.id}
                 id={node.id}
-                name={node.name}
-                par={node.par}          
+                name={node.name}       
                 />
             </Link>
         ))}

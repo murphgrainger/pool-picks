@@ -2,13 +2,11 @@ import React from 'react';
 
 interface Props {
   name: string;
-  par: number | null;
   id: number;
 }
 
 export const CardTournament: React.FC<Props> = ({
   name,
-  par,
   id,
 }) => {
   return (
