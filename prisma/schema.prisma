@@ -48,9 +48,9 @@ model Tournament {
   city        String
   region      String
   status      String     @default("Scheduled")
+  athletes    AthletesInTournaments[]
   pools       Pool[]
 }
-
 
 model Athlete {
   id          Int       @id @default(autoincrement())
@@ -58,9 +58,31 @@ model Athlete {
   updated_at  DateTime  @updatedAt
   first_name  String
   last_name   String
-  full_name   String
+  full_name   String    @unique
   ranking     Int?
   external_id Int?
+  tournaments AthletesInTournaments[]
+}
+
+model AthletesInTournaments {
+  status              String @default("Active")
+  position            Int?
+  thru                Int?
+  score_today         Int?
+  score_round_one     Int?
+  score_round_two     Int?
+  score_round_three   Int?
+  score_round_four    Int?
+  score_playoff       Int?
+  score_sum           Int?
+  tournament_id       Int
+  athlete_id          Int
+  tournament          Tournament  @relation(fields: [tournament_id], references: [id])
+  athlete             Athlete@relation(fields: [athlete_id], references: [id])
+  assigned_at         DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  @@id([tournament_id, athlete_id])
 }
 
 model Pool {

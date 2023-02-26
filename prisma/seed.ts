@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
-import { athletes } from '../data/athletes';
+import { Athlete, PrismaClient } from '@prisma/client';
 import { tournaments } from '../data/tournaments';
-
+import { mastersAthletes } from '../data/masters';
 
 const prisma = new PrismaClient();
 
@@ -16,9 +15,9 @@ async function main() {
   await prisma.tournament.createMany({
     data: formattedTournaments
   })
-  await prisma.athlete.createMany({
-    data: athletes,
-  });
+ 
+  await importAthletesForTournament(8, mastersAthletes);
+  
 }
 
 main()
@@ -29,3 +28,31 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
+
+  interface AthleteSeed {
+    full_name: string;
+    first_name: string;
+    last_name: string;
+  };
+
+  async function importAthletesForTournament(tournamentId: number, tournamentAthletes: AthleteSeed[]): Promise<void> {
+  
+    const athleteRecords: Athlete[] = await Promise.all(
+      tournamentAthletes.map(async (athleteData: AthleteSeed): Promise<Athlete> => {
+        let athlete: Athlete | null = await prisma.athlete.findUnique({ where: { full_name: athleteData.full_name } })
+  
+        if (!athlete) {
+          athlete = await prisma.athlete.create({ data: { ...athleteData } })
+        }
+  
+        return athlete
+      })
+    )
+  
+    await prisma.athletesInTournaments.createMany({
+      data: athleteRecords.map((athlete: Athlete): { athlete_id: number; tournament_id: number } => ({
+        athlete_id: athlete.id,
+        tournament_id: tournamentId,
+      })),
+    })
+  }
