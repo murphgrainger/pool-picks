@@ -42,11 +42,13 @@ model Tournament {
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
   name        String    @unique
-  sport       String
-  start_date  DateTime? @db.Date
-  par         Int?
-  cut         Int?
-  status      String     @default("Pending")
+  start_date  DateTime  @db.Date
+  end_date    DateTime  @db.Date
+  course      String  
+  city        String
+  region      String
+  status      String     @default("Scheduled")
+  pools       Pool[]
 }
 
 
@@ -54,10 +56,21 @@ model Athlete {
   id          Int       @id @default(autoincrement())
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
-  sport       String    @default("Golf")
   first_name  String
   last_name   String
   full_name   String
   ranking     Int?
   external_id Int?
+}
+
+model Pool {
+  id              Int       @id @default(autoincrement())
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  name            String 
+  invite_code     String
+  amount_entry    Int     
+  amount_sum      Int        @default(0)
+  tournament      Tournament @relation(fields: [tournament_id], references: [id])
+  tournament_id   Int
 }
