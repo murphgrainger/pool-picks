@@ -22,13 +22,14 @@ function Home() {
         <div className="flex flex-col justify-center items-center flex-wrap rounded bg-blue-400 w-full mt-4 py-8 px-6">
           <h3 className="mb-4">Active Pools</h3>
           <p className="text-center">You currently don't have any active pools or pending invitations to join a pool.</p>
-          <Link href="/admin" className="w-full text-center mt-5"><button className="w-full rounded">Create Pool</button></Link>
+          <Link href="/pool-create" className="w-full text-center mt-5"><button className="w-full rounded">Create Pool</button></Link>
         </div>
         <div className="flex flex-col justify-center items-center flex-wrap rounded bg-green-400 w-full mt-4 py-8 px-6">
-          <h3 className="mb-4">Upcoming Tournament</h3>
+          <h3 className="mb-4">Next Tournament</h3>
           <div className="bg-green-200 p-5 w-full rounded">
             <p className="">Honda Classic</p>
           </div>
+          <Link href="/admin" className="w-full text-center mt-5"><button className="w-full rounded">See More</button></Link>
         </div>
 
         <div className="w-full">

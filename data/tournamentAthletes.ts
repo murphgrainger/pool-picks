@@ -1,4 +1,4 @@
-export const mastersAthletes = [
+export const tournamentAthletes = [
     {
       "first_name": "Chris",
       "last_name": "Kirk",
