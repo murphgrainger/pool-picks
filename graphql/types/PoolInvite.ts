@@ -3,7 +3,7 @@ import { builder } from "../builder";
 builder.prismaObject('PoolInvite', {
     fields: (t) => ({
       id: t.exposeID('id'),
-      name: t.exposeString('email'),
+      email: t.exposeString('email'),
       status: t.exposeString('status'),
       pool_id: t.exposeID('pool_id'),
       pools: t.relation('pool'),
@@ -12,14 +12,14 @@ builder.prismaObject('PoolInvite', {
     }),
   })
 
-  builder.queryField('poolInvites', (t) =>
-  t.prismaConnection({
-    type: 'PoolInvite',
-    cursor: 'id',
+builder.queryField("poolInvites", (t) =>
+  t.prismaField({
+    type: ['PoolInvite'],
     resolve: (query, _parent, _args, _ctx, _info) =>
       prisma.poolInvite.findMany({ ...query })
   })
 )
+
 
 builder.queryField('poolInvite', (t) =>
   t.prismaField({
@@ -56,5 +56,25 @@ builder.mutationField('createPoolInvite', (t) =>
         }
       })
     }
+  })
+)
+
+builder.mutationField('updatePoolInvite', (t) =>
+  t.prismaField({
+    type: 'PoolInvite',
+    args: {
+      id: t.arg.id({ required: true }),
+      status: t.arg.string({ required: true })
+    },
+    resolve: async (query, _parent, args, _ctx) =>
+      prisma.poolInvite.update({
+        ...query,
+        where: {
+          id: Number(args.id),
+        },
+        data: {
+          status: args.status
+        }
+      })
   })
 )

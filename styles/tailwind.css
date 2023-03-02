@@ -23,3 +23,11 @@ button {
     padding: 1em 2em;
     outline: none;
 }
+
+.button-tertiary {
+    color: black;
+    padding: .5em 1em;
+    margin: 0 1em;
+    border-radius: 20px;
+    font-size: 12px;
+}
