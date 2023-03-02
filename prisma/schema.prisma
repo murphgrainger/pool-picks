@@ -12,13 +12,12 @@ generator pothos {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String?  @unique
-  image     String?
-  role      Role     @default(USER)
-  bookmarks Link[]
+  id              Int           @id @default(autoincrement())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  email           String        @unique
+  role            Role          @default(USER)
+  pool_members    PoolMember[]
 }
 
 enum Role {
@@ -34,7 +33,6 @@ model Link {
   description String
   url         String
   category    String
-  users       User[]
 }
 
 model Tournament {
@@ -96,6 +94,7 @@ model Pool {
   tournament_id   Int
   tournament      Tournament @relation(fields: [tournament_id], references: [id])
   pool_invites    PoolInvite[]
+  pool_members    PoolMember[]
 }
 
 model PoolInvite {
@@ -106,4 +105,13 @@ model PoolInvite {
   status          String    @default("Invited")
   pool_id         Int
   pool            Pool      @relation(fields: [pool_id], references: [id])
+}
+
+model PoolMember {
+    id              Int       @id @default(autoincrement())
+    created_at      DateTime  @default(now())
+    pool_id         Int
+    pool            Pool      @relation(fields: [pool_id], references: [id])
+    user_id         Int
+    user            User      @relation(fields: [user_id], references: [id])
 }

@@ -20,6 +20,13 @@ builder.queryField("poolInvites", (t) =>
   })
 )
 
+builder.queryField("pendingPoolInvites", (t) =>
+  t.prismaField({
+    type: ['PoolInvite'],
+    resolve: (query, _parent, { where }, _ctx, _info) =>
+      prisma.poolInvite.findMany({ ...query, where: { status: 'Invited' } })
+  })
+)
 
 builder.queryField('poolInvite', (t) =>
   t.prismaField({
