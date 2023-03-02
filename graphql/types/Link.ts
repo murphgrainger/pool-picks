@@ -8,7 +8,6 @@ builder.prismaObject('Link', {
     url: t.exposeString('url'),
     description: t.exposeString('description'),
     category: t.exposeString('category'),
-    users: t.relation('users')
   }),
 })
 
@@ -102,42 +101,6 @@ builder.mutationField('updateLink', (t) =>
           description: args.description ? args.description : undefined,
         }
       })
-  })
-)
-
-builder.mutationField('bookmarkLink', (t) =>
-  t.prismaField({
-    type: 'Link',
-    args: {
-      id: t.arg.id({ required: true })
-    },
-    resolve: async (query, _parent, args, ctx) => {
-      if (!(await ctx).user) {
-        throw new Error("You have to be logged in to perform this action")
-      }
-
-      const user = await prisma.user.findUnique({
-        where: {
-          email: (await ctx).user?.email,
-        }
-      })
-
-      if (!user) throw Error('User not found')
-
-      const link = await prisma.link.update({
-        ...query,
-        where: {
-          id: Number(args.id)
-        },
-        data: {
-          users: {
-            connect: [{ email: (await ctx).user?.email }]
-          }
-        }
-      })
-
-      return link
-    }
   })
 )
 

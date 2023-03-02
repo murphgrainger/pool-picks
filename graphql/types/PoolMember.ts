@@ -46,7 +46,7 @@ builder.mutationField('createPoolMember', (t) =>
     resolve: async (query, _parent, args, ctx) => {
       const { pool_id, user_id } = args
 
-      return await prisma.poolInvite.create({
+      return await prisma.poolMember.create({
         ...query,
         data: {
             pool_id,
