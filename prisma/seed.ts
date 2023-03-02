@@ -2,7 +2,7 @@ import { Athlete, PrismaClient } from '@prisma/client';
 import { tournaments } from '../data/tournaments';
 import { tournamentAthletes } from '../data/tournamentAthletes';
 import { pools } from '../data/pools';
-
+import { poolInvites } from '../data/poolInvites';
 
 const prisma = new PrismaClient();
 
@@ -21,6 +21,8 @@ async function main() {
   await importAthletesForTournament(8, tournamentAthletes);
 
   await prisma.pool.createMany({ data: pools })
+
+  await prisma.poolInvite.createMany({ data: poolInvites })
   
 }
 

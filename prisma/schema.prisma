@@ -93,6 +93,17 @@ model Pool {
   invite_code     String?
   amount_entry    Int     
   amount_sum      Int?        @default(0)
-  tournament      Tournament @relation(fields: [tournament_id], references: [id])
   tournament_id   Int
+  tournament      Tournament @relation(fields: [tournament_id], references: [id])
+  pool_invites    PoolInvite[]
+}
+
+model PoolInvite {
+  id              Int       @id @default(autoincrement())
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  email           String
+  status          String    @default("Invited")
+  pool_id         Int
+  pool            Pool      @relation(fields: [pool_id], references: [id])
 }
