@@ -75,7 +75,9 @@ function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
-      { data?.pendingPoolInvites?.map((invite:any) => (
+        <div className="flex flex-col justify-center items-center flex-wrap rounded bg-blue-400 w-full mt-4 py-8 px-6">
+          <h3 className="mb-4">Active Pools</h3>
+          { data?.pendingPoolInvites?.map((invite:any) => (
         <div className="p-4 bg-yellow-200 w-full rounded" key={invite.id}>
             <div className="text-center">
               <span>You have been invited to:</span>
@@ -87,8 +89,6 @@ function Home() {
             </div>
           </div>
           ))}
-        <div className="flex flex-col justify-center items-center flex-wrap rounded bg-blue-400 w-full mt-4 py-8 px-6">
-          <h3 className="mb-4">Active Pools</h3>
           { data?.poolMembers?.map((member:any) => (
         <div className="p-4 bg-blue-200 w-full rounded" key={member.id}>
             <div className="text-center">

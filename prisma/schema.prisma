@@ -60,6 +60,7 @@ model Athlete {
   ranking     Int?
   external_id Int?
   tournaments AthletesInTournaments[]
+  poolMembers PoolMembersAthletes[]
 }
 
 model AthletesInTournaments {
@@ -114,4 +115,15 @@ model PoolMember {
     pool            Pool      @relation(fields: [pool_id], references: [id])
     user_id         Int
     user            User      @relation(fields: [user_id], references: [id])
+    athletes        PoolMembersAthletes[]
+}
+
+model PoolMembersAthletes {
+    poolMember_id       Int
+    athlete_id          Int
+    poolMember          PoolMember  @relation(fields: [poolMember_id], references: [id])
+    athlete             Athlete     @relation(fields: [athlete_id], references: [id])
+    assigned_at         DateTime    @default(now())
+    
+    @@id([poolMember_id, athlete_id])
 }
