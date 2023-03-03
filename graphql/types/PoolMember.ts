@@ -40,19 +40,34 @@ builder.mutationField('createPoolMember', (t) =>
   t.prismaField({
     type: 'PoolMember',
     args: {
-      pool_id: t.arg.int({ required: true }),
-      user_id: t.arg.int({required: true})
+      pool_id: t.arg.string({ required: true }),
     },
     resolve: async (query, _parent, args, ctx) => {
-      const { pool_id, user_id } = args
+        console.log('getting in here oddly')
+      const { pool_id } = args
 
-      return await prisma.poolMember.create({
-        ...query,
-        data: {
-            pool_id,
-            user_id
+      if (!(await ctx).user) {
+        throw new Error("You have to be logged in to perform this action")
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          email: (await ctx).user?.email,
         }
       })
+      console.log("user", user)
+
+      if (!user) {
+        throw new Error("User not found")
+      }
+      
+    return await prisma.poolMember.create({
+        ...query,
+        data: {
+            pool_id: Number(pool_id),
+            user_id: user.id
+        }
+        })
     }
   })
 )

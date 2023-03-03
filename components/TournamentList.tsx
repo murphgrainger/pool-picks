@@ -33,10 +33,7 @@ const TournamentList = () => {
 
     const { data, loading, error, fetchMore } = useQuery(AllTournamentsQuery, {
     variables: { first: 3 },
-    });
-
-    console.log(data?.tournaments)
-    
+    });    
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;

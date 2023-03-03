@@ -28,15 +28,21 @@ function Home() {
      updatePoolInvite(id: $id, status: $status) { status }
   }`
 
-  const [updatePoolInviteStatus] = useMutation(CreatePoolInviteMutation)
+  const CreatePoolMemberMutation = gql`
+    mutation($pool_id: String!) {
+      createPoolMember(pool_id: $pool_id) { pool_id }
+    }`
 
-  const updateInviteStatus = async (id:number, status:string, pool_id:number) => {
+  const [updatePoolInviteStatus] = useMutation(CreatePoolInviteMutation)
+  const [createPoolMember] = useMutation(CreatePoolMemberMutation)
+
+  const updateInviteStatus = async (id:number, status:string, pool_id:string) => {
 
     try {
-      const response = await updatePoolInviteStatus({ variables: { id, status } });
+      await updatePoolInviteStatus({ variables: { id, status } });
       if(status === "Accepted") {
       // if accept create new pool member and redirect to pool
-
+      await createPoolMember({ variables: { pool_id } });
         router.push(`/pool/${pool_id}`)
         return;
       }
