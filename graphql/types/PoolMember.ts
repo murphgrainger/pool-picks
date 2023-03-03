@@ -43,7 +43,6 @@ builder.mutationField('createPoolMember', (t) =>
       pool_id: t.arg.string({ required: true }),
     },
     resolve: async (query, _parent, args, ctx) => {
-        console.log('getting in here oddly')
       const { pool_id } = args
 
       if (!(await ctx).user) {
@@ -55,7 +54,6 @@ builder.mutationField('createPoolMember', (t) =>
           email: (await ctx).user?.email,
         }
       })
-      console.log("user", user)
 
       if (!user) {
         throw new Error("User not found")
