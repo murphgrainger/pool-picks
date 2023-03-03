@@ -6,12 +6,10 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
     return (
-      <div>
-        <div className="prose container mx-auto px-8">
+      <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
           <h1>{pool.name}</h1>
           <p>2023</p>
         </div>
-      </div>
     );
   };
   

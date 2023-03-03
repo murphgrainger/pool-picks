@@ -8,20 +8,28 @@ function Home() {
   const { user } = useUser();
   const router = useRouter();
 
-  const AllInvitesQuery = gql`
-    query allInvitesQuery {
-      pendingPoolInvites {
-        id
-        email
-        status
-        created_at
-        pool_id
-        pools {
-          id
-          name
-        }
-      }
-    }`
+      const HomeDataQuery = gql`
+        query allDataQuery {
+          pendingPoolInvites {
+            id
+            email
+            status
+            created_at
+            pool_id
+            pools {
+              id
+              name
+            }
+          }
+          poolMembers {
+            id
+            pool_id
+            pools {
+              id
+              name
+            }
+          }
+        }`
 
   const CreatePoolInviteMutation = gql`
     mutation($id: ID!, $status: String!) {
@@ -54,7 +62,8 @@ function Home() {
     }
   }
 
-    const { data, loading, error } = useQuery(AllInvitesQuery)
+  const { data, loading, error } = useQuery(HomeDataQuery)
+  console.log(data)
 
     if (loading) return <p className="text-center">Loading...</p>;
     if (error) return <p>Oh no... {error.message}</p>;
@@ -80,8 +89,16 @@ function Home() {
           ))}
         <div className="flex flex-col justify-center items-center flex-wrap rounded bg-blue-400 w-full mt-4 py-8 px-6">
           <h3 className="mb-4">Active Pools</h3>
-          <p className="text-center">You currently aren't in any active pools.</p>
-          <Link href="/pool-create" className="w-full text-center mt-5"><button className="w-full rounded">Create Pool</button></Link>
+          { data?.poolMembers?.map((member:any) => (
+        <div className="p-4 bg-blue-200 w-full rounded" key={member.id}>
+            <div className="text-center">
+              <h3 className="mb-4">{member.pools.name}</h3>
+              <div className="flex flex-wrap justify-center">
+                <Link href={`/pool/${member.pool_id}`}><button className="rounded">Go to Pool</button></Link>
+              </div>
+            </div>
+          </div>
+          ))}
         </div>
         <div className="flex flex-col justify-center items-center flex-wrap rounded bg-green-400 w-full mt-4 py-8 px-6">
           <h3 className="mb-4">Next Tournament</h3>
