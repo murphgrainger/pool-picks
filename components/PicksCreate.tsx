@@ -1,7 +1,7 @@
 import { Athlete } from '@prisma/client';
 import React, { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
-
+import Select from 'react-select';
 
 interface Props {
     athletes: Array<{
@@ -10,25 +10,45 @@ interface Props {
     }>;
 }
 
+interface SelectValues {
+    value: number,
+    label: string
+}
+
 type FormValues = {
     picks: { full_name: string }[];
   }
 
+
 const PicksCreate: React.FC<Props> = ({athletes}) => {
+
     const [picks, setPicks] = useState<Array<Athlete | null>>([null, null, null, null]);
-    console.log(athletes)
-    const handlePickChange = (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
 
+    const availableAthletes = athletes.filter((athlete) => {
+        return !picks.some((pick) =>  pick?.id === athlete.id );
+      });
+      
+      const selectOptions: SelectValues[] = availableAthletes.map((athlete) => ({
+        value: athlete.id,
+        label: athlete.full_name
+      }));
 
-        
-      const newPick = athletes.find((athlete) => athlete.full_name.toLowerCase() === event.target.value.toLowerCase()) as Athlete;
-      console.log('new', newPick)
-      if (newPick && picks.every((pick) => pick?.id !== newPick.id)) {
-        const newPicks = [...picks];
-        newPicks[index] = newPick;
-        setPicks(newPicks);
-      }
-    };
+    const handlePickChange = (option: SelectValues | null, index: number) => {
+        try {
+            const newPick = option ? athletes.find((athlete) => athlete.id === option.value) as Athlete : undefined;
+            if (newPick && picks.every((pick) => pick?.id !== newPick.id)) {
+              const newPicks = [...picks];
+              newPicks[index] = newPick;
+              setPicks(newPicks);
+            } else {
+                // throw an error saying the athlete was already picked
+    
+            }
+        } catch(error) {
+            console.log(error)
+        }
+      };
+      
 
     const {
         register,
@@ -38,7 +58,12 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
       } = useForm<FormValues>()
   
     const onSubmit: SubmitHandler<FormValues> = (picks) => {
-        console.log(picks);
+
+        try {
+            console.log(picks);
+        } catch(error) {
+            console.log(error)
+        }
     };
 
     return (
@@ -49,14 +74,14 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
             {[0, 1, 2, 3].map((index) => (
                 <label key={index} className="block">
                 <span className="text-gray-700">Pick {index + 1}</span>
-                <input
-                    {...register(`picks.${index}.full_name`, { required: true })}
-                    name={`pick-${index}`}
-                    type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    onChange={handlePickChange(index)}
+                <Select
+                {...register(`picks.${index}.full_name`, { required: true })}
+                name={`pick-${index}`}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                onChange={(option: SelectValues | null) => handlePickChange(option, index)}
+                options={selectOptions} 
+                isClearable={true}
                 />
-                
                 </label>
             ))}
             <button type="submit" className="my-4 capitalize bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600">
