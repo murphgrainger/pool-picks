@@ -1,5 +1,5 @@
 import { Athlete } from '@prisma/client';
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 
@@ -12,13 +12,12 @@ interface Props {
 
 interface SelectValues {
     value: number,
-    label: string
+    label?: string
 }
 
 type FormValues = {
-    picks: { full_name: string }[];
-  }
-
+    picks: { id: number }[];
+}
 
 const PicksCreate: React.FC<Props> = ({athletes}) => {
 
@@ -36,13 +35,10 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
     const handlePickChange = (option: SelectValues | null, index: number) => {
         try {
             const newPick = option ? athletes.find((athlete) => athlete.id === option.value) as Athlete : undefined;
-            if (newPick && picks.every((pick) => pick?.id !== newPick.id)) {
+            if (newPick) {
               const newPicks = [...picks];
               newPicks[index] = newPick;
               setPicks(newPicks);
-            } else {
-                // throw an error saying the athlete was already picked
-    
             }
         } catch(error) {
             console.log(error)
@@ -57,10 +53,15 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
         reset
       } = useForm<FormValues>()
   
-    const onSubmit: SubmitHandler<FormValues> = (picks) => {
+    const onSubmit: SubmitHandler<FormValues> = (data) => {
+        console.log('CLICKING SUBMIT!');
+        console.log('CLICKING SUBMIT!');
+
 
         try {
-            console.log(picks);
+            console.log(data.picks);
+
+
         } catch(error) {
             console.log(error)
         }
@@ -75,7 +76,8 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
                 <label key={index} className="block">
                 <span className="text-gray-700">Pick {index + 1}</span>
                 <Select
-                {...register(`picks.${index}.full_name`, { required: true })}
+                {...register(`picks.${index}.id`, { required: true })}
+                instanceId="long-value-select"
                 name={`pick-${index}`}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 onChange={(option: SelectValues | null) => handlePickChange(option, index)}
