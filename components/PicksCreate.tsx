@@ -1,5 +1,5 @@
 import { Athlete } from '@prisma/client';
-import React, { useState, useId } from 'react';
+import React, { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 
@@ -15,9 +15,6 @@ interface SelectValues {
     label?: string
 }
 
-type FormValues = {
-    picks: { id: number }[];
-}
 
 const PicksCreate: React.FC<Props> = ({athletes}) => {
 
@@ -39,27 +36,18 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
               const newPicks = [...picks];
               newPicks[index] = newPick;
               setPicks(newPicks);
+              setValue(`picks.${index}.id`, option?.value);
             }
         } catch(error) {
             console.log(error)
         }
       };
       
-
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        reset
-      } = useForm<FormValues>()
+    const { setValue, handleSubmit  } = useForm();
   
-    const onSubmit: SubmitHandler<FormValues> = (data) => {
-        console.log('CLICKING SUBMIT!');
-        console.log('CLICKING SUBMIT!');
-
-
+    const onSubmit = (data:any) => {
         try {
-            console.log(data.picks);
+            console.log('logging the data', data);
 
 
         } catch(error) {
@@ -76,7 +64,6 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
                 <label key={index} className="block">
                 <span className="text-gray-700">Pick {index + 1}</span>
                 <Select
-                {...register(`picks.${index}.id`, { required: true })}
                 instanceId="long-value-select"
                 name={`pick-${index}`}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
