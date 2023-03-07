@@ -15,6 +15,9 @@ interface SelectValues {
     label?: string
 }
 
+type FormValues = {
+    picks: { id: number }[];
+  }
 
 const PicksCreate: React.FC<Props> = ({athletes}) => {
 
@@ -36,22 +39,39 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
               const newPicks = [...picks];
               newPicks[index] = newPick;
               setPicks(newPicks);
-              setValue(`picks.${index}.id`, option?.value);
-            }
+              setValue(`picks.${index}.id`, option?.value ?? 0);
+              clearErrors();
+             }
         } catch(error) {
             console.log(error)
         }
       };
       
-    const { setValue, handleSubmit  } = useForm();
-  
-    const onSubmit = (data:any) => {
-        try {
-            console.log('logging the data', data);
+      const {
+        setValue,
+        handleSubmit,
+        formState: { errors },
+        setError,
+        clearErrors,
+        reset
+      } = useForm<FormValues>()
 
+      console.log('form errors', errors)
+  
+    const onSubmit: SubmitHandler<FormValues> = async (data) => {
+        try {
+            console.log(data?.picks?.length)
+           if (data?.picks?.length !== 4) {
+            setError("picks", {
+                type: "type",
+                message: "Please fill out all your picks!"
+            });
+           } else {
+            console.log('data!!', data)
+           }
 
         } catch(error) {
-            console.log(error)
+            console.log('error', error)
         }
     };
 
@@ -69,10 +89,10 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 onChange={(option: SelectValues | null) => handlePickChange(option, index)}
                 options={selectOptions} 
-                isClearable={true}
                 />
                 </label>
             ))}
+            {errors?.picks && <p>{errors.picks.message}</p>}
             <button type="submit" className="my-4 capitalize bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600">
                 Submit Picks
             </button>
