@@ -55,19 +55,19 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
         clearErrors,
         reset
       } = useForm<FormValues>()
-
-      console.log('form errors', errors)
   
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         try {
-            console.log(data?.picks?.length)
-           if (data?.picks?.length !== 4) {
+            console.log('data', data)
+            // need to have dynamic pick length value
+           if (data?.picks?.length === 4) {
+            // submit form
+  
+           } else {
             setError("picks", {
                 type: "type",
                 message: "Please fill out all your picks!"
             });
-           } else {
-            console.log('data!!', data)
            }
 
         } catch(error) {
