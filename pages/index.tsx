@@ -14,17 +14,15 @@ function Home() {
             id
             email
             status
-            created_at
-            pool_id
-            pools {
+            created_at  
+            pool {
               id
               name
             }
           }
           poolMembers {
             id
-            pool_id
-            pools {
+            pool {
               id
               name
             }
@@ -81,7 +79,7 @@ function Home() {
         <div className="p-4 bg-yellow-200 w-full rounded" key={invite.id}>
             <div className="text-center">
               <span>You have been invited to:</span>
-              <h3 className="mb-4">{invite.pools.name}</h3>
+              <h3 className="mb-4">{invite.pool.name}</h3>
               <div className="flex flex-wrap justify-center">
                 <button className="button-tertiary bg-gray-400" onClick={() => {updateInviteStatus(invite.id, "Rejected", invite.pool_id)}}>Reject</button>
                 <button className="button-tertiary bg-green-500" onClick={() => {updateInviteStatus(invite.id, "Accepted", invite.pool_id,)}}>Accept</button>
