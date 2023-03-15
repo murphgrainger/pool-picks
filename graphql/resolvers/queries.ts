@@ -16,5 +16,15 @@ export const Query = {
           where: {
               status: "Invited"
           }
-      })
+      }),
+      poolMembersByEmail: async (_: any, args: any, context: any) => {
+        const { email } = args;
+        return context.prisma.poolMember.findMany({
+          where: {
+            user: {
+              email: email,
+            },
+          },
+        });
+      },
 }

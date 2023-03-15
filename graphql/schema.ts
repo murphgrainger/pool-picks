@@ -56,6 +56,7 @@ export const typeDefs = `
         pendingPoolInvites: [PoolInvite]
         picks(pool_member_id: ID!): [Pick]
         allPicks: [Pick!]
+        poolMembersByEmail(email: String!): [PoolMember!]!
     }
 
     type Mutation {
