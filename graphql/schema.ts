@@ -7,7 +7,7 @@ export const typeDefs = `
         amount_entry: Int
         amount_sum: Int
         invite_code: String
-        tournaments: [Tournament]
+        tournament: Tournament
     } 
 
     type PoolInvite {
@@ -40,10 +40,9 @@ export const typeDefs = `
         full_name: String
     }
 
-
     type Pick {
-        poolMember_id: ID
-        athlete_id: ID
+        poolMember: PoolMember!
+        athlete: Athlete!
     }
     
     type Query {
@@ -54,7 +53,16 @@ export const typeDefs = `
         poolMembers: [PoolMember]!
         poolInvites: [PoolInvite]!
         athletes: [Athlete]!
-        pendingPoolInvites: [PoolInvite]!
-        picks(pool_member_id: ID!): [Pick]!
+        pendingPoolInvites: [PoolInvite]
+        picks(pool_member_id: ID!): [Pick]
+        allPicks: [Pick!]
+    }
+
+    type Mutation {
+        createPool(
+            name: String!
+            amount_entry: Int!
+            tournament_id: Int!
+        ): Pool!
     }
 `

@@ -1,8 +1,10 @@
 import { createSchema, createYoga } from 'graphql-yoga'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { resolvers } from '../../graphql/resolvers'
+import { DateTimeResolver } from "graphql-scalars";
 import { typeDefs } from '../../graphql/schema'
-
+import { Query } from "../../graphql/resolvers/queries";
+import { Mutation } from "../../graphql/resolvers/mutations";
+import { Models } from "../../graphql/resolvers/models";
 
 export default createYoga<{
   req: NextApiRequest
@@ -10,7 +12,12 @@ export default createYoga<{
 }>({
   schema: createSchema({
     typeDefs,
-    resolvers
+    resolvers: {
+      Query,
+      Mutation,
+      ...Models,
+      DateTime: DateTimeResolver
+    }
   }),
   graphqlEndpoint: '/api/graphql'
 })

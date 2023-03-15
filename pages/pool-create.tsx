@@ -15,7 +15,9 @@ type FormValues = {
       createPool(name: $name, amount_entry: $amount_entry, tournament_id: $tournament_id) {
         name
         amount_entry
-        tournament_id
+        tournament {
+          id
+        }
       }
     }
   `
@@ -33,6 +35,7 @@ const PoolCreate = () => {
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         const { name, amount_entry, tournament_id } = data
         const variables = { name, amount_entry: parseInt(amount_entry, 10), tournament_id: parseInt(tournament_id, 10) }
+        console.log('variables', variables)
         try {
           toast.promise(createPool({ variables }), {
             loading: 'Creating new pool..',
