@@ -3,9 +3,11 @@ import prisma from '../../lib/prisma';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 import PicksCreate from '../../components/PicksCreate';
-import { Athlete } from '@prisma/client';
+import { Athlete, PoolInvite } from '@prisma/client';
 
 const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+console.log(pool)
+console.log(pool.pool_invites)
 
   const tournamentAthletes:Athlete[] = pool.tournament.athletes.map(({ athlete }: { athlete:Athlete }) => athlete);
 
@@ -27,6 +29,13 @@ const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) 
               { !member.athletes.length &&
                 <PicksCreate athletes={tournamentAthletes} />
               }
+            </div>
+          )
+        })}
+        { pool?.pool_invites?.map((invite : any) => {
+          return (
+            <div className="w-full mt-6 p-6 rounded bg-gray-300">
+             <p>{invite.email}</p>
             </div>
           )
         })}
@@ -79,7 +88,8 @@ const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) 
           },
           select: {
             id: true,
-            status: true
+            status: true,
+            email: true
           }
         },
         pool_members: {
