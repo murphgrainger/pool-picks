@@ -21,7 +21,7 @@ export const typeDefs = `
 
     type PoolMember {
         id: ID
-        pool: [Pool]
+        pool: Pool
     }
 
     type Tournament {

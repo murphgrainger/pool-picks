@@ -7,6 +7,14 @@ export const Models = {
             })
             .pool(),
       },
+      PoolMember: {
+        pool: (parent: any) =>
+          prisma.poolMember
+            .findUnique({
+              where: { id: parent.id },
+            })
+            .pool(),
+      },
       Pick: {
         poolMember: (parent: any) => parent.poolMember,
         athlete: (parent: any) => parent.athlete

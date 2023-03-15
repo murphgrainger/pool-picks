@@ -79,7 +79,7 @@ function Home() {
         <div className="p-4 bg-yellow-200 w-full rounded" key={invite.id}>
             <div className="text-center">
               <span>You have been invited to:</span>
-              <h3 className="mb-4">{invite.pool.name}</h3>
+              <h3 className="mb-4">{invite?.pool?.name}</h3>
               <div className="flex flex-wrap justify-center">
                 <button className="button-tertiary bg-gray-400" onClick={() => {updateInviteStatus(invite.id, "Rejected", invite.pool_id)}}>Reject</button>
                 <button className="button-tertiary bg-green-500" onClick={() => {updateInviteStatus(invite.id, "Accepted", invite.pool_id,)}}>Accept</button>
@@ -90,9 +90,9 @@ function Home() {
           { data?.poolMembers?.map((member:any) => (
         <div className="p-4 bg-blue-200 w-full rounded" key={member.id}>
             <div className="text-center">
-              <h3 className="mb-4">{member.pools.name}</h3>
+              <h3 className="mb-4">{member?.pool?.name}</h3>
               <div className="flex flex-wrap justify-center">
-                <Link href={`/pool/${member.pool_id}`}><button className="rounded">Go to Pool</button></Link>
+                <Link href={`/pool/${member.pool.id}`}><button className="rounded">Go to Pool</button></Link>
               </div>
             </div>
           </div>
