@@ -14,18 +14,23 @@ const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) 
         <h1>{pool.name}</h1>
         <p>{pool.tournament.name}</p>
         <p>{pool.tournament.course}</p>
-        <p>{pool.tournament.city}, {pool.tournament.region}</p>
-        <p>{pool.tournament.status}</p>
-        <p>Athlete Count: {pool.tournament.athletes.length}</p>
-
-
-        <p>${pool.amount_entry} Buy-In</p>
-        <p>${pool.amount_sum} Total Pot</p>
-        <p>Active Members: {pool.pool_members.length}</p>
-        <p>Pending Members: {pool.pool_invites.length}</p>
-        <PicksCreate
-        athletes={tournamentAthletes}
-        />
+        <p>${pool.amount_entry} Buy-In | Total Pot: ${pool.amount_sum} </p>
+        { pool?.pool_members?.map((member:any) => {
+          return (
+            <div className="w-full mt-6 p-6 rounded bg-blue-300" key={member.id}>
+              <h3>{member?.user?.email}</h3>
+              { member?.athletes?.map(({ athlete }: { athlete: Athlete }) => {
+                return (
+                  <p key={athlete.id}>{athlete.full_name}</p>
+                )
+              })}
+              { !member.athletes.length &&
+                <PicksCreate athletes={tournamentAthletes} />
+              }
+            </div>
+          )
+        })}
+        
         </div>
     );
   };
@@ -84,6 +89,15 @@ const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) 
             user: {
               select: {
                 email: true
+              }
+            },
+            athletes: {
+              select: {
+                athlete: {
+                  select: {
+                    full_name: true
+                  }
+                }
               }
             }
           }

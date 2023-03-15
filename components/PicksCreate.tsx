@@ -1,7 +1,10 @@
 import { Athlete } from '@prisma/client';
+import { useMutation, gql } from '@apollo/client';
 import React, { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
+import { useRouter } from 'next/router';
+
 
 interface Props {
     athletes: Array<{
@@ -19,9 +22,25 @@ type FormValues = {
     picks: { id: number }[];
   }
 
+  const CREATE_PICKS = gql`
+  mutation CreatePicks($poolMemberId: ID!, $athleteIds: [ID!]!) {
+    createPicks(poolMemberId: $poolMemberId, athleteIds: $athleteIds) {
+      athlete {
+        id
+        full_name
+      }
+      poolMember {
+        id
+      }
+    }
+  }
+`;
+
 const PicksCreate: React.FC<Props> = ({athletes}) => {
 
+    const router = useRouter();
     const [picks, setPicks] = useState<Array<Athlete | null>>([null, null, null, null]);
+    const [createPicks] = useMutation(CREATE_PICKS);
 
     const availableAthletes = athletes.filter((athlete) => {
         return !picks.some((pick) =>  pick?.id === athlete.id );
@@ -58,26 +77,21 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
   
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         try {
-            console.log('data', data)
-            // need to have dynamic pick length value
-           if (data?.picks?.length === 4) {
-            // submit form
-  
-           } else {
-            setError("picks", {
-                type: "type",
-                message: "Please fill out all your picks!"
-            });
-           }
-
-        } catch(error) {
-            console.log('error', error)
-        }
+              const poolMemberId = 1;
+              const athleteIds = data.picks.map((pick) => pick.id);
+              const response = await createPicks({
+                variables: { poolMemberId, athleteIds },
+              });
+              console.log('Response:', response);
+              router.reload();
+          } catch (error) {
+            console.log('error!!!', error);
+          }
     };
 
     return (
         <div className="w-full mt-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-y-6 p-8 rounded-lg bg-red-300">
+            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-blue-200">
             <h3>Make Your Picks</h3>
             <p>Here are some generic instructions.</p>
             {[0, 1, 2, 3].map((index) => (
