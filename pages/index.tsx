@@ -1,45 +1,48 @@
 import Head from "next/head";
+import { useState } from 'react';
 import { gql, useQuery, useMutation } from "@apollo/client";
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import prisma from '../lib/prisma';
 import Link from "next/link";
 import { getSession } from '@auth0/nextjs-auth0';
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useRouter } from 'next/router';
 
-  const PoolInvitesAndMembers = ({ poolInvites, poolMembers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const PoolInvitesAndMembers = ({ poolInvites: initialPoolInvites, poolMembers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+    const [poolInvites, setPoolInvites] = useState(initialPoolInvites)
+    const [isLoading, setLoading] = useState(false)
     const { user } = useUser();
     const router = useRouter();
 
-  const CreatePoolInviteMutation = gql`
-    mutation($id: ID!, $status: String!) {
-     updatePoolInvite(id: $id, status: $status) { status }
-  }`
-
-  const CreatePoolMemberMutation = gql`
-    mutation($pool_id: String!) {
-      createPoolMember(pool_id: $pool_id) { pool_id }
-    }`
-
-  const [updatePoolInviteStatus] = useMutation(CreatePoolInviteMutation)
-  const [createPoolMember] = useMutation(CreatePoolMemberMutation)
-
-  const updateInviteStatus = async (id:number, status:string, pool_id:string) => {
-
-    try {
-      await updatePoolInviteStatus({ variables: { id, status } });
-      if(status === "Accepted") {
-      // if accept create new pool member and redirect to pool
-      await createPoolMember({ variables: { pool_id } });
-        router.push(`/pool/${pool_id}`)
-        return;
-      }
-      // if reject remove invite card from screen
-      return;
-      
-    } catch (error) {
-      console.log(error)
+    const CreateInviteMutation = gql`
+    mutation($id: ID!, $status: String!, $pool_id: Int!, $email: String!) {
+      updateInviteStatus(id: $id, status: $status, pool_id: $pool_id, email: $email) { id }
     }
-  }
+  `;  
+
+  const [updatePoolInviteStatus] = useMutation(CreateInviteMutation)
+
+  const updateInviteStatus = async (id: number, status: string, pool_id: string, email: string) => {
+    try {
+      setLoading(true);
+      await updatePoolInviteStatus({ variables: { id, status, pool_id, email } });
+
+      if (status === "Accepted") {
+        router.push(`/pool/${pool_id}`);
+        setLoading(false)
+        return;
+      } else {
+        setPoolInvites(poolInvites.filter((invite : any) => invite.id !== id));
+        setLoading(false)
+      }
+      
+      return;
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+  
 
   return (
     <div>
@@ -67,8 +70,8 @@ import { useRouter } from 'next/router';
               <span>You have been invited to:</span>
               <h3 className="mb-4">{invite?.pool?.name}</h3>
               <div className="flex flex-wrap justify-center">
-                <button className="button-tertiary bg-gray-400" onClick={() => {updateInviteStatus(invite.id, "Rejected", invite.pool_id)}}>Reject</button>
-                <button className="button-tertiary bg-green-500" onClick={() => {updateInviteStatus(invite.id, "Accepted", invite.pool_id,)}}>Accept</button>
+                <button className="button-tertiary bg-gray-400" onClick={() => {updateInviteStatus(invite.id, "Rejected", invite.pool.id, user.email ?? '')}} disabled={isLoading}>Reject</button>
+                <button className="button-tertiary bg-green-500" onClick={() => {updateInviteStatus(invite.id, "Accepted", invite.pool.id, user.email ?? '')}} disabled={isLoading}>Accept</button>
               </div>
             </div>
           </div>
@@ -103,7 +106,6 @@ export default PoolInvitesAndMembers;
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSession(req, res);
   const email = session?.user?.email;
-  console.log(email)
 
   const poolInvites = await prisma.poolInvite.findMany({
     where: {

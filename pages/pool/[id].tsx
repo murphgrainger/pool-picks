@@ -6,8 +6,6 @@ import PicksCreate from '../../components/PicksCreate';
 import { Athlete, PoolInvite } from '@prisma/client';
 
 const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-console.log(pool)
-console.log(pool.pool_invites)
 
   const tournamentAthletes:Athlete[] = pool.tournament.athletes.map(({ athlete }: { athlete:Athlete }) => athlete);
 

@@ -82,10 +82,9 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
               const response = await createPicks({
                 variables: { poolMemberId, athleteIds },
               });
-              console.log('Response:', response);
               router.reload();
           } catch (error) {
-            console.log('error!!!', error);
+            console.log('error', error);
           }
     };
 

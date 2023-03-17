@@ -20,7 +20,6 @@ export const Mutation = {
   },
   createPicks: async (_: any, args: any, context: any) => {
     try {
-      console.log('args', args)
       const { poolMemberId, athleteIds } = args;
       const picks = await Promise.all(
         athleteIds.map(async (athleteId: string) => {
@@ -41,5 +40,27 @@ export const Mutation = {
     } catch (error: any) {     
       throw new ApolloError(`Could not create picks: ${error.message}`);
     }
+  },
+  updateInviteStatus: async(_: any, args: any, context: any) => {
+    try {
+      await prisma.poolInvite.update({
+        where: { id: parseInt(args.id) },
+        data: { status: args.status }
+      });
+  
+      if (args.status === "Accepted") {
+        const response = await prisma.poolMember.create({
+          data: {
+            pool: { connect: { id: parseInt(args.id) } },
+            user: { connect: { email: args.email } }
+          }
+        });
+        return response.id;
+      }
+  
+    } catch (error: any) {
+      throw new ApolloError(`Could not update invite status and create pool member: ${error.message}`);
+    }
   }
+  
 }
