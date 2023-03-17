@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { useRouter } from 'next/router';
+import { type } from 'os';
 
 
 interface Props {
+    memberId: number,
     athletes: Array<{
         id: number,
         full_name: string,
@@ -23,7 +25,7 @@ type FormValues = {
   }
 
   const CREATE_PICKS = gql`
-  mutation CreatePicks($poolMemberId: ID!, $athleteIds: [ID!]!) {
+  mutation CreatePicks($poolMemberId: Int!, $athleteIds: [Int!]!) {
     createPicks(poolMemberId: $poolMemberId, athleteIds: $athleteIds) {
       athlete {
         id
@@ -36,7 +38,7 @@ type FormValues = {
   }
 `;
 
-const PicksCreate: React.FC<Props> = ({athletes}) => {
+const PicksCreate: React.FC<Props> = ({memberId, athletes}) => {
 
     const router = useRouter();
     const [picks, setPicks] = useState<Array<Athlete | null>>([null, null, null, null]);
@@ -77,10 +79,9 @@ const PicksCreate: React.FC<Props> = ({athletes}) => {
   
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         try {
-              const poolMemberId = 1;
               const athleteIds = data.picks.map((pick) => pick.id);
-              const response = await createPicks({
-                variables: { poolMemberId, athleteIds },
+              await createPicks({
+                variables: { poolMemberId: memberId, athleteIds },
               });
               router.reload();
           } catch (error) {

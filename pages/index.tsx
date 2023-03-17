@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useState } from 'react';
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import prisma from '../lib/prisma';
 import Link from "next/link";

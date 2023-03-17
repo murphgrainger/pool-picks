@@ -65,7 +65,7 @@ export const typeDefs = `
             amount_entry: Int!
             tournament_id: Int!
         ): Pool!
-        createPicks(poolMemberId: ID!, athleteIds: [ID!]!): [Pick!]
+        createPicks(poolMemberId: Int!, athleteIds: [Int!]!): [Pick!]
         updateInviteStatus(id: ID!, status: String!, pool_id: Int!, email: String!): PoolMember
     }
 `

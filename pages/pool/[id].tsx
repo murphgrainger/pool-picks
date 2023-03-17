@@ -1,11 +1,13 @@
 import React from 'react';
 import prisma from '../../lib/prisma';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { getSession } from '@auth0/nextjs-auth0';
+
 
 import PicksCreate from '../../components/PicksCreate';
 import { Athlete, PoolInvite } from '@prisma/client';
 
-const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
   const tournamentAthletes:Athlete[] = pool.tournament.athletes.map(({ athlete }: { athlete:Athlete }) => athlete);
 
@@ -25,7 +27,9 @@ const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) 
                 )
               })}
               { !member.athletes.length &&
-                <PicksCreate athletes={tournamentAthletes} />
+                <PicksCreate 
+                  memberId={currentUserPoolMemberId}
+                  athletes={tournamentAthletes} />
               }
             </div>
           )
@@ -44,9 +48,13 @@ const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) 
   
   export default Pool;
 
-  export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+  export const getServerSideProps: GetServerSideProps = async ({ params, req, res }) => {
 
     const id = params?.id;
+
+    const session = await getSession(req, res);
+    const email = session?.user?.email;
+
     const pool = await prisma.pool.findUnique({
       where: {
         id: Number(id)
@@ -116,10 +124,14 @@ const Pool = ({ pool }: InferGetServerSidePropsType<typeof getServerSideProps>) 
     if (!pool) return {
       notFound: true
     }
+
+    const currentUserPoolMember = pool.pool_members.find((member) => member.user.email === email);
+
   
     return {
       props: {
         pool,
+        currentUserPoolMemberId: currentUserPoolMember?.id,
       },
     };
   };
