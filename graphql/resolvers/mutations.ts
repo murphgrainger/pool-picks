@@ -43,6 +43,7 @@ export const Mutation = {
   },
   updateInviteStatus: async(_: any, args: any, context: any) => {
     try {
+      console.log('args', args)
       await prisma.poolInvite.update({
         where: { id: parseInt(args.id) },
         data: { status: args.status }
@@ -51,7 +52,7 @@ export const Mutation = {
       if (args.status === "Accepted") {
         const response = await prisma.poolMember.create({
           data: {
-            pool: { connect: { id: parseInt(args.id) } },
+            pool: { connect: { id: parseInt(args.pool_id) } },
             user: { connect: { email: args.email } }
           }
         });

@@ -17,6 +17,7 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
         <p>{pool.tournament.name}</p>
         <p>{pool.tournament.course}</p>
         <p>${pool.amount_entry} Buy-In | Total Pot: ${pool.amount_sum} </p>
+        <p>{pool.status}</p>
         { pool?.pool_members?.map((member:any) => {
           return (
             <div className="w-full mt-6 p-6 rounded bg-blue-300" key={member.id}>
@@ -62,6 +63,7 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
       select: {
         id: true,
         name: true,
+        status: true,
         amount_entry: true,
         amount_sum: true,
         tournament: {

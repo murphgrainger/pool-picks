@@ -85,6 +85,7 @@ model Pool {
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
   name            String 
+  status          String      @default("Setup")
   invite_code     String?
   amount_entry    Int     
   amount_sum      Int?        @default(0)

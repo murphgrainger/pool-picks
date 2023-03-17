@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
     const [isLoading, setLoading] = useState(false)
     const { user } = useUser();
     const router = useRouter();
+    console.log(user)
 
     const CreateInviteMutation = gql`
     mutation($id: ID!, $status: String!, $pool_id: Int!, $email: String!) {
@@ -23,6 +24,7 @@ import { useRouter } from 'next/router';
   const [updatePoolInviteStatus] = useMutation(CreateInviteMutation)
 
   const updateInviteStatus = async (id: number, status: string, pool_id: string, email: string) => {
+    
     try {
       setLoading(true);
       await updatePoolInviteStatus({ variables: { id, status, pool_id, email } });
@@ -117,7 +119,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       pool: {
         select: {
           id: true,
-          name: true
+          name: true,
+          status: true
         }
       }
     },
@@ -134,7 +137,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       pool: {
         select: {
           id: true,
-          name: true
+          name: true,
+          status: true
         }
       },
       user: {

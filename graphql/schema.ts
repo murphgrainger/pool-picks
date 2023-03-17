@@ -4,6 +4,7 @@ export const typeDefs = `
     type Pool {
         id: ID
         name: String
+        status: String
         amount_entry: Int
         amount_sum: Int
         invite_code: String
