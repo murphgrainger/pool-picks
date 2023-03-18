@@ -1,49 +1,49 @@
 import React from 'react';
 import prisma from '../../lib/prisma';
+import { Athlete } from '@prisma/client';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { getSession } from '@auth0/nextjs-auth0';
-
-
-import PicksCreate from '../../components/PicksCreate';
-import { Athlete, PoolInvite } from '@prisma/client';
+import { CardPoolMember } from '../../components/CardPoolMember';
+import { CardPoolStatus } from '../../components/CardPoolStatus';
 
 const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
   const tournamentAthletes:Athlete[] = pool.tournament.athletes.map(({ athlete }: { athlete:Athlete }) => athlete);
 
+  const sortedMembers = pool?.pool_members?.sort((a:any, b:any) => {
+    if (a.id === currentUserPoolMemberId) return -1;
+    if (b.id === currentUserPoolMemberId) return 1;
+    return 0;
+  });
+
+  const totalPotAmount = sortedMembers.length * pool.amount_entry;
+
     return (
       <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
         <h1>{pool.name}</h1>
-        <p>{pool.tournament.name}</p>
+        <h3>{pool.tournament.name}</h3>
         <p>{pool.tournament.course}</p>
-        <p>${pool.amount_entry} Buy-In | Total Pot: ${pool.amount_sum} </p>
-        <p>{pool.status}</p>
-        { pool?.pool_members?.map((member:any) => {
+        <p>${pool.amount_entry} Buy-In | Total Pot: ${totalPotAmount} </p>
+        <CardPoolStatus status={pool.status}/>
+        { sortedMembers?.map((member:any) => {
           return (
-            <div className="w-full mt-6 p-6 rounded bg-blue-300" key={member.id}>
-              <h3>{member?.user?.email}</h3>
-              { member?.athletes?.map(({ athlete }: { athlete: Athlete }) => {
-                return (
-                  <p key={athlete.id}>{athlete.full_name}</p>
-                )
-              })}
-              { !member.athletes.length &&
-                <PicksCreate 
-                  memberId={currentUserPoolMemberId}
-                  athletes={tournamentAthletes} />
-              }
-            </div>
+            <CardPoolMember
+            key={member.id}
+            member={member}
+            currentMemberId={currentUserPoolMemberId}
+            poolStatus={pool.status}
+            athletes={tournamentAthletes}
+            />
           )
         })}
         { pool?.pool_invites?.map((invite : any) => {
           return (
-            <div className="w-full mt-6 p-6 rounded bg-gray-300">
-             <p>{invite.email}</p>
+            <div className="w-full mt-6 p-6 rounded bg-gray-300" key={invite.id}>
+             <p>{invite.nickname}</p>
             </div>
           )
         })}
-        
-        </div>
+      </div>
     );
   };
   
@@ -97,7 +97,8 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
           select: {
             id: true,
             status: true,
-            email: true
+            email: true,
+            nickname: true
           }
         },
         pool_members: {
@@ -106,7 +107,8 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
             user_id: true,
             user: {
               select: {
-                email: true
+                email: true,
+                nickname: true
               }
             },
             athletes: {

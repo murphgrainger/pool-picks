@@ -12,6 +12,7 @@ model User {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   email           String        @unique
+  nickname        String?       @unique
   role            Role          @default(USER)
   pool_members    PoolMember[]
 }
@@ -100,6 +101,7 @@ model PoolInvite {
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
   email           String
+  nickname        String
   status          String    @default("Invited")
   pool_id         Int
   pool            Pool      @relation(fields: [pool_id], references: [id])

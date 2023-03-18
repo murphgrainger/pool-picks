@@ -13,21 +13,21 @@ import { useRouter } from 'next/router';
     const [isLoading, setLoading] = useState(false)
     const { user } = useUser();
     const router = useRouter();
-    console.log(user)
+    console.log(initialPoolInvites)
 
     const CreateInviteMutation = gql`
-    mutation($id: ID!, $status: String!, $pool_id: Int!, $email: String!) {
-      updateInviteStatus(id: $id, status: $status, pool_id: $pool_id, email: $email) { id }
+    mutation($id: ID!, $status: String!, $pool_id: Int!, $nickname: String!, $email: String!) {
+      updateInviteStatus(id: $id, status: $status, pool_id: $pool_id, nickname: $nickname, email: $email) { id }
     }
   `;  
 
   const [updatePoolInviteStatus] = useMutation(CreateInviteMutation)
 
-  const updateInviteStatus = async (id: number, status: string, pool_id: string, email: string) => {
+  const updateInviteStatus = async (id: number, status: string, pool_id: string, nickname: string, email: string) => {
     
     try {
       setLoading(true);
-      await updatePoolInviteStatus({ variables: { id, status, pool_id, email } });
+      await updatePoolInviteStatus({ variables: { id, status, pool_id, nickname, email } });
 
       if (status === "Accepted") {
         router.push(`/pool/${pool_id}`);
@@ -72,8 +72,8 @@ import { useRouter } from 'next/router';
               <span>You have been invited to:</span>
               <h3 className="mb-4">{invite?.pool?.name}</h3>
               <div className="flex flex-wrap justify-center">
-                <button className="button-tertiary bg-gray-400" onClick={() => {updateInviteStatus(invite.id, "Rejected", invite.pool.id, user.email ?? '')}} disabled={isLoading}>Reject</button>
-                <button className="button-tertiary bg-green-500" onClick={() => {updateInviteStatus(invite.id, "Accepted", invite.pool.id, user.email ?? '')}} disabled={isLoading}>Accept</button>
+                <button className="button-tertiary bg-gray-400" onClick={() => {updateInviteStatus(invite.id, "Rejected", invite.pool.id, invite.nickname, user.email ?? '')}} disabled={isLoading}>Reject</button>
+                <button className="button-tertiary bg-green-500" onClick={() => {updateInviteStatus(invite.id, "Accepted", invite.pool.id, invite.nickname, user.email ?? '')}} disabled={isLoading}>Accept</button>
               </div>
             </div>
           </div>
@@ -84,7 +84,8 @@ import { useRouter } from 'next/router';
           { poolMembers?.map((member:any) => (
         <div className="p-4 bg-blue-200 w-full rounded" key={member.id}>
             <div className="text-center">
-              <h3 className="mb-4">{member?.pool?.name}</h3>
+              <h3 className="mb-2">{member?.pool?.name}</h3>
+              <p className="mb-4">Status: {member?.pool?.status}</p>
               <div className="flex flex-wrap justify-center">
                 <Link href={`/pool/${member.pool.id}`}><button className="rounded">Go to Pool</button></Link>
               </div>
@@ -116,6 +117,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     },
     select: {
       id: true,
+      nickname: true,
       pool: {
         select: {
           id: true,

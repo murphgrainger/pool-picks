@@ -1,6 +1,12 @@
 export const typeDefs = `
     scalar DateTime
 
+    type User {
+        id: ID
+        email: String
+        nickname: String
+    }
+
     type Pool {
         id: ID
         name: String
@@ -14,6 +20,7 @@ export const typeDefs = `
     type PoolInvite {
         id: ID
         email: String
+        nickname: String
         status: String
         created_at: DateTime!
         pool_id: ID
@@ -67,6 +74,6 @@ export const typeDefs = `
             tournament_id: Int!
         ): Pool!
         createPicks(poolMemberId: Int!, athleteIds: [Int!]!): [Pick!]
-        updateInviteStatus(id: ID!, status: String!, pool_id: Int!, email: String!): PoolMember
+        updateInviteStatus(id: ID!, status: String!, pool_id: Int!, nickname: String!, email: String!): PoolMember
     }
 `
