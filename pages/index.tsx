@@ -13,7 +13,6 @@ import { useRouter } from 'next/router';
     const [isLoading, setLoading] = useState(false)
     const { user } = useUser();
     const router = useRouter();
-    console.log(initialPoolInvites)
 
     const CreateInviteMutation = gql`
     mutation($id: ID!, $status: String!, $pool_id: Int!, $nickname: String!, $email: String!) {

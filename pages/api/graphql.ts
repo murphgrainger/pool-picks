@@ -16,8 +16,8 @@ export default createYoga<{
       Query,
       Mutation,
       ...Models,
-      DateTime: DateTimeResolver
-    }
+      DateTime: DateTimeResolver,
+    },
   }),
   graphqlEndpoint: '/api/graphql'
 })

@@ -7,13 +7,10 @@ interface Props {
     member: Record<string, any>;
     currentMemberId: number,
     poolStatus: string,
-    athletes: Array<{
-        id: number,
-        full_name: string,
-    }>;
+    tournamentId: number
   }
 
-export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, athletes }) => {
+export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, tournamentId }) => {
     
     const currentUserCard = member.id === currentMemberId;
     const pickStatus = member.athletes.length ? "Picks Submitted" : "Awaiting Picks"
@@ -28,7 +25,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                 { currentUserCard && !member.athletes.length &&
                     <PicksCreate 
                     memberId={currentMemberId}
-                    athletes={athletes}
+                    tournamentId={tournamentId}
                     />
                 }
                 { currentUserCard && member?.athletes?.map(({ athlete }: { athlete: Athlete }) => {

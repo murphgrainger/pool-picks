@@ -8,8 +8,6 @@ import { CardPoolStatus } from '../../components/CardPoolStatus';
 
 const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
-  const tournamentAthletes:Athlete[] = pool.tournament.athletes.map(({ athlete }: { athlete:Athlete }) => athlete);
-
   const sortedMembers = pool?.pool_members?.sort((a:any, b:any) => {
     if (a.id === currentUserPoolMemberId) return -1;
     if (b.id === currentUserPoolMemberId) return 1;
@@ -32,7 +30,7 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
             member={member}
             currentMemberId={currentUserPoolMemberId}
             poolStatus={pool.status}
-            athletes={tournamentAthletes}
+            tournamentId={pool.tournament.id}
             />
           )
         })}
@@ -80,6 +78,7 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
                 position: true,
                 thru: true,
                 score_today: true,
+                score_sum: true,
                 athlete: {
                   select: {
                     id: true,
@@ -115,7 +114,7 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
               select: {
                 athlete: {
                   select: {
-                    full_name: true
+                    full_name: true,
                   }
                 }
               }

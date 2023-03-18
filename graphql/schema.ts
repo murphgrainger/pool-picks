@@ -30,6 +30,7 @@ export const typeDefs = `
     type PoolMember {
         id: ID
         pool: Pool
+        user: User
     }
 
     type Tournament {
@@ -41,16 +42,32 @@ export const typeDefs = `
         status: String
     }
 
+    type Pick {
+        poolMember: PoolMember!
+        athlete: Athlete!
+    }
+
+    type AthletesInTournaments {
+        status:              String
+        position:            Int
+        thru:                Int
+        score_today:         Int
+        score_round_one:     Int
+        score_round_two:     Int
+        score_round_three:   Int
+        score_round_four:    Int
+        score_playoff:       Int
+        score_sum:           Int
+        updated_at:          DateTime
+        tournament:           Tournament!
+        athlete:              Athlete!
+    }
+
     type Athlete {
         id: ID
         first_name: String
         last_name: String
         full_name: String
-    }
-
-    type Pick {
-        poolMember: PoolMember!
-        athlete: Athlete!
     }
     
     type Query {
@@ -61,10 +78,11 @@ export const typeDefs = `
         poolMembers: [PoolMember]!
         poolInvites: [PoolInvite]!
         athletes: [Athlete]!
+        athletesInTournaments: [AthletesInTournaments]!
+        athletesByTournamentId(tournament_id: Int!): [Athlete!]!
         pendingPoolInvites: [PoolInvite]
         picks(pool_member_id: ID!): [Pick]
         allPicks: [Pick!]
-        poolMembersByEmail(email: String!): [PoolMember!]!
     }
 
     type Mutation {

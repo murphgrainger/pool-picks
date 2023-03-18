@@ -1,18 +1,13 @@
 import { Athlete } from '@prisma/client';
-import { useMutation, gql } from '@apollo/client';
+import { useMutation, useQuery, gql } from '@apollo/client';
 import React, { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { useRouter } from 'next/router';
-import { type } from 'os';
-
 
 interface Props {
     memberId: number,
-    athletes: Array<{
-        id: number,
-        full_name: string,
-    }>;
+    tournamentId: number
 }
 
 interface SelectValues {
@@ -38,24 +33,42 @@ type FormValues = {
   }
 `;
 
-const PicksCreate: React.FC<Props> = ({memberId, athletes}) => {
+const PicksCreate: React.FC<Props> = ({memberId, tournamentId}) => {
+
+  const {
+    setValue,
+    handleSubmit,
+    formState: { errors },
+    setError,
+    clearErrors,
+    reset
+  } = useForm<FormValues>()
+
+    const { loading, error, data } = useQuery(GET_ATHLETES_BY_TOURNAMENT_ID, {
+      variables: { tournament_id: tournamentId },
+    });
+
+    const athletes = data?.athletesByTournamentId;
 
     const router = useRouter();
     const [picks, setPicks] = useState<Array<Athlete | null>>([null, null, null, null]);
     const [createPicks] = useMutation(CREATE_PICKS);
 
-    const availableAthletes = athletes.filter((athlete) => {
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error.message}</p>;
+
+    const availableAthletes = athletes.filter((athlete: any) => {
         return !picks.some((pick) =>  pick?.id === athlete.id );
       });
       
-      const selectOptions: SelectValues[] = availableAthletes.map((athlete) => ({
+      const selectOptions: SelectValues[] = availableAthletes.map((athlete: any) => ({
         value: athlete.id,
         label: athlete.full_name
       }));
 
     const handlePickChange = (option: SelectValues | null, index: number) => {
         try {
-            const newPick = option ? athletes.find((athlete) => athlete.id === option.value) as Athlete : undefined;
+            const newPick = option ? athletes.find((athlete:any) => athlete.id === option.value) as Athlete : undefined;
             if (newPick) {
               const newPicks = [...picks];
               newPicks[index] = newPick;
@@ -67,15 +80,6 @@ const PicksCreate: React.FC<Props> = ({memberId, athletes}) => {
             console.log(error)
         }
       };
-      
-      const {
-        setValue,
-        handleSubmit,
-        formState: { errors },
-        setError,
-        clearErrors,
-        reset
-      } = useForm<FormValues>()
   
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         try {
@@ -116,3 +120,12 @@ const PicksCreate: React.FC<Props> = ({memberId, athletes}) => {
 }
 
 export default PicksCreate;
+
+const GET_ATHLETES_BY_TOURNAMENT_ID = gql`
+  query athletesByTournamentId($tournament_id: Int!) {
+    athletesByTournamentId(tournament_id: $tournament_id) {
+          id
+          full_name
+    }
+  }
+`;

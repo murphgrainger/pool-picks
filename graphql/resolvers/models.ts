@@ -18,5 +18,8 @@ export const Models = {
       Pick: {
         poolMember: (parent: any) => parent.poolMember,
         athlete: (parent: any) => parent.athlete
+      },
+      AthletesInTournaments: {
+        athlete: (parent: any) => parent.athlete
       }
 }

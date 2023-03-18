@@ -17,14 +17,22 @@ export const Query = {
               status: "Invited"
           }
       }),
-      poolMembersByEmail: async (_: any, args: any, context: any) => {
-        const { email } = args;
-        return context.prisma.poolMember.findMany({
-          where: {
-            user: {
-              email: email,
+      athletesByTournamentId: async (_: any, args: any, context: any) => {
+        try {
+          const { tournament_id } = args;
+          const athletesInTournaments = await prisma.athletesInTournaments.findMany({
+            where: { tournament_id },
+            include: {
+              athlete: true,
             },
-          },
-        });
-      },
+          });
+                
+          // Extract athletes from athletesInTournaments
+          const athletes = athletesInTournaments.map((ait: any) => ait.athlete);
+
+          return athletes;
+        } catch (error) {
+          console.log(error);
+        }
+      }
 }
