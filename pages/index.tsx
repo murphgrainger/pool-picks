@@ -113,7 +113,10 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const poolInvites = await prisma.poolInvite.findMany({
     where: {
       email: String(email),
-      status: 'Invited'
+      status: 'Invited',
+      pool: {
+        status: "Open"
+      }
     },
     select: {
       id: true,

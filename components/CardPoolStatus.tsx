@@ -11,7 +11,7 @@ export const CardPoolStatus : React.FC<Props> = ({ status }) => {
     if(status === "Open") {
         statusDescription = "This pool is still accepting member picks. All member picks will be hidden from you except your own until the pool is activated by the commissioner."
     } else if (status === "Locked") {
-        statusDescription = "All pool picks have been submitted and are locked for the rest of the tournament."
+        statusDescription = "All pool picks have been submitted and are locked for the rest of the tournament. As the event progresses, your individual pick scores and overall pool place will update."
     } else if (status === "Complete") {
         statusDescription = "The tournament for this pool has finished and the results of the pool are final."
     } else if (status === "Setup") {
