@@ -11,12 +11,12 @@ interface Props {
 }
 
 interface SelectValues {
-    value: number,
+    value: string,
     label?: string
 }
 
 type FormValues = {
-    picks: { id: number }[];
+    picks: { id: string }[];
   }
 
   const CREATE_PICKS = gql`
@@ -73,7 +73,7 @@ const PicksCreate: React.FC<Props> = ({memberId, tournamentId}) => {
               const newPicks = [...picks];
               newPicks[index] = newPick;
               setPicks(newPicks);
-              setValue(`picks.${index}.id`, option?.value ?? 0);
+              setValue(`picks.${index}.id`, option?.value ?? "");
               clearErrors();
              }
         } catch(error) {
@@ -83,7 +83,8 @@ const PicksCreate: React.FC<Props> = ({memberId, tournamentId}) => {
   
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         try {
-              const athleteIds = data.picks.map((pick) => pick.id);
+              const athleteIds = data.picks.map((pick) => parseInt(pick.id));
+              console.log('ids',athleteIds)
               await createPicks({
                 variables: { poolMemberId: memberId, athleteIds },
               });
