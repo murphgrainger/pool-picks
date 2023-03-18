@@ -74,7 +74,7 @@ model AthletesInTournaments {
   tournament_id       Int
   athlete_id          Int
   tournament          Tournament  @relation(fields: [tournament_id], references: [id])
-  athlete             Athlete@relation(fields: [athlete_id], references: [id])
+  athlete             Athlete     @relation(fields: [athlete_id], references: [id])
   assigned_at         DateTime  @default(now())
   updated_at          DateTime  @updatedAt
 
