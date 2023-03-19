@@ -14,13 +14,16 @@ interface Props {
         score_round_three: number;
         score_round_four: number;
         score_sum: number;
+        tournament_id: number;
       }[];
-    };
+    },
+    tournamentId: number;
   }
 
-export const CardPick: React.FC<Props> = ({ pick }) => {
+export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
 
-    const data = pick.tournaments[0];
+    // WIP: will refactor gql instead to just pull the correct tournament
+    const data = pick.tournaments.filter(t => t.tournament_id === tournamentId)[0]
 
     return (
         <div key={pick.id} className="bg-blue-100 mb-4 rounded p-4">

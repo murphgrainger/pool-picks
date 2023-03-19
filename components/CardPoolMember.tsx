@@ -53,7 +53,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
             </div>
             { member?.athletes?.map(({ athlete }: { athlete: any }) => {
                 return (
-                <CardPick pick={athlete}/>
+                <CardPick pick={athlete} tournamentId={tournamentId}/>
                 )
             })}
         </div>
