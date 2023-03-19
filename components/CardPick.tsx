@@ -19,40 +19,42 @@ interface Props {
   }
 
 export const CardPick: React.FC<Props> = ({ pick }) => {
-    console.log('pick', pick)
+
+    const data = pick.tournaments[0];
+
     return (
         <div key={pick.id} className="bg-blue-100 mb-4 rounded p-4">
             <div className="flex items-center">
                 <p className="flex-1 font-semibold text-xl">{pick.full_name}</p>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Pos</span>
-                    <p className="text-xl">T12</p>
+                    <p className="text-xl">{data.position || "-"}</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Tot</span>
-                    <p className="text-xl">564</p>
+                    <p className="text-xl">{data.score_sum || "-"}</p>
                 </div>
             </div>
             <div className="mt-4 flex justify-around bg-blue-200 p-4 rounded">
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Status</span>
-                    <p className="">Active</p>
+                    <p className="">{data.status || "-"}</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">R1</span>
-                    <p className="">65</p>
+                    <p className="">{data.score_round_one || "-"}</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">R2</span>
-                    <p className="">62</p>
+                    <p className="">{data.score_round_two || "-"}</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">R3</span>
-                    <p className="">77</p>
+                    <p className="">{data.score_round_three || "-"}</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">R4</span>
-                    <p className="">79</p>
+                    <p className="">{data.score_round_four || "-"}</p>
                 </div>
             </div>
         </div>
