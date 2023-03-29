@@ -59,7 +59,7 @@ export const typeDefs = `
         score_round_four:    Int
         score_playoff:       Int
         score_sum:           Int
-        score_under_par      Int
+        score_under_par:     Int
         updated_at:          DateTime
         tournament:          Tournament!
         athlete:             Athlete!
