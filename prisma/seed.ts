@@ -37,8 +37,6 @@ main()
 
   interface AthleteSeed {
     full_name: string;
-    first_name: string;
-    last_name: string;
   };
 
   async function importAthletesForTournament(tournamentId: number, tournamentAthletes: AthleteSeed[]): Promise<void> {
@@ -48,7 +46,7 @@ main()
         let athlete: Athlete | null = await prisma.athlete.findUnique({ where: { full_name: athleteData.full_name } })
   
         if (!athlete) {
-          athlete = await prisma.athlete.create({ data: { ...athleteData } })
+          athlete = await prisma.athlete.create({ data: { full_name: athleteData.full_name } })
         }
   
         return athlete

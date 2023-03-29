@@ -65,7 +65,7 @@ import { useRouter } from 'next/router';
         <div className="flex flex-col justify-center items-center flex-wrap rounded bg-blue-400 w-full mt-4 py-8 px-6">
           <h3 className="mb-4">Active Pools</h3>
           { poolInvites?.map((invite:any) => (
-        <div className="p-4 bg-yellow-200 w-full rounded" key={invite.id}>
+        <div className="p-4 bg-yellow-200 w-full rounded mb-6" key={invite.id}>
             <div className="text-center">
               <span>You have been invited to:</span>
               <h3 className="mb-4">{invite?.pool?.name}</h3>
