@@ -1,8 +1,8 @@
 import React from 'react';
 import prisma from '../../lib/prisma';
-import { Athlete } from '@prisma/client';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import { getSession } from '@auth0/nextjs-auth0';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from '../api/auth/[...nextauth]';
 import { CardPoolMember } from '../../components/CardPoolMember';
 import { CardPoolStatus } from '../../components/CardPoolStatus';
 
@@ -47,11 +47,11 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
   
   export default Pool;
 
-  export const getServerSideProps: GetServerSideProps = async ({ params, req, res }) => {
+  export const getServerSideProps: GetServerSideProps = async (context) => {
 
-    const id = params?.id;
+    const id = context.params?.id;
 
-    const session = await getSession(req, res);
+    const session = await getServerSession(context.req, context.res, authOptions)
     const email = session?.user?.email;
 
     const pool = await prisma.pool.findUnique({

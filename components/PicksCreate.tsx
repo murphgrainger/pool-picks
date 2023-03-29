@@ -84,7 +84,6 @@ const PicksCreate: React.FC<Props> = ({memberId, tournamentId}) => {
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         try {
               const athleteIds = data.picks.map((pick) => parseInt(pick.id));
-              console.log('ids',athleteIds)
               await createPicks({
                 variables: { poolMemberId: memberId, athleteIds },
               });

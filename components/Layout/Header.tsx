@@ -1,10 +1,8 @@
-// components/Layout/Header.tsx
 import React from 'react'
 import Link from 'next/link'
-import { useUser } from '@auth0/nextjs-auth0/client'
 
 const Header = () => {
-  const { user } = useUser()
+  const user = true;
   return (
     <header className="text-gray-600 body-font bg-green-300">
       <div className="container mx-auto flex flex-wrap p-5 md:flex-row justify-between">
