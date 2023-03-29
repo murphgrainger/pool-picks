@@ -13,6 +13,7 @@ interface Props {
         score_round_two: number;
         score_round_three: number;
         score_round_four: number;
+        score_under_par: number;
         score_sum: number;
         tournament_id: number;
       }[];
@@ -30,8 +31,12 @@ export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
             <div className="flex items-center">
                 <p className="flex-1 font-semibold text-xl">{pick.full_name}</p>
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <span className="text-xs">Score</span>
+                    <span className="text-xs">Pos</span>
                     <p className="text-xl">{data.position || "-"}</p>
+                </div>
+                <div className="flex-1 flex flex-col items-center justify-center">
+                    <span className="text-xs">Score</span>
+                    <p className="text-xl">{data.score_under_par || "-"}</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Tot</span>

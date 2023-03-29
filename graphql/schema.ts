@@ -40,6 +40,7 @@ export const typeDefs = `
         city: String
         region: String
         status: String
+        external_id: Int
     }
 
     type Pick {

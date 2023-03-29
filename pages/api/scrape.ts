@@ -4,6 +4,8 @@ import prisma from '../../lib/prisma';
 import axios from 'axios';
 import cheerio from 'cheerio';
 
+const adminKey = process.env.ADMIN_KEY;
+
 interface Athlete {
   full_name: string;
 }
@@ -25,8 +27,13 @@ interface ParsedAthleteData {
   athleteInTournament: AthleteInTournament;
 }
 
-async function fetchGolfData() {
-  const url = 'https://www.espn.com/golf/leaderboard/_/tournamentId/401465527';
+async function fetchGolfData(id: string) {
+  let tournament = await prisma.tournament.findUnique({
+    where: { id: parseInt(id) },
+  });
+  if(!tournament || !tournament.external_id) throw new Error('Invalid tournament ID requested.')
+  const externalId = tournament.external_id;
+  const url = `https://www.espn.com/golf/leaderboard/_/tournamentId/${externalId}`;
   const response = await axios.get(url);
   const $ = cheerio.load(response.data);
   const parsedAthleteData: ParsedAthleteData[] = [];
@@ -158,15 +165,23 @@ async function updateGolfData(parsedAthleteData: ParsedAthleteData[], tournament
   } 
 
   export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    const id = req.query.id as string;
+    if(!id) return res.status(500).json({message: 'No key found!'})
+
+    if (!adminKey || req.headers.authorization !== `Bearer ${adminKey}`) {
+      return res.status(401).json({ message: 'Unauthorized request' });
+    }
+
     try {
-      const golfData = await fetchGolfData();
-      await updateGolfData(golfData, 4); // Replace tournament ID dynamically
+      const golfData = await fetchGolfData(id);
+      await updateGolfData(golfData, parseInt(id));
       res.status(200).json({ message: 'Success updating golf data!' });
-    } catch (error) {
-        console.log('ERROR UPDATING TOURNAMENT SCORES:', error)
-      res.status(500).json({ message: 'An error occurred while fetching and updating data.' });
+    } catch (error:any) {
+      console.log('ERROR UPDATING TOURNAMENT SCORES:', error)
+      res.status(500).json({ message: error.message });
     }
   }
+  
   
   function parseLeaderboardPosition(toPar: string) {
     switch (toPar.toUpperCase()) {

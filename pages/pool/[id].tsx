@@ -112,6 +112,7 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
                         score_round_three: true,
                         score_round_four: true,
                         score_sum: true,
+                        score_under_par: true,
                         tournament_id: true
                       }
                     }
