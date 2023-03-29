@@ -2,7 +2,9 @@ import React from 'react'
 import { type SubmitHandler, useForm } from 'react-hook-form'
 import { gql, useMutation } from '@apollo/client'
 import toast, { Toaster } from 'react-hot-toast'
-
+import { useSession } from 'next-auth/react'
+import { useEffect } from "react"
+import Router from 'next/router'
 
 type FormValues = {
     name: string;
@@ -24,6 +26,12 @@ type FormValues = {
 
 
 const PoolCreate = () => {
+  const { data: session, status } = useSession()
+  console.log(session)
+  useEffect(() => {
+    if(status === "unauthenticated") Router.replace('/')
+  }, [status])
+  
     const [createPool, { data, loading, error }] = useMutation(CreatePoolMutation)
     const {
       register,

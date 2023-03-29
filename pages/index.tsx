@@ -4,7 +4,7 @@ import { gql, useMutation } from "@apollo/client";
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import prisma from '../lib/prisma';
 import Link from "next/link";
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signIn } from "next-auth/react"
 import { getServerSession } from "next-auth/next";
 import { authOptions } from './api/auth/[...nextauth]';
 import { useRouter } from 'next/router';
@@ -55,8 +55,8 @@ import { useRouter } from 'next/router';
       { !session &&
       <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
         <h1 className="mt-10">Welcome to Pool Picks!</h1>
-        <p className="mt-4">Login to get started.</p>
-        <button onClick={() => signIn()}>Sign in</button>
+        <p className="m-4">Login to get started.</p>
+        <button onClick={() => signIn()} className="rounded">Login</button>
       </div>
       }
 

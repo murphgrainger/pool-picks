@@ -7,7 +7,7 @@ const DashboardProtected: NextPage = (): JSX.Element => {
   const { data: session, status } = useSession()
   
   useEffect(() => {
-    if(status === "unauthenticated") Router.replace('/signin')
+    if(status === "unauthenticated") Router.replace('/')
   }, [status])
   
   if(status === "authenticated") {
