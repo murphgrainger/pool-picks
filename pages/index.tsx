@@ -106,7 +106,6 @@ export default PoolInvitesAndMembers;
 
 export const getServerSideProps: GetServerSideProps = async ( context ) => {
   const session = await getServerSession(context.req, context.res, authOptions)
-  console.log('session',session)
   const email = session?.user?.email;
 
   const poolInvites = await prisma.poolInvite.findMany({

@@ -5,7 +5,6 @@ import Router from 'next/router';
 import loadConfig from "next/dist/server/config";
 const DashboardProtected: NextPage = (): JSX.Element => {
   const { data: session, status } = useSession()
-  console.log('auth', session)
   
   useEffect(() => {
     if(status === "unauthenticated") Router.replace('/signin')
