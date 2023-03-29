@@ -30,7 +30,7 @@ export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
             <div className="flex items-center">
                 <p className="flex-1 font-semibold text-xl">{pick.full_name}</p>
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <span className="text-xs">Pos</span>
+                    <span className="text-xs">Score</span>
                     <p className="text-xl">{data.position || "-"}</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">

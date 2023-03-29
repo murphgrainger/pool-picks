@@ -71,6 +71,7 @@ model AthletesInTournaments {
   score_round_four    Int?
   score_playoff       Int?
   score_sum           Int?
+  score_under_par     Int?
   tournament_id       Int
   athlete_id          Int
   tournament          Tournament  @relation(fields: [tournament_id], references: [id])
