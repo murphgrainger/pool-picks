@@ -51,7 +51,7 @@ const PicksCreate: React.FC<Props> = ({memberId, tournamentId}) => {
     const athletes = data?.athletesByTournamentId;
 
     const router = useRouter();
-    const [picks, setPicks] = useState<Array<Athlete | null>>([null, null, null, null]);
+    const [picks, setPicks] = useState<Array<Athlete | null>>([null, null, null, null, null, null]);
     const [createPicks] = useMutation(CREATE_PICKS);
 
     if (loading) return <p>Loading...</p>;
@@ -98,7 +98,7 @@ const PicksCreate: React.FC<Props> = ({memberId, tournamentId}) => {
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-blue-200">
             <h3>Make Your Picks</h3>
             <p>Here are some generic instructions.</p>
-            {[0, 1, 2, 3].map((index) => (
+            {[0, 1, 2, 3, 4, 5].map((index) => (
                 <label key={index} className="block">
                 <span className="text-gray-700">Pick {index + 1}</span>
                 <Select
@@ -124,8 +124,9 @@ export default PicksCreate;
 const GET_ATHLETES_BY_TOURNAMENT_ID = gql`
   query athletesByTournamentId($tournament_id: Int!) {
     athletesByTournamentId(tournament_id: $tournament_id) {
-          id
-          full_name
+      id
+      full_name
     }
   }
 `;
+

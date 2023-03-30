@@ -29,6 +29,7 @@ export const Query = {
                 
           // Extract athletes from athletesInTournaments
           const athletes = athletesInTournaments.map((ait: any) => ait.athlete);
+          athletes.sort((a: any, b: any) => a.full_name.localeCompare(b.full_name));
 
           return athletes;
         } catch (error) {
