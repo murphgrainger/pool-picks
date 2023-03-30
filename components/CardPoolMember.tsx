@@ -51,11 +51,14 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     <p className="text-xl">929</p>
                 </div>
             </div>
-            { member?.athletes?.map(({ athlete }: { athlete: any }) => {
-                return (
-                <CardPick pick={athlete} tournamentId={tournamentId}/>
-                )
-            })}
+            {
+            member?.athletes
+                ?.sort((a: any, b: any) => a.athlete.score_sum - b.athlete.score_sum)
+                .map(({ athlete }: { athlete: any }) => (
+                <CardPick pick={athlete} tournamentId={tournamentId} />
+                ))
+}
+
         </div>
    )
 }
