@@ -6,16 +6,17 @@ import { authOptions } from '../api/auth/[...nextauth]';
 import { CardPoolMember } from '../../components/CardPoolMember';
 import { CardPoolStatus } from '../../components/CardPoolStatus';
 
-import { redirectToHome } from '../../utils/utils';
+import { redirectToHome, sumMemberPicks } from '../../utils/utils';
 
-const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
-  const sortedMembers = pool?.pool_members?.sort((a:any, b:any) => {
-    if (a.id === currentUserPoolMemberId) return -1;
-    if (b.id === currentUserPoolMemberId) return 1;
-    return 0;
+
+  const sortedMembers = poolMembers.sort((a: any, b: any) => {
+    const aLowest = sumMemberPicks(a.athletes, pool.tournament_id);
+    const bLowest = sumMemberPicks(b.athletes, pool.tournament_id);
+    return aLowest - bLowest;
   });
-
+  
   const totalPotAmount = sortedMembers.length * pool.amount_entry;
 
     return (
@@ -25,7 +26,7 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
         <p>{pool.tournament.course}</p>
         <p>${pool.amount_entry} Buy-In | Total Pot: ${totalPotAmount} </p>
         <CardPoolStatus status={pool.status}/>
-        { sortedMembers?.map((member:any) => {
+        { sortedMembers?.map((member:any, i:number) => {
           return (
             <CardPoolMember
             key={member.id}
@@ -33,6 +34,7 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
             currentMemberId={currentUserPoolMemberId}
             poolStatus={pool.status}
             tournamentId={pool.tournament.id}
+            position={i+1}
             />
           )
         })}
@@ -70,6 +72,7 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
         status: true,
         amount_entry: true,
         amount_sum: true,
+        tournament_id: true,
         tournament: {
           select: {
             id: true,
@@ -135,10 +138,19 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
 
     const currentUserPoolMember = pool!.pool_members.find((member) => member.user.email === email);
     if(!currentUserPoolMember) { return redirectToHome() }
+
+    const poolMembers = pool!.pool_members.map((member) => {
+      const member_sum_under_par = sumMemberPicks(member.athletes, pool.tournament_id);
+      return {
+        ...member,
+        member_sum_under_par,
+      };
+    });
   
     return {
       props: {
         pool,
+        poolMembers,
         currentUserPoolMemberId: currentUserPoolMember?.id,
       },
     };

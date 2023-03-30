@@ -45,3 +45,7 @@ button {
   .accordion-arrow.open {
     transform: rotate(180deg);
   }
+
+  sup {
+    margin-left: -4px;
+  }
