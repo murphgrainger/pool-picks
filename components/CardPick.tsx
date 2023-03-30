@@ -53,7 +53,7 @@ export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
                     <p className="text-xl">{data.score_sum || "-"}</p>
                 </div>
                 <div className="accordion-header" onClick={toggle}>
-                    <span className={`accordion-arrow ${isOpen ? 'open' : ''}`}>&#9660;</span>
+                    <span className={`accordion-arrow text-blue-400 ${isOpen ? 'open' : ''}`}>&#9660;</span>
                 </div>
             </div>
             { isOpen &&

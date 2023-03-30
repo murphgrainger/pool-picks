@@ -38,8 +38,9 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
         })}
         { pool?.pool_invites?.map((invite : any) => {
           return (
-            <div className="w-full mt-6 p-6 rounded bg-gray-300" key={invite.id}>
+            <div className="w-full mt-6 p-6 rounded bg-gray-300 flex justify-between items-center" key={invite.id}>
              <p>{invite.nickname}</p>
+             <span className="italic text-xs">Invited</span>
             </div>
           )
         })}

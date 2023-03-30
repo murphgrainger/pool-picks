@@ -55,8 +55,8 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     <span className="text-xs">Tot</span>
                     <p className="text-xl">929</p>
                 </div>
-                <div className="cursor-pointer" onClick={togglePicks}>
-                {showPicks ? '^' : 'V'}
+                <div className="accordion-header" onClick={togglePicks}>
+                    <span className={`accordion-arrow text-blue-900 ${showPicks ? 'open' : ''}`}>&#9660;</span>
                 </div>
             </div>
             {showPicks &&
