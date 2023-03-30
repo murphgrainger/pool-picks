@@ -25,6 +25,12 @@ export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
 
     // WIP: will refactor gql instead to just pull the correct tournament
     const data = pick.tournaments.filter(t => t.tournament_id === tournamentId)[0]
+    
+    const underParFormatted = data.score_under_par === null
+    ? '--'
+    : data.score_under_par === 0
+    ? 'E'
+    : data.score_under_par.toString();
 
     return (
         <div key={pick.id} className="bg-blue-100 mb-4 rounded p-4">
@@ -36,7 +42,7 @@ export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Score</span>
-                    <p className="text-xl">{data.score_under_par || "-"}</p>
+                    <p className="text-xl">{underParFormatted}</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Tot</span>

@@ -62,7 +62,7 @@ import { useRouter } from 'next/router';
 
       { session && 
         <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
-        <div className="flex flex-col justify-center items-center flex-wrap rounded bg-blue-400 w-full mt-4 py-8 px-6">
+        <div className="flex flex-col justify-center items-center flex-wrap rounded bg-blue-400 w-full mt-4 pt-8 px-6">
           <h3 className="mb-4">Active Pools</h3>
           { poolInvites?.map((invite:any) => (
         <div className="p-4 bg-yellow-200 w-full rounded mb-6" key={invite.id}>
@@ -80,7 +80,7 @@ import { useRouter } from 'next/router';
             <p className="text-center">You currently aren't in any active pools. Ask your commissioner to invite you!</p>
           )}
           { poolMembers?.map((member:any) => (
-        <div className="p-4 bg-blue-200 w-full rounded" key={member.id}>
+        <div className="p-4 mb-6 bg-blue-200 w-full rounded" key={member.id}>
             <div className="text-center">
               <h3 className="mb-2">{member?.pool?.name}</h3>
               <p className="mb-4">Status: {member?.pool?.status}</p>

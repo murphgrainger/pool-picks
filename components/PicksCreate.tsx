@@ -96,8 +96,13 @@ const PicksCreate: React.FC<Props> = ({memberId, tournamentId}) => {
     return (
         <div className="w-full mt-6">
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-blue-200">
-            <h3>Make Your Picks</h3>
-            <p>Here are some generic instructions.</p>
+            <h3>Submit Your Picks</h3>
+            <ul className="list-none"><span className="font-bold">Pick 6, Use 4</span>
+              <li>- A maximum of 3 players can be picked from the A Group.</li>
+              <li>- The best 4 of your 6 to par player scores make up your total score. </li>
+              <li>- You are DQd if less than 4 players make the cut.</li>
+              <li>- The lowest total score wins.</li>
+            </ul>
             {[0, 1, 2, 3, 4, 5].map((index) => (
                 <label key={index} className="block">
                 <span className="text-gray-700">Pick {index + 1}</span>

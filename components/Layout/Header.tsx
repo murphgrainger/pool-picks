@@ -14,7 +14,7 @@ const Header = () => {
         <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
           { session?.user && (
             <div className="flex items-center space-x-5">
-              <button onClick={() => signOut()}>Logout</button>
+              <button onClick={() => signOut({ callbackUrl: '/' })}>Logout</button>
             </div>
           )
         }
