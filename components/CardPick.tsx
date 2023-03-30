@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { formatToPar } from '../utils/utils';
+
 interface Props {
     pick: {
       id: number;
@@ -26,11 +28,7 @@ export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
     // WIP: will refactor gql instead to just pull the correct tournament
     const data = pick.tournaments.filter(t => t.tournament_id === tournamentId)[0]
     
-    const underParFormatted = data.score_under_par === null
-    ? '--'
-    : data.score_under_par === 0
-    ? 'E'
-    : data.score_under_par.toString();
+    const underParFormatted = formatToPar(data.score_under_par);
 
     return (
         <div key={pick.id} className="bg-blue-100 mb-4 rounded p-4">
