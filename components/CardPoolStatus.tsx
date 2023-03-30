@@ -19,7 +19,7 @@ export const CardPoolStatus : React.FC<Props> = ({ status }) => {
     }
 
     return (
-        <div className="w-full mt-6 p-6 rounded bg-yellow-300">
+        <div className="w-full mt-6 p-6 rounded bg-yellow-100">
          <p>{ statusDescription }</p>
         </div>
     )

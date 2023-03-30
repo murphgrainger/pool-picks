@@ -32,3 +32,16 @@ button {
     border-radius: 20px;
     font-size: 12px;
 }
+
+.accordion-arrow {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 0.5em;
+    transition: transform 0.3s ease-in-out;
+    cursor: pointer;
+  }
+  
+  .accordion-arrow.open {
+    transform: rotate(180deg);
+  }

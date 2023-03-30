@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { formatToPar } from '../utils/utils';
 
@@ -25,6 +25,12 @@ interface Props {
 
 export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
 
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggle = () => {
+        setIsOpen(!isOpen)
+    }
+
     // WIP: will refactor gql instead to just pull the correct tournament
     const data = pick.tournaments.filter(t => t.tournament_id === tournamentId)[0]
     
@@ -46,7 +52,11 @@ export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
                     <span className="text-xs">Tot</span>
                     <p className="text-xl">{data.score_sum || "-"}</p>
                 </div>
+                <div className="accordion-header" onClick={toggle}>
+                    <span className={`accordion-arrow ${isOpen ? 'open' : ''}`}>&#9660;</span>
+                </div>
             </div>
+            { isOpen &&
             <div className="mt-4 flex justify-around bg-blue-200 p-4 rounded">
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Status</span>
@@ -69,6 +79,7 @@ export const CardPick: React.FC<Props> = ({ pick, tournamentId }) => {
                     <p className="">{data.score_round_four || "-"}</p>
                 </div>
             </div>
+            }
         </div>
     )
 

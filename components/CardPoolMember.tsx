@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PicksCreate from './PicksCreate';
 import { Athlete } from '@prisma/client';
 import { CardPick } from './CardPick';
-
 
 interface Props {
     member: Record<string, any>;
@@ -15,6 +14,12 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     
     const currentUserCard = member.id === currentMemberId;
     const pickStatus = member.athletes.length ? "Picks Submitted" : "Awaiting Picks"
+
+    const[showPicks, setShowPicks] = useState(false)
+
+    const togglePicks = () => {
+        setShowPicks(!showPicks)
+    }
 
     if(poolStatus === "Open") {
         return (
@@ -50,8 +55,11 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     <span className="text-xs">Tot</span>
                     <p className="text-xl">929</p>
                 </div>
+                <div className="cursor-pointer" onClick={togglePicks}>
+                {showPicks ? '^' : 'V'}
+                </div>
             </div>
-            {
+            {showPicks &&
             member?.athletes
                 ?.sort((a: any, b: any) => a.athlete.score_under_par - b.athlete.score_under_par)
                 .map(({ athlete }: { athlete: any }) => (
