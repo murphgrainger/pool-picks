@@ -31,7 +31,7 @@ async function fetchAthleteField(id: string) {
 
     parsedAthletes.push(athlete);
   });
-  console.log(parsedAthletes)
+  
   return parsedAthletes;
 }
 

@@ -53,12 +53,11 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
             </div>
             {
             member?.athletes
-                ?.sort((a: any, b: any) => a.athlete.score_sum - b.athlete.score_sum)
+                ?.sort((a: any, b: any) => a.athlete.score_under_par - b.athlete.score_under_par)
                 .map(({ athlete }: { athlete: any }) => (
                 <CardPick pick={athlete} tournamentId={tournamentId} />
                 ))
-}
-
+            }
         </div>
    )
 }

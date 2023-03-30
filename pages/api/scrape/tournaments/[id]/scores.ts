@@ -104,7 +104,7 @@ async function fetchGolfData(id: string) {
         } else if (column === 'score_under_par') {
           const formattedToPar = parseLeaderboardPosition(score);
           athleteInTournament[column] = formattedToPar;
-          athleteInTournament['status'] = !formattedToPar ? score : 'Active';
+          athleteInTournament['status'] = formattedToPar === null ? score : 'Active';
         } else if (score !== '--') {
           athleteInTournament[column] = parseInt(score, 10);
         }
