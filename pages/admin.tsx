@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import { useSession } from 'next-auth/react';
 import { useEffect } from "react";
 import Router from 'next/router';
-import loadConfig from "next/dist/server/config";
+
 const DashboardProtected: NextPage = (): JSX.Element => {
   const { data: session, status } = useSession()
   

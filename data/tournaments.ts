@@ -61,7 +61,8 @@ export const tournaments = [
       "name": "Masters Tournament",
       "course": "Augusta National Golf Club",
       "city": "Augusta",
-      "region": "GA"
+      "region": "GA",
+      "external_id": 401465508
     },
     {
       "start_date": "4/13/2023",

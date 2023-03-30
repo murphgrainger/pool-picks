@@ -90,7 +90,7 @@ model Athlete {
 }
 
 model AthletesInTournaments {
-  status              String @default("Active")
+  status              String @default("ACTIVE")
   position            Int?
   thru                Int?
   score_today         Int?

@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 
 const Header = () => {

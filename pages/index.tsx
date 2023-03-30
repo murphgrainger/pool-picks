@@ -77,7 +77,7 @@ import { useRouter } from 'next/router';
           </div>
           ))}
           { !poolMembers.length && !poolInvites.length && (
-            <p className="text-center">You currently aren't in any active pools. Ask your commissioner to invite you!</p>
+            <p className="text-center pb-8">You currently aren't in any active pools. Ask your commissioner to invite you!</p>
           )}
           { poolMembers?.map((member:any) => (
         <div className="p-4 mb-6 bg-blue-200 w-full rounded" key={member.id}>
