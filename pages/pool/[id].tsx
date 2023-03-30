@@ -6,6 +6,8 @@ import { authOptions } from '../api/auth/[...nextauth]';
 import { CardPoolMember } from '../../components/CardPoolMember';
 import { CardPoolStatus } from '../../components/CardPoolStatus';
 
+import { redirectToHome } from '../../utils/utils';
+
 const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
   const sortedMembers = pool?.pool_members?.sort((a:any, b:any) => {
@@ -52,7 +54,10 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
     const id = context.params?.id;
 
     const session = await getServerSession(context.req, context.res, authOptions)
-    const email = session?.user?.email;
+    
+    if(!session) { return redirectToHome() };
+
+    const email = session!.user?.email;
 
     const pool = await prisma.pool.findUnique({
       where: {
@@ -125,12 +130,10 @@ const Pool = ({ pool, currentUserPoolMemberId }: InferGetServerSidePropsType<typ
       },
     });
   
-    if (!pool) return {
-      notFound: true
-    }
+    if(!pool) { return redirectToHome() }
 
-    const currentUserPoolMember = pool.pool_members.find((member) => member.user.email === email);
-
+    const currentUserPoolMember = pool!.pool_members.find((member) => member.user.email === email);
+    if(!currentUserPoolMember) { return redirectToHome() }
   
     return {
       props: {
