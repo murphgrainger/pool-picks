@@ -6,18 +6,12 @@ import { authOptions } from '../api/auth/[...nextauth]';
 import { CardPoolMember } from '../../components/CardPoolMember';
 import { CardPoolStatus } from '../../components/CardPoolStatus';
 
-import { redirectToHome, sumMemberPicks } from '../../utils/utils';
+import { redirectToHome, reformatPoolMembers } from '../../utils/utils';
 
 const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
-
-  const sortedMembers = poolMembers.sort((a: any, b: any) => {
-    const aLowest = sumMemberPicks(a.athletes, pool.tournament_id);
-    const bLowest = sumMemberPicks(b.athletes, pool.tournament_id);
-    return aLowest - bLowest;
-  });
   
-  const totalPotAmount = sortedMembers.length * pool.amount_entry;
+  const totalPotAmount = poolMembers.length * pool.amount_entry;
 
     return (
       <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
@@ -26,7 +20,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
         <p>{pool.tournament.course}</p>
         <p>${pool.amount_entry} Buy-In | Total Pot: ${totalPotAmount} </p>
         <CardPoolStatus status={pool.status}/>
-        { sortedMembers?.map((member:any, i:number) => {
+        { poolMembers?.map((member:any, i:number) => {
           return (
             <CardPoolMember
             key={member.id}
@@ -139,14 +133,8 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
     const currentUserPoolMember = pool!.pool_members.find((member) => member.user.email === email);
     if(!currentUserPoolMember) { return redirectToHome() }
 
-    const poolMembers = pool!.pool_members.map((member) => {
-      const member_sum_under_par = sumMemberPicks(member.athletes, pool.tournament_id);
-      return {
-        ...member,
-        member_sum_under_par,
-      };
-    });
-  
+    const poolMembers = reformatPoolMembers(pool.pool_members, pool.tournament_id)
+
     return {
       props: {
         pool,
