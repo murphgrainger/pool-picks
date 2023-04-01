@@ -31,6 +31,7 @@ export const CardPick: React.FC<Props> = ({ pick }) => {
     // WIP: will refactor gql instead to just pull the correct tournament
     
     const underParFormatted = formatToPar(pick.score_under_par);
+    const scoreTodayFormatted = formatToPar(pick.score_today)
 
     return (
         <div key={pick.id} className="bg-blue-100 mb-4 rounded p-4">
@@ -54,6 +55,10 @@ export const CardPick: React.FC<Props> = ({ pick }) => {
             </div>
             { isOpen &&
             <div className="mt-4 flex justify-around bg-blue-200 p-4 rounded">
+                <div className="flex-1 flex flex-col items-center justify-center">
+                    <span className="text-xs">Today</span>
+                    <p className="">{ scoreTodayFormatted || "-" }</p>
+                </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Thru</span>
                     <p className="">{ pick.thru || "-" }</p>

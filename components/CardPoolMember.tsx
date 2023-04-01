@@ -45,6 +45,15 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
         )
     }
 
+    if(!member.picks.length) {
+        return (
+            <div className="w-full mt-6 p-6 rounded bg-red-100 flex justify-between items-center">
+             <p>{member?.nickname}</p>
+             <span className="italic text-xs">No Picks Submitted</span>
+            </div>
+        )
+    }
+
     return (
         <div className="w-full mt-6 p-6 pb-2 rounded bg-blue-300" key={member.id}>
             <div className="flex items-center pb-4 pt-0">

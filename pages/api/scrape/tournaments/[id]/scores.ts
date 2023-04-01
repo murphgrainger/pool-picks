@@ -18,6 +18,7 @@ interface AthleteInTournament {
   score_round_four: number | null;
   score_sum: number | null;
   score_under_par: number | null;
+  score_today: number | null;
   thru: string | null;
   status: string;
   [key: string]: number | null | string;
@@ -60,6 +61,9 @@ async function fetchGolfData(id: string) {
         case 'toPar':
           columnIndexes.score_under_par = index;
           break;
+        case 'today':
+          columnIndexes.score_today = index;
+          break;
         case 'thru':
           columnIndexes.thru = index;
           break;
@@ -87,7 +91,6 @@ async function fetchGolfData(id: string) {
   $('tr.PlayerRow__Overview').each((index, element) => {
     const fullName = $(element).find('.leaderboard_player_name').text();
     const scores = $(element).find('.Table__TD').map((i, el) => $(el).text()).toArray();
-    
     const athlete: Athlete = {
       full_name: fullName,
     };
@@ -100,8 +103,9 @@ async function fetchGolfData(id: string) {
       score_round_four: null,
       score_sum: null,
       score_under_par: null,
+      score_today: null,
       thru: null,
-      status: 'ACTIVE'
+      status: 'Active'
     };
 
       for (const [key, value] of Object.entries(columnIndexes)) {
@@ -118,6 +122,9 @@ async function fetchGolfData(id: string) {
               const formattedToPar = parseLeaderboardPosition(score);
               athleteInTournament[key] = formattedToPar;
               athleteInTournament['status'] = formattedToPar === null ? score : 'Active';
+            } else if (key === 'score_today') {
+              const formattedToPar = parseLeaderboardPosition(score);
+              athleteInTournament[key] = formattedToPar;
             } else if (key === 'thru')  {
               athleteInTournament[key] = score;
             } else {
@@ -176,6 +183,7 @@ async function updateGolfData(
           score_round_four: athleteInTournament.score_round_four,
           score_sum: athleteInTournament.score_sum,
           score_under_par: athleteInTournament.score_under_par,
+          score_today: athleteInTournament.score_today,
           position: athleteInTournament.position,
           thru: athleteInTournament.thru,
           status: athleteInTournament.status
@@ -187,6 +195,7 @@ async function updateGolfData(
           score_round_four: athleteInTournament.score_round_four,
           score_under_par: athleteInTournament.score_under_par,
           score_sum: athleteInTournament.score_sum,
+          score_today: athleteInTournament.score_today,
           position: athleteInTournament.position,
           thru: athleteInTournament.thru,
           status: athleteInTournament.status

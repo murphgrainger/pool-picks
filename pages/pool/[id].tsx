@@ -15,7 +15,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
 
     return (
       <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
-        <h1>{pool.name}</h1>
+        <h1 className="mt-4">{pool.name}</h1>
         <h3>{pool.tournament.name}</h3>
         <p>{pool.tournament.course}</p>
         <p>${pool.amount_entry} Buy-In | Total Pot: ${totalPotAmount} </p>
