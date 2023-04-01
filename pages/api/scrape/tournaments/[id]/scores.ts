@@ -53,6 +53,7 @@ async function fetchGolfData(id: string) {
           columnIndexes.score_under_par = index;
           break;
         case 'r1':
+          console.log('r1:', index);
           columnIndexes.score_round_one = index;
           break;
         case 'r2':
@@ -73,13 +74,15 @@ async function fetchGolfData(id: string) {
     }
   });
 
+  const cutLine = $('.cut-score').text();
+  console.log('cut!', cutLine)
   $('tr.PlayerRow__Overview').each((index, element) => {
     const fullName = $(element).find('.leaderboard_player_name').text();
     const scores = $(element).find('.Table__TD').not('.tc').map((i, el) => $(el).text()).toArray();
     const athlete: Athlete = {
       full_name: fullName,
     };
-
+  
     const athleteInTournament: AthleteInTournament = {
       position: null,
       score_round_one: null,
@@ -91,27 +94,32 @@ async function fetchGolfData(id: string) {
       status: 'ACTIVE'
     };
 
-    for (const column in columnIndexes) {
-      if (column in athleteInTournament && columnIndexes[column] !== undefined) {
-        const scoreIndex = columnIndexes[column]!;
-        let score = scores[scoreIndex];
+    for (let i = 0; i < scores.length; i++) {
+      let score = scores[i];
+      console.log(Object.entries(columnIndexes))
+      const property = Object.entries(columnIndexes).find(([key, val]) => val === i)?.[0];
+      console.log(`score: ${score} index: ${i} property ${property}`);
 
-        if (column === 'position') {
+      if (property) {
+        if (property === 'position') {
           if (score && score !== '-') {
-            if(score.includes('T')) score = score.substring(1);
-            athleteInTournament[column] = parseInt(score, 10);
+            if (score.includes('T')) score = score.substring(1);
+            athleteInTournament[property] = parseInt(score, 10);
           }
-        } else if (column === 'score_under_par') {
+        } else if (property === 'score_under_par') {
           const formattedToPar = parseLeaderboardPosition(score);
-          athleteInTournament[column] = formattedToPar;
+          athleteInTournament[property] = formattedToPar;
           athleteInTournament['status'] = formattedToPar === null ? score : 'Active';
         } else if (score !== '--') {
-          athleteInTournament[column] = parseInt(score, 10);
+          athleteInTournament[property] = parseInt(score, 10);
         }
       }
     }
+    
     parsedAthleteData.push({ athlete, athleteInTournament });
+  
   });
+  
 
   return parsedAthleteData;
 }
