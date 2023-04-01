@@ -43,6 +43,7 @@ async function fetchGolfData(id: string) {
   // iterate through column headers to get their indexes
   $('thead.Table__THEAD tr.Table__TR.Table__even th').each((index, element) => {
     const cssClass = $(element).attr('class');
+
     if (cssClass) {
       const column = cssClass.split(' ')[0];
       switch (column) {
@@ -53,7 +54,6 @@ async function fetchGolfData(id: string) {
           columnIndexes.score_under_par = index;
           break;
         case 'r1':
-          console.log('r1:', index);
           columnIndexes.score_round_one = index;
           break;
         case 'r2':
@@ -78,7 +78,7 @@ async function fetchGolfData(id: string) {
   console.log('cut!', cutLine)
   $('tr.PlayerRow__Overview').each((index, element) => {
     const fullName = $(element).find('.leaderboard_player_name').text();
-    const scores = $(element).find('.Table__TD').not('.tc').map((i, el) => $(el).text()).toArray();
+    const scores = $(element).find('.Table__TD').not('.tc .caret').map((i, el) => $(el).text()).toArray();
     const athlete: Athlete = {
       full_name: fullName,
     };
@@ -94,28 +94,24 @@ async function fetchGolfData(id: string) {
       status: 'ACTIVE'
     };
 
-    for (let i = 0; i < scores.length; i++) {
-      let score = scores[i];
-      console.log(Object.entries(columnIndexes))
-      const property = Object.entries(columnIndexes).find(([key, val]) => val === i)?.[0];
-      console.log(`score: ${score} index: ${i} property ${property}`);
-
-      if (property) {
-        if (property === 'position') {
-          if (score && score !== '-') {
-            if (score.includes('T')) score = score.substring(1);
-            athleteInTournament[property] = parseInt(score, 10);
+      for (const [key, value] of Object.entries(columnIndexes)) {
+        let score = scores[value];
+        if (score !== '--') {
+          if (key === 'position') {
+            if (score && score !== '-') {
+              if (score.includes('T')) score = score.substring(1);
+              athleteInTournament[key] = parseInt(score, 10);
+            }
+          } else if (key === 'score_under_par') {
+            const formattedToPar = parseLeaderboardPosition(score);
+            athleteInTournament[key] = formattedToPar;
+            athleteInTournament['status'] = formattedToPar === null ? score : 'Active';
+          } else {
+            athleteInTournament[key] = parseInt(score, 10);
           }
-        } else if (property === 'score_under_par') {
-          const formattedToPar = parseLeaderboardPosition(score);
-          athleteInTournament[property] = formattedToPar;
-          athleteInTournament['status'] = formattedToPar === null ? score : 'Active';
-        } else if (score !== '--') {
-          athleteInTournament[property] = parseInt(score, 10);
         }
       }
-    }
-    
+
     parsedAthleteData.push({ athlete, athleteInTournament });
   
   });
