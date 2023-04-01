@@ -27,7 +27,6 @@ type FormValues = {
 
 const PoolCreate = () => {
   const { data: session, status } = useSession()
-  console.log(session)
   useEffect(() => {
     if(status === "unauthenticated") Router.replace('/')
   }, [status])

@@ -40,6 +40,7 @@ export const typeDefs = `
         city: String
         region: String
         status: String
+        cut_line: Int
         external_id: Int
     }
 

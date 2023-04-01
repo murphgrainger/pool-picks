@@ -19,6 +19,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
         <h3>{pool.tournament.name}</h3>
         <p>{pool.tournament.course}</p>
         <p>${pool.amount_entry} Buy-In | Total Pot: ${totalPotAmount} </p>
+        {pool.tournament.cut_line && <p>Projected Cut <strong>{pool.tournament.cut_line}</strong></p>}
         <CardPoolStatus status={pool.status}/>
         { poolMembers?.map((member:any, i:number) => {
           return (
@@ -75,6 +76,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
             city: true,
             region: true,
             status: true,
+            cut_line: true
           }
         },
         pool_invites: {

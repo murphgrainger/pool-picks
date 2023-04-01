@@ -52,8 +52,8 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     <p className="text-sm">{ position } <sup>{ suffix }</sup></p>
                 </div>
                 <h3 className="flex-1 text-2xl">{member?.nickname}</h3>
-                <div className="flex-1 flex flex-col items-center justify-center">
-                    <p className="text-xl">{ underParFormatted }</p>
+                <div className="flex-1 flex flex-col items-end pr-6 justify-center">
+                    <p className="text-xl rounded-lg bg-blue-100 p-2 pr-3 pl-3 font-bold">{ underParFormatted }</p>
                 </div>
                 <div className="accordion-header" onClick={togglePicks}>
                     <span className={`accordion-arrow text-blue-900 ${showPicks ? 'open' : ''}`}>&#9660;</span>

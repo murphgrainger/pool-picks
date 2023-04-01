@@ -72,7 +72,8 @@ model Tournament {
   course      String  
   city        String
   region      String
-  status      String     @default("Scheduled")
+  status      String    @default("Scheduled")
+  cut_line    Int?
   external_id Int?
   athletes    AthletesInTournaments[]
   pools       Pool[]

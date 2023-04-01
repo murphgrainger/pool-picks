@@ -28,6 +28,10 @@ interface ParsedAthleteData {
   athleteInTournament: AthleteInTournament;
 }
 
+interface ParsedTournamentData {
+  cut_line: number | null;
+}
+
 async function fetchGolfData(id: string) {
   let tournament = await prisma.tournament.findUnique({
     where: { id: parseInt(id) },
@@ -38,7 +42,9 @@ async function fetchGolfData(id: string) {
   const response = await axios.get(url);
   const $ = cheerio.load(response.data);
   const parsedAthleteData: ParsedAthleteData[] = [];
-
+  const parsedTournamentData: ParsedTournamentData = {
+    cut_line: null
+  };
   const columnIndexes: Partial<Record<keyof AthleteInTournament, number>> = {};
 
   // iterate through column headers to get their indexes
@@ -78,8 +84,6 @@ async function fetchGolfData(id: string) {
     }
   });
 
-  const cutLine = $('.cut-score').text();
-  
   $('tr.PlayerRow__Overview').each((index, element) => {
     const fullName = $(element).find('.leaderboard_player_name').text();
     const scores = $(element).find('.Table__TD').map((i, el) => $(el).text()).toArray();
@@ -101,21 +105,24 @@ async function fetchGolfData(id: string) {
     };
 
       for (const [key, value] of Object.entries(columnIndexes)) {
-        let score = scores[value];
-        if (score !== '--') {
-          if (key === 'position') {
-            if (score && score !== '-') {
-              if (score.includes('T')) score = score.substring(1);
+        
+        if (value !== undefined) {
+          let score = scores[value];
+          if (score !== '--') {
+            if (key === 'position') {
+              if (score && score !== '-') {
+                if (score.includes('T')) score = score.substring(1);
+                athleteInTournament[key] = parseInt(score, 10);
+              }
+            } else if (key === 'score_under_par') {
+              const formattedToPar = parseLeaderboardPosition(score);
+              athleteInTournament[key] = formattedToPar;
+              athleteInTournament['status'] = formattedToPar === null ? score : 'Active';
+            } else if (key === 'thru')  {
+              athleteInTournament[key] = score;
+            } else {
               athleteInTournament[key] = parseInt(score, 10);
             }
-          } else if (key === 'score_under_par') {
-            const formattedToPar = parseLeaderboardPosition(score);
-            athleteInTournament[key] = formattedToPar;
-            athleteInTournament['status'] = formattedToPar === null ? score : 'Active';
-          } else if (key === 'thru')  {
-            athleteInTournament[key] = score;
-          } else {
-            athleteInTournament[key] = parseInt(score, 10);
           }
         }
       }
@@ -123,14 +130,21 @@ async function fetchGolfData(id: string) {
     parsedAthleteData.push({ athlete, athleteInTournament });
   
   });
-  
 
-  return parsedAthleteData;
+  const cutLine = $('.cut-score').text();
+  parsedTournamentData.cut_line = parseInt(cutLine);
+
+  return { parsedAthleteData, parsedTournamentData };
 }
 
 
-async function updateGolfData(parsedAthleteData: ParsedAthleteData[], tournamentId: number) {
-
+async function updateGolfData(
+  { parsedAthleteData, parsedTournamentData }: { 
+    parsedAthleteData: ParsedAthleteData[],
+    parsedTournamentData: ParsedTournamentData
+  }, 
+  tournamentId: number
+) {
     if(!parsedAthleteData.length) throw new Error('No data available for this tournament!');
 
     for (const { athlete, athleteInTournament } of parsedAthleteData) {
@@ -178,6 +192,17 @@ async function updateGolfData(parsedAthleteData: ParsedAthleteData[], tournament
           status: athleteInTournament.status
         },
       });
+    }
+
+    if(parsedTournamentData?.cut_line) {
+      await prisma.tournament.update({
+        where: {
+          id: tournamentId
+        },
+          data: {
+            cut_line: parsedTournamentData.cut_line
+          }
+      })
     }
   } 
 
