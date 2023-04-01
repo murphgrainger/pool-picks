@@ -50,6 +50,7 @@ export const redirectToHome = () => ({
           score_round_four: tournament?.score_round_four ?? null,
           score_sum: tournament?.score_sum ?? null,
           score_under_par: tournament?.score_under_par ?? null,
+          thru: tournament?.thru ?? null,
           tournament_id: tournament?.tournament_id ?? null,
         }
       });
