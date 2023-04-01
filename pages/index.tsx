@@ -53,10 +53,12 @@ import { useRouter } from 'next/router';
         <link rel="icon" href="/favicon.ico" />
       </Head>
       { !session &&
-      <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
-        <h1 className="mt-10">Welcome to Pool Picks!</h1>
-        <p className="m-4">Login to get started.</p>
-        <button onClick={() => signIn()} className="rounded">Login</button>
+      <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4 text-center">
+          <div className="w-full bg-green-100 rounded p-10">
+            <h1 className="">PoolPicks Beta</h1>
+            <p className="m-4">Only beta testers can login</p>
+            <button onClick={() => signIn()} className="rounded mt-4">Login</button>
+          </div>
       </div>
       }
 

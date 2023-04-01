@@ -57,6 +57,11 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model BetaList {
+  id    Int    @id @default(autoincrement())
+  email String @unique
+}
+
 enum Role {
   USER
   ADMIN

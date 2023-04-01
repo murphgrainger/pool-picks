@@ -9,7 +9,7 @@ const Header = () => {
   return (
     <header className="text-gray-600 body-font bg-green-300">
       <div className="container mx-auto flex flex-wrap p-5 md:flex-row justify-between">
-        <Link href="/" className="flex title-font font-medium items-center text-gray-900 md:mb-0"><h3>Pool Picks</h3>
+        <Link href="/" className="flex title-font font-medium items-center text-gray-900 md:mb-0"><h3>PoolPicks</h3>
         </Link>
         <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
           { session?.user && (
