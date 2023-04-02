@@ -4,16 +4,15 @@ import { gql, useMutation } from "@apollo/client";
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import prisma from '../lib/prisma';
 import Link from "next/link";
-import { useSession, signIn } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { getServerSession } from "next-auth/next";
 import { authOptions } from './api/auth/[...nextauth]';
 import { useRouter } from 'next/router';
 
-  const PoolInvitesAndMembers = ({ poolInvites: initialPoolInvites, poolMembers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const PoolInvitesAndMembers = ({ session, poolInvites: initialPoolInvites, poolMembers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const [poolInvites, setPoolInvites] = useState(initialPoolInvites)
     const [isLoading, setLoading] = useState(false)
     const router = useRouter();
-    const { data: session } = useSession()
 
     const CreateInviteMutation = gql`
     mutation($id: ID!, $status: String!, $pool_id: Int!, $nickname: String!, $email: String!) {
@@ -160,6 +159,7 @@ export const getServerSideProps: GetServerSideProps = async ( context ) => {
 
   return {
     props: {
+      session,
       poolInvites,
       poolMembers
     },
