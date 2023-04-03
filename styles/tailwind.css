@@ -32,7 +32,7 @@ button, [type='submit'] {
     padding: .5em 1em;
     margin: 0 1em;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 16px;
 }
 
 .button-oauth {

@@ -14,6 +14,7 @@ import { redirectToSignIn } from '../utils/utils';
   const PoolInvitesAndMembers = ({ session, poolInvites: initialPoolInvites, poolMembers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const [poolInvites, setPoolInvites] = useState(initialPoolInvites)
     const [isLoading, setLoading] = useState(false)
+    const [loadingButtonId, setLoadingButtonId] = useState<string | null>(null);
     const router = useRouter();
 
     const CreateInviteMutation = gql`
@@ -27,12 +28,11 @@ import { redirectToSignIn } from '../utils/utils';
   const updateInviteStatus = async (id: number, status: string, pool_id: string, nickname: string, email: string) => {
     
     try {
-      setLoading(true);
       await updatePoolInviteStatus({ variables: { id, status, pool_id, nickname, email } });
 
       if (status === "Accepted") {
-        router.push(`/pool/${pool_id}`);
-        setLoading(false)
+        await router.push(`/pool/${pool_id}`);
+        setLoadingButtonId(null);
         return;
       } else {
         setPoolInvites(poolInvites.filter((invite : any) => invite.id !== id));
@@ -71,13 +71,63 @@ import { redirectToSignIn } from '../utils/utils';
         <div className="p-4 bg-yellow-200 w-full rounded mb-6" key={invite.id}>
             <div className="text-center">
               <span>You have been invited to:</span>
-              <h3 className="mb-4">{invite?.pool?.name}</h3>
+              <h3>{invite?.pool?.name}</h3>
+              <p className="pb-2">${invite?.pool?.amount_entry} Ante</p>
               <div className="flex flex-wrap justify-center">
-                <button className="button-tertiary bg-gray-400" onClick={() => {updateInviteStatus(invite.id, "Rejected", invite.pool.id, invite.nickname, session.user?.email ?? '')}} disabled={isLoading}>Reject</button>
-                <button className="button-tertiary bg-green-500" onClick={() => {updateInviteStatus(invite.id, "Accepted", invite.pool.id, invite.nickname, session.user?.email ?? '')}} disabled={isLoading}>Accept</button>
+                <button
+                disabled={loadingButtonId !== null}
+                className="button-tertiary bg-red-300"
+                onClick={() => {
+                  setLoadingButtonId(`${invite.id}-reject`);
+                  updateInviteStatus(invite.id, "Rejected", invite.pool.id, invite.nickname, session.user?.email ?? '');
+                }}
+              >
+                { loadingButtonId === `${invite.id}-reject` ? (
+                    <span className="flex items-center justify-center ">
+                      <svg
+                        className="w-6 h-6 animate-spin mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
+                      </svg>
+                      Rejecting...
+                    </span>
+                  ) : (
+                    <span>Reject</span>
+                  )
+                }
+                </button>
+                <button
+                disabled={loadingButtonId !== null}
+                className="button-tertiary bg-green-500"
+                onClick={() => {
+                  setLoadingButtonId(`${invite.id}-accept`);
+                  updateInviteStatus(invite.id, "Accepted", invite.pool.id, invite.nickname, session.user?.email ?? '');
+                }}
+              >
+                { loadingButtonId === `${invite.id}-accept` ? (
+                    <span className="flex items-center justify-center ">
+                      <svg
+                        className="w-6 h-6 animate-spin mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
+                      </svg>
+                      Accepting...
+                    </span>
+                  ) : (
+                    <span>Accept</span>
+                  )
+                }
+                </button>
               </div>
             </div>
           </div>
+          
           ))}
           { !poolMembers.length && !poolInvites.length && (
             <p className="text-center pb-8">You currently aren't in any active pools. Ask your commissioner to invite you!</p>
@@ -128,7 +178,8 @@ export const getServerSideProps: GetServerSideProps = async ( context ) => {
         select: {
           id: true,
           name: true,
-          status: true
+          status: true,
+          amount_entry: true
         }
       }
     },
@@ -146,7 +197,8 @@ export const getServerSideProps: GetServerSideProps = async ( context ) => {
         select: {
           id: true,
           name: true,
-          status: true
+          status: true,
+          amount_entry: true
         }
       },
       user: {

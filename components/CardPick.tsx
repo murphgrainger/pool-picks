@@ -34,6 +34,7 @@ export const CardPick: React.FC<Props> = ({ pick }) => {
     const scoreTodayFormatted = formatToPar(pick.score_today);
     const suffix = ordinalSuffix(pick.position);
 
+    const showStatus = pick.status === 'CUT' || pick.status === 'WD' ? pick.status : '--'
 
     return (
         <div key={pick.id} className="bg-blue-100 mb-4 rounded p-4">
@@ -41,7 +42,7 @@ export const CardPick: React.FC<Props> = ({ pick }) => {
                 <p className="flex-1 font-semibold text-base">{pick.full_name}</p>
                 <div className="flex-1 flex flex-col items-center justify-center">
                 <span className="text-xs">Pos</span>
-                    <p className="text-xl">{ pick.position || pick.status }</p>
+                    <p className="text-xl">{ pick.position || showStatus }</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Score</span>
