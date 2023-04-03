@@ -34,7 +34,7 @@ export const redirectToSignIn = () => ({
   }
   
   export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) => {
-    return poolMembers.map((member: any) => {
+    const reformattedMembers = poolMembers.map((member: any) => {
       const picks = member.athletes.map((athletePick: any) => {
         const tournament = athletePick.athlete.tournaments.find((t: any) => t.tournament_id === tournamentId);
         
@@ -56,14 +56,25 @@ export const redirectToSignIn = () => ({
       });
       
       const sum = sumMemberPicks(picks);
-      
       return {
         id: member.id,
         nickname: member.user.nickname,
         member_sum_under_par: sum,
         picks: picks,
       }
-    }).sort((a: any, b: any) => a.member_sum_under_par - b.member_sum_under_par);
+    })
+    const hasMemberSumUnderPar = reformattedMembers.some((member: any) => member.member_sum_under_par !== null);
+
+    return reformattedMembers.sort((a: any, b: any) => {
+      if(!a.picks.length) {
+        return a.member_sum_under_par - b.member_sum_under_par;
+      }
+      if (hasMemberSumUnderPar) {
+        return a.member_sum_under_par - b.member_sum_under_par;
+      } else {
+        return a.nickname.localeCompare(b.nickname);
+      }
+    });
   }
   
   export const ordinalSuffix = (i: number) => {

@@ -17,9 +17,9 @@ const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { data: session, status } = useSession();
   const { loading, error, data } = useQuery(GET_POOLS_QUERY);
+  console.log(data)
 
   useEffect(() => {
-    console.log(session);
     if(status === "unauthenticated") Router.replace('/auth/signin')
     if (status === "authenticated" && session?.role !== "ADMIN") {
       Router.replace('/');
@@ -31,7 +31,7 @@ const AdminPage = () => {
       <h1>Commish Home</h1>
       <h2>Pools:</h2>
       <ul>
-        {data.pools.map((pool:any) => (
+        {data?.pools.map((pool:any) => (
           <li key={pool.id}>
             <div>{pool.name}</div>
             <div>Status: {pool.status}</div>

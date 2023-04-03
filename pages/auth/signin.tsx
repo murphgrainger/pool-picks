@@ -27,6 +27,7 @@ export default function SignIn({providers} : any, {csrfToken}: any) {
   return (
     <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
       <div className="bg-gray-200 w-full max-w-md p-10 rounded flex flex-col items-center">
+        <h1 className="mb-10">Sign In</h1>
     { googleProvider && (
         <button onClick={() => signIn(googleProvider.id, { callbackUrl: '/' })} className="w-full mb-8 button-oauth hover:bg-gray-100 active:bg-gray-100">
           <img src="/google_logo.svg" alt="Google Icon" className="oauth-logo"/>
@@ -48,7 +49,7 @@ export default function SignIn({providers} : any, {csrfToken}: any) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}/>
           <button type="submit" className="mt-4" disabled={loading}>
-          {loading ? "Sending an email to you..." : "Continue with Email"}
+          {loading ? "Sending you an email..." : "Continue with Email"}
         </button>
         {error && <p className="mt-2 text-red-600">{error}</p>}        </form>
       </div>

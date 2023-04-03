@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { formatToPar } from '../utils/utils';
+import { ordinalSuffix, formatToPar } from '../utils/utils';
 
 interface Props {
     pick: {
@@ -31,19 +31,17 @@ export const CardPick: React.FC<Props> = ({ pick }) => {
     // WIP: will refactor gql instead to just pull the correct tournament
     
     const underParFormatted = formatToPar(pick.score_under_par);
-    const scoreTodayFormatted = formatToPar(pick.score_today)
+    const scoreTodayFormatted = formatToPar(pick.score_today);
+    const suffix = ordinalSuffix(pick.position);
+
 
     return (
         <div key={pick.id} className="bg-blue-100 mb-4 rounded p-4">
             <div className="flex items-center">
                 <p className="flex-1 font-semibold text-base">{pick.full_name}</p>
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <span className="text-xs">Pos</span>
-                    <p className="text-xl">{ pick.position || "-" }</p>
-                </div>
-                <div className="flex-1 flex flex-col items-center justify-center">
-                    <span className="text-xs">Tot</span>
-                    <p className="text-xl">{ pick.score_sum || "-" }</p>
+                <span className="text-xs">Pos</span>
+                    <p className="text-xl">{ pick.position || pick.status }</p>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Score</span>

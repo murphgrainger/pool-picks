@@ -133,15 +133,14 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
     if(!pool) { return redirectToSignIn() }
 
     const currentUserPoolMember = pool!.pool_members.find((member) => member.user.email === email);
-    if(!currentUserPoolMember) { return redirectToSignIn() }
+    if(!currentUserPoolMember && session.role !== 'ADMIN') { return redirectToSignIn() }
 
     const poolMembers = reformatPoolMembers(pool.pool_members, pool.tournament_id)
-
     return {
       props: {
         pool,
         poolMembers,
-        currentUserPoolMemberId: currentUserPoolMember?.id,
+        currentUserPoolMemberId: currentUserPoolMember?.id || null,
       },
     };
   };

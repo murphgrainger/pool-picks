@@ -26,9 +26,14 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     if(poolStatus === "Open") {
         return (
             <div className="w-full mt-6 p-6 rounded bg-blue-300" key={member.id}>
-                <h3>{member?.nickname}</h3>
-                { !currentUserCard &&  
+               { !currentUserCard &&  
+                <div className="flex justify-between">
+                    <h3 className="">{member?.nickname}</h3>
                     <p className="font-semibold">{ pickStatus }</p>
+                </div>
+                }
+                { currentUserCard && member.picks &&
+                    <h3 className="mb-4">{member?.nickname}</h3>
                 }
                 { currentUserCard && !member.picks.length &&
                     <PicksCreate 
@@ -36,9 +41,10 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     tournamentId={tournamentId}
                     />
                 }
+
                 { currentUserCard && member?.picks?.map((athlete:any) => {
                     return (
-                    <p key={athlete.id}>{athlete.full_name}</p>
+                    <p key={athlete.id} className="p-2 mb-2 bg-blue-100 rounded">{athlete.full_name}</p>
                     )
                 })}
          </div>  
@@ -57,24 +63,40 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     return (
         <div className="w-full mt-6 p-6 pb-2 rounded bg-blue-300" key={member.id}>
             <div className="flex items-center pb-4 pt-0">
-            <div className="flex flex-col pr-4 bg-blue-100 rounded-lg p-3 mr-5">
+                {
+                    member.member_score_under_par &&
+                    <div className="flex flex-col pr-4 bg-blue-100 rounded-lg p-3 mr-5">
                     <p className="text-sm">{ position } <sup>{ suffix }</sup></p>
                 </div>
+                }
+
                 <h3 className="flex-1 text-2xl">{member?.nickname}</h3>
-                <div className="flex-1 flex flex-col items-end pr-6 justify-center">
-                    <p className="text-xl rounded-lg bg-blue-100 p-2 pr-3 pl-3 font-bold">{ underParFormatted }</p>
-                </div>
+
+                { underParFormatted !== '--' &&
+                    <div className="flex-1 flex flex-col items-end pr-6 justify-center">
+                     <p className="text-xl rounded-lg bg-blue-100 p-2 pr-3 pl-3 font-bold">{ underParFormatted }</p>
+                    </div>
+                }
+           
                 <div className="accordion-header" onClick={togglePicks}>
                     <span className={`accordion-arrow text-blue-900 ${showPicks ? 'open' : ''}`}>&#9660;</span>
                 </div>
             </div>
             {showPicks &&
-            member?.picks
-                ?.sort((a: any, b: any) => a.score_under_par - b.score_under_par)
-                .map((athlete:any, i: number) => (
-                <CardPick key={i} pick={athlete}/>
-                ))
-            }
+                member?.picks
+                    ?.sort((a: any, b: any) => {
+                    if (a.score_under_par !== null && b.score_under_par !== null) {
+                        return a.score_under_par - b.score_under_par;
+                    } else if (a.score_under_par !== null) {
+                        return -1;
+                    } else if (b.score_under_par !== null) {
+                        return 1;
+                    } else {
+                        return a.full_name.localeCompare(b.full_name);
+                    }
+                    })
+                    .map((athlete: any, i: number) => <CardPick key={i} pick={athlete} />)
+                }
         </div>
    )
 }
