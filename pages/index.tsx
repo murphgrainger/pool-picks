@@ -13,7 +13,6 @@ import { redirectToSignIn } from '../utils/utils';
 
   const PoolInvitesAndMembers = ({ session, poolInvites: initialPoolInvites, poolMembers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const [poolInvites, setPoolInvites] = useState(initialPoolInvites)
-    const [isLoading, setLoading] = useState(false)
     const [loadingButtonId, setLoadingButtonId] = useState<string | null>(null);
     const router = useRouter();
 
@@ -36,13 +35,14 @@ import { redirectToSignIn } from '../utils/utils';
         return;
       } else {
         setPoolInvites(poolInvites.filter((invite : any) => invite.id !== id));
-        setLoading(false)
+        setLoadingButtonId(null);
       }
       
       return;
     } catch (error) {
       console.log(error);
-      setLoading(false);
+      setLoadingButtonId(null);
+
     }
   };
   

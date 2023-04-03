@@ -1,25 +1,26 @@
 import { Athlete } from '@prisma/client';
 import { useMutation, useQuery, gql } from '@apollo/client';
 import React, { useState } from 'react';
-import { type SubmitHandler, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { useRouter } from 'next/router';
+import { SubmitHandler } from 'react-hook-form';
 
 interface Props {
-    memberId: number,
-    tournamentId: number
+  memberId: number;
+  tournamentId: number;
 }
 
 interface SelectValues {
-    value: string,
-    label?: string
+  value: string;
+  label?: string;
 }
 
 type FormValues = {
-    picks: { id: string }[];
-  }
+  picks: { id: string }[];
+};
 
-  const CREATE_PICKS = gql`
+const CREATE_PICKS = gql`
   mutation CreatePicks($poolMemberId: Int!, $athleteIds: [Int!]!) {
     createPicks(poolMemberId: $poolMemberId, athleteIds: $athleteIds) {
       athlete {
@@ -33,92 +34,140 @@ type FormValues = {
   }
 `;
 
-const PicksCreate: React.FC<Props> = ({memberId, tournamentId}) => {
-
+const PicksCreate: React.FC<Props> = ({ memberId, tournamentId }) => {
   const {
+    register,
     setValue,
     handleSubmit,
     formState: { errors },
     setError,
     clearErrors,
-    reset
-  } = useForm<FormValues>()
+    reset,
+  } = useForm<FormValues>();
 
-    const { loading, error, data } = useQuery(GET_ATHLETES_BY_TOURNAMENT_ID, {
-      variables: { tournament_id: tournamentId },
-    });
+  const { loading, error, data } = useQuery(GET_ATHLETES_BY_TOURNAMENT_ID, {
+    variables: { tournament_id: tournamentId },
+  });
 
-    const athletes = data?.athletesByTournamentId;
+  const athletes = data?.athletesByTournamentId;
 
-    const router = useRouter();
-    const [picks, setPicks] = useState<Array<Athlete | null>>([null, null, null, null, null, null]);
-    const [createPicks] = useMutation(CREATE_PICKS);
+  const router = useRouter();
+  const [picks, setPicks] = useState<Array<Athlete | null>>([
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ]);
+  const [createPicks] = useMutation(CREATE_PICKS);
+  const [isSubmitting, setSubmitting] = useState(false);
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error.message}</p>;
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
-    const availableAthletes = athletes.filter((athlete: any) => {
-        return !picks.some((pick) =>  pick?.id === athlete.id );
+  const availableAthletes = athletes.filter((athlete: any) => {
+    return !picks.some((pick) => pick?.id === athlete.id);
+  });
+
+  const selectOptions: SelectValues[] = availableAthletes.map(
+    (athlete: any) => ({
+      value: athlete.id,
+      label: athlete.full_name,
+    })
+  );
+
+  const handlePickChange = (option: SelectValues | null, index: number) => {
+    try {
+      const newPick = option
+        ? (athletes.find((athlete: any) => athlete.id === option.value) as Athlete)
+        : undefined;
+      if (newPick) {
+        const newPicks = [...picks];
+        newPicks[index] = newPick;
+        setPicks(newPicks);
+        setValue(`picks.${index}.id`, option?.value ?? '');
+        clearErrors();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onSubmit: SubmitHandler<FormValues> = async (data:any) => {
+    try {
+      setSubmitting(true);
+      const athleteIds = data.picks.map((pick:any) => parseInt(pick.id));
+      await createPicks({
+        variables: { poolMemberId: memberId, athleteIds },
       });
-      
-      const selectOptions: SelectValues[] = availableAthletes.map((athlete: any) => ({
-        value: athlete.id,
-        label: athlete.full_name
-      }));
+      router.reload();
+    } catch (error) {
+      console.log('error', error);
+      setSubmitting(false);
+    }
+  };
 
-    const handlePickChange = (option: SelectValues | null, index: number) => {
-        try {
-            const newPick = option ? athletes.find((athlete:any) => athlete.id === option.value) as Athlete : undefined;
-            if (newPick) {
-              const newPicks = [...picks];
-              newPicks[index] = newPick;
-              setPicks(newPicks);
-              setValue(`picks.${index}.id`, option?.value ?? "");
-              clearErrors();
-             }
-        } catch(error) {
-            console.log(error)
-        }
-      };
-  
-    const onSubmit: SubmitHandler<FormValues> = async (data) => {
-        try {
-              const athleteIds = data.picks.map((pick) => parseInt(pick.id));
-              await createPicks({
-                variables: { poolMemberId: memberId, athleteIds },
-              });
-              router.reload();
-          } catch (error) {
-            console.log('error', error);
-          }
-    };
-
-    return (
-        <div className="w-full mt-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-blue-200">
-            <h3>Submit Your Picks</h3>
-            <ul className="list-none"><span className="font-bold">Pick 6, Use 4</span>
-              <li>- A maximum of 3 players can be picked from the A Group.</li>
-              <li>- The best 4 of your 6 to par player scores make up your total score. </li>
-              <li>- You are DQd if less than 4 players make the cut.</li>
-              <li>- The lowest total score wins.</li>
-            </ul>
-            {[0, 1, 2, 3, 4, 5].map((index) => (
-                <label key={index} className="block">
-                <span className="text-gray-700">Pick {index + 1}</span>
-                <Select
-                instanceId="long-value-select"
+  return (
+    <div className="w-full mt-6">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-blue-200"
+      >
+        <h3>Submit Your Picks</h3>
+        <ul className="list-none">
+          <span className="font-bold">Pick 6, Use 4</span>
+          <li>- A maximum of 3 players can be picked from the A Group.</li>
+          <li>
+            - The best 4 of your 6 to par player scores make up your total score.
+          </li>
+          <li>- You are DQd if less than 4 players make the cut.</li>
+          <li>- The lowest total score wins.</li>
+        </ul>
+        {Array.from({ length: 6 }, (_, index) => (
+          <div key={index}>
+            <label className="block">
+              <span className="text-gray-700">Pick {index + 1}</span>
+              <input
+                type="hidden"
+                {...register(`picks.${index}.id`, { required: true })}
+              />
+              <Select
+                instanceId={`long-value-select-${index}`}
                 name={`pick-${index}`}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                onChange={(option: SelectValues | null) => handlePickChange(option, index)}
-                options={selectOptions} 
-                />
-                </label>
-            ))}
-            {errors?.picks && <p>{errors.picks.message}</p>}
-            <button type="submit" className="my-4 capitalize bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600">
-                Submit Picks
-            </button>
+                onChange={(option: SelectValues | null) =>
+                  handlePickChange(option, index)
+                }
+                options={selectOptions}
+              />
+            </label>
+            {errors?.picks?.[index] && (
+              <p className="text-red-500">Pick {index + 1} is required</p>
+            )}
+          </div>
+        ))}
+        <button
+          disabled={isSubmitting}
+          type="submit"
+          className="my-4 capitalize bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600"
+        >
+                {isSubmitting ? (
+                    <span className="flex items-center justify-center">
+                    <svg
+                        className="w-6 h-6 animate-spin mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
+                    </svg>
+                    Submitting Picks...
+                    </span>
+                ) : (
+                    <span>Submit Picks</span>
+                )}
+                </button>
             </form>
         </div>
     )
