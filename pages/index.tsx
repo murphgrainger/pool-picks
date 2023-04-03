@@ -8,6 +8,8 @@ import { signIn } from "next-auth/react"
 import { getServerSession } from "next-auth/next";
 import { authOptions } from './api/auth/[...nextauth]';
 import { useRouter } from 'next/router';
+import { redirectToSignIn } from '../utils/utils';
+
 
   const PoolInvitesAndMembers = ({ session, poolInvites: initialPoolInvites, poolMembers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const [poolInvites, setPoolInvites] = useState(initialPoolInvites)
@@ -107,7 +109,9 @@ export default PoolInvitesAndMembers;
 
 export const getServerSideProps: GetServerSideProps = async ( context ) => {
   const session = await getServerSession(context.req, context.res, authOptions)
-  const email = session?.user?.email;
+  if(!session) { return redirectToSignIn() };
+  
+  const email = session.user?.email;
 
   const poolInvites = await prisma.poolInvite.findMany({
     where: {

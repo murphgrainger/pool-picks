@@ -1,6 +1,6 @@
-export const redirectToHome = () => ({
+export const redirectToSignIn = () => ({
       redirect: {
-        destination: '/',
+        destination: '/auth/signin',
         permanent: false,
       }
   })

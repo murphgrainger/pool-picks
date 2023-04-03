@@ -17,13 +17,15 @@ h3 {
     font-weight: 700;
 }
 
-button {
+button, [type='submit'] {
     background: black;
     color: white;
     padding: 1em 2em;
     outline: none;
     border-radius: 0.25rem;
 }
+
+
 
 .button-tertiary {
     color: black;
@@ -32,6 +34,21 @@ button {
     border-radius: 20px;
     font-size: 12px;
 }
+
+.button-oauth {
+    background: white;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #888;
+}
+
+.button-oauth .oauth-logo {
+    width: 22px;
+    margin-right: 20px;
+}
+
 
 .accordion-arrow {
     display: inline-block;
@@ -48,4 +65,23 @@ button {
 
   sup {
     margin-left: -4px;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid #888;
+    display: block;
+    margin: 2rem auto 1rem;
+    overflow: visible;
+    width: 100%
+  }
+
+  hr::before {
+    background: rgb(229 231 235 / var(--tw-bg-opacity));
+    color: #888;
+    content: "or";
+    padding: 0 0.4rem;
+    position: relative;
+    top: -0.8rem;
+    left: 50%;
   }

@@ -6,7 +6,7 @@ import { authOptions } from '../api/auth/[...nextauth]';
 import { CardPoolMember } from '../../components/CardPoolMember';
 import { CardPoolStatus } from '../../components/CardPoolStatus';
 
-import { redirectToHome, reformatPoolMembers } from '../../utils/utils';
+import { redirectToSignIn, reformatPoolMembers } from '../../utils/utils';
 
 const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
@@ -53,7 +53,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
 
     const session = await getServerSession(context.req, context.res, authOptions)
     
-    if(!session) { return redirectToHome() };
+    if(!session) { return redirectToSignIn() };
 
     const email = session!.user?.email;
 
@@ -130,10 +130,10 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
       },
     });
   
-    if(!pool) { return redirectToHome() }
+    if(!pool) { return redirectToSignIn() }
 
     const currentUserPoolMember = pool!.pool_members.find((member) => member.user.email === email);
-    if(!currentUserPoolMember) { return redirectToHome() }
+    if(!currentUserPoolMember) { return redirectToSignIn() }
 
     const poolMembers = reformatPoolMembers(pool.pool_members, pool.tournament_id)
 

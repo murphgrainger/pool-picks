@@ -28,7 +28,7 @@ type FormValues = {
 const PoolCreate = () => {
   const { data: session, status } = useSession()
   useEffect(() => {
-    if(status === "unauthenticated") Router.replace('/')
+    if(status === "unauthenticated") Router.replace('/auth/signin')
   }, [status])
   
     const [createPool, { data, loading, error }] = useMutation(CreatePoolMutation)

@@ -9,7 +9,6 @@ const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -29,6 +28,10 @@ export const authOptions: NextAuthOptions = {
   theme: {
     colorScheme: "light",
   },
+  pages: {
+    signIn: '/auth/signin',
+    verifyRequest: '/auth/verify-request'
+  },
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       const allowedEmail = await prisma.betaList.findUnique({
@@ -44,30 +47,16 @@ export const authOptions: NextAuthOptions = {
           where: { email: user.email! },
           select: { role: true },
         });
-
-        console.log('userData', userData)
   
         if (userData) {
-          session.role = 'ADMIN';
+          session.role = userData.role
         }
       }
       
       return session
     },
-    async jwt({ token, user }) {
-      if (user) {
-        const userData = await prisma.user.findUnique({
-          where: { email: user.email! },
-          select: { role: true },
-        });
-
-        console.log('userData', userData)
-  
-        if (userData) {
-          token.role = 'ADMIN';
-        }
-      }
-  
+    async jwt({ token }) {
+      token.userRole = "admin";
       return token;
     },
   },
