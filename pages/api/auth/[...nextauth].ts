@@ -38,8 +38,36 @@ export const authOptions: NextAuthOptions = {
       if (allowedEmail) return true;
       return "/join-waitlist";
     },
-    async jwt({ token }) {
-      token.userRole = "admin";
+    async session({ session, token, user }) {
+        if (user) {
+        const userData = await prisma.user.findUnique({
+          where: { email: user.email! },
+          select: { role: true },
+        });
+
+        console.log('userData', userData)
+  
+        if (userData) {
+          session.role = 'ADMIN';
+        }
+      }
+      
+      return session
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        const userData = await prisma.user.findUnique({
+          where: { email: user.email! },
+          select: { role: true },
+        });
+
+        console.log('userData', userData)
+  
+        if (userData) {
+          token.role = 'ADMIN';
+        }
+      }
+  
       return token;
     },
   },
