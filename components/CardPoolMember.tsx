@@ -9,10 +9,11 @@ interface Props {
     currentMemberId: number,
     poolStatus: string,
     tournamentId: number,
-    position: number
+    position: number,
+    tournamentExternalUrl: string | null
   }
 
-export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, tournamentId, position }) => {
+export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, tournamentId, position, tournamentExternalUrl }) => {
     const currentUserCard = member.id === currentMemberId;
     const pickStatus = member.picks.length ? "Picks Submitted" : "Awaiting Picks"
 
@@ -39,6 +40,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     <PicksCreate 
                     memberId={currentMemberId}
                     tournamentId={tournamentId}
+                    tournamentExternalUrl={tournamentExternalUrl}
                     />
                 }
 

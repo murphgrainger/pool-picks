@@ -9,16 +9,21 @@ import { CardPoolStatus } from '../../components/CardPoolStatus';
 import { redirectToSignIn, reformatPoolMembers } from '../../utils/utils';
 
 const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-
   
   const totalPotAmount = poolMembers.length * pool.amount_entry;
+  const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
 
+  console.log(poolMembers)
+  
     return (
       <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
         <h1 className="mt-4">{pool.name}</h1>
         <h3>{pool.tournament.name}</h3>
         <p>{pool.tournament.course}</p>
         <p>${pool.amount_entry} Ante | Total Pot: ${totalPotAmount} </p>
+        { pool.tournament.external_id &&
+          <a href={tournamentExternalUrl} className="font-bold text-green-500 underline" target="_blank" rel="noreferrer">Full Leaderboard</a>
+        }
         {pool.tournament.cut_line && <p>Projected Cut <strong>{pool.tournament.cut_line}</strong></p>}
         <CardPoolStatus status={pool.status}/>
         { poolMembers?.map((member:any, i:number) => {
@@ -29,6 +34,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
             currentMemberId={currentUserPoolMemberId}
             poolStatus={pool.status}
             tournamentId={pool.tournament.id}
+            tournamentExternalUrl={tournamentExternalUrl}
             position={i+1}
             />
           )
@@ -76,7 +82,8 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
             city: true,
             region: true,
             status: true,
-            cut_line: true
+            cut_line: true,
+            external_id: true
           }
         },
         pool_invites: {
@@ -118,7 +125,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
                         score_round_four: true,
                         score_sum: true,
                         score_under_par: true,
-                        tournament_id: true
+                        tournament_id: true,
                       }
                     }
                   }

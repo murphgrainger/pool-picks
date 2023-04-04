@@ -9,6 +9,7 @@ import { SubmitHandler } from 'react-hook-form';
 interface Props {
   memberId: number;
   tournamentId: number;
+  tournamentExternalUrl: string | null;
 }
 
 interface SelectValues {
@@ -34,7 +35,7 @@ const CREATE_PICKS = gql`
   }
 `;
 
-const PicksCreate: React.FC<Props> = ({ memberId, tournamentId }) => {
+const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExternalUrl }) => {
   const {
     register,
     setValue,
@@ -115,15 +116,20 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId }) => {
         className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-blue-200"
       >
         <h3>Submit Your Picks</h3>
-        <ul className="list-none">
+       <ul className="list-none">
           <span className="font-bold">Pick 6, Use 4</span>
-          <li>- You can pick a max of 3 players from the A Group: Top 20</li>
+          <li>- You can pick a max of 3 players in the Top 20 Offical Word Golf Ranking.</li>
           <li>
             - The best 4 of your 6 player scores to par make up your total score.
           </li>
           <li>- You are DQd if less than 4 players make the cut.</li>
           <li>- The lowest total score wins.</li>
           <li>- Picks cannot be changed after submission.</li>
+          { tournamentExternalUrl &&
+          <li><a href={tournamentExternalUrl} className="font-bold text-green-700 underline" target="_blank" rel="noreferrer">Full Tournament Field</a></li>
+        }
+        <li><a href='https://www.espn.com/golf/rankings' className="font-bold text-green-700 underline" target="_blank" rel="noreferrer">Official World Golf Rankings</a></li>
+       
         </ul>
         {Array.from({ length: 6 }, (_, index) => (
           <div key={index}>
