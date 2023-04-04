@@ -6,7 +6,7 @@ interface Props {
 }
 const Layout: React.FC<Props> = ({ children }) => {
   return (
-    <div className="bg-black h-screen">
+    <div className="bg-black min-h-screen">
       <Header />
       {children}
     </div>
