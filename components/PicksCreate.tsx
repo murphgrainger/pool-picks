@@ -117,12 +117,13 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId }) => {
         <h3>Submit Your Picks</h3>
         <ul className="list-none">
           <span className="font-bold">Pick 6, Use 4</span>
-          <li>- A maximum of 3 players can be picked from the A Group.</li>
+          <li>- You must pick 2 players per A, B, C tier.</li>
           <li>
-            - The best 4 of your 6 to par player scores make up your total score.
+            - The best 4 of your 6 player scores to par make up your total score.
           </li>
           <li>- You are DQd if less than 4 players make the cut.</li>
           <li>- The lowest total score wins.</li>
+          <li>- Picks cannot be changed after submission.</li>
         </ul>
         {Array.from({ length: 6 }, (_, index) => (
           <div key={index}>

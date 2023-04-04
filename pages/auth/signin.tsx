@@ -48,7 +48,7 @@ export default function SignIn({providers} : any, {csrfToken}: any) {
           className="w-full rounded h-14"
           value={email}
           onChange={(e) => setEmail(e.target.value)}/>
-          <button type="submit" className="mt-4" disabled={loading}>
+          <button type="submit" className="mt-4 hover:bg-slate-800" disabled={loading}>
           {loading ? "Sending you an email..." : "Continue with Email"}
         </button>
         {error && <p className="mt-2 text-red-600">{error}</p>}        </form>

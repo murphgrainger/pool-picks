@@ -65,6 +65,11 @@ import { redirectToSignIn } from '../utils/utils';
 
       { session && 
         <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
+           <div className="w-full mt-6 p-6 rounded bg-yellow-100">
+              <p className="text-center">PoolPicks is currently in Alpha:</p>
+              <p className="text-center">Only the app developer can be a commissioner.</p>
+              <p className="text-center">Alpha testers (you!) can accept invitations to pools, make picks, and win the pool.</p>
+            </div>
         <div className="flex flex-col justify-center items-center flex-wrap rounded bg-blue-400 w-full mt-4 pt-8 px-6">
           <h3 className="mb-4">Active Pools</h3>
           { poolInvites?.map((invite:any) => (
@@ -138,7 +143,7 @@ import { redirectToSignIn } from '../utils/utils';
               <h3 className="mb-2">{member?.pool?.name}</h3>
               <p className="mb-4">Status: {member?.pool?.status}</p>
               <div className="flex flex-wrap justify-center">
-                <Link href={`/pool/${member.pool.id}`}><button className="rounded">Go to Pool</button></Link>
+                <Link href={`/pool/${member.pool.id}`}><button className="rounded  hover:bg-green-600">Go to Pool</button></Link>
               </div>
             </div>
           </div>

@@ -21,7 +21,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
 
 
     const suffix = ordinalSuffix(position);
-    const underParFormatted = formatToPar(member.member_sum_under_par)
+    const underParFormatted = formatToPar(member.member_sum_under_par);
 
     if(poolStatus === "Open") {
         return (
