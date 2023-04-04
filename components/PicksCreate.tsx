@@ -125,6 +125,7 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExtern
           <li>- You are DQd if less than 4 players make the cut.</li>
           <li>- The lowest total score wins.</li>
           <li>- Picks cannot be changed after submission.</li>
+          <br></br>
           { tournamentExternalUrl &&
           <li><a href={tournamentExternalUrl} className="font-bold text-green-700 underline" target="_blank" rel="noreferrer">Full Tournament Field</a></li>
         }

@@ -59,6 +59,7 @@ export const redirectToSignIn = () => ({
       return {
         id: member.id,
         nickname: member.user.nickname,
+        username: member.username,
         member_sum_under_par: sum,
         picks: picks,
       }

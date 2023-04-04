@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PicksCreate from './PicksCreate';
 import { CardPick } from './CardPick';
+import UsernameCreate  from './UsernameCreate';
 
 import { ordinalSuffix, formatToPar } from '../utils/utils';
 
@@ -18,25 +19,46 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     const pickStatus = member.picks.length ? "Picks Submitted" : "Awaiting Picks"
 
     const[showPicks, setShowPicks] = useState(false)
-    const togglePicks = () => { setShowPicks(!showPicks) }
+    const [hasSubmittedUsername, setHasSubmittedUsername] = useState(!!member.username); // initialize the state based on whether the member has a username
 
+    const [showUsernameCreate, setShowUsernameCreate] = useState(!member.username);
+
+    const togglePicks = () => { setShowPicks(!showPicks) }
 
     const suffix = ordinalSuffix(position);
     const underParFormatted = formatToPar(member.member_sum_under_par);
+
+    useEffect(() => {
+        if (member.username) {
+          setHasSubmittedUsername(true);
+        }
+      }, [member.username]);
+
+
+  const handleUsernameSubmitSuccess = (username: string) => {
+    setHasSubmittedUsername(true);
+    member.username = username;
+  };
 
     if(poolStatus === "Open") {
         return (
             <div className="w-full mt-6 p-6 rounded bg-blue-300" key={member.id}>
                { !currentUserCard &&  
                 <div className="flex justify-between">
-                    <h3 className="">{member?.nickname}</h3>
+                    <h3 className="">{hasSubmittedUsername ? member.username : member?.nickname}</h3>
                     <p className="font-semibold">{ pickStatus }</p>
                 </div>
                 }
                 { currentUserCard && member.picks &&
-                    <h3 className="mb-4">{member?.nickname}</h3>
+                    <h3 className="mb-4">{member.username || member?.nickname}</h3>
                 }
-                { currentUserCard && !member.picks.length &&
+               { !hasSubmittedUsername &&
+                <UsernameCreate
+                    memberId={currentMemberId}
+                    onSubmitSuccess={handleUsernameSubmitSuccess}
+                />
+                }
+                { currentUserCard && hasSubmittedUsername && !member.picks.length &&
                     <PicksCreate 
                     memberId={currentMemberId}
                     tournamentId={tournamentId}
@@ -56,7 +78,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     if(!member.picks.length) {
         return (
             <div className="w-full mt-6 p-6 rounded bg-red-100 flex justify-between items-center">
-             <p>{member?.nickname}</p>
+                <h3 className="">{hasSubmittedUsername ? member.username : member?.nickname}</h3>
              <span className="italic text-xs">No Picks Submitted</span>
             </div>
         )
@@ -72,7 +94,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                 </div>
                 }
 
-                <h3 className="flex-1 text-2xl">{member?.nickname}</h3>
+                <h3 className="">{hasSubmittedUsername ? member.username : member?.nickname}</h3>
 
                 { underParFormatted !== '--' &&
                     <div className="flex-1 flex flex-col items-end pr-6 justify-center">

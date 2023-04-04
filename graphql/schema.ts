@@ -29,6 +29,7 @@ export const typeDefs = `
 
     type PoolMember {
         id: ID
+        username: String
         pool: Pool
         user: User
     }
@@ -96,5 +97,6 @@ export const typeDefs = `
         ): Pool!
         createPicks(poolMemberId: Int!, athleteIds: [Int!]!): [Pick!]
         updateInviteStatus(id: ID!, status: String!, pool_id: Int!, nickname: String!, email: String!): PoolMember
+        updatePoolMemberUsername(id:ID!, username: String!): PoolMember
     }
 `

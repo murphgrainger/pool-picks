@@ -64,8 +64,18 @@ export const Mutation = {
       }
   
     } catch (error: any) {
-      throw new ApolloError(`Could not update invite status and create pool member: ${error.message}`);
+      throw new Error(`Could not update username: ${error.message}`);
     }
+  },
+  updatePoolMemberUsername: async(_: any, args: any, context: any) => {
+    try {
+      await prisma.poolMember.update({
+        where: { id: parseInt(args.id) },
+        data: { username: args.username }
+      });
+  } catch (error:any) {
+    throw new ApolloError(`Could not update username: ${error.message}`);
+
   }
-  
+  }
 }

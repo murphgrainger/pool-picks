@@ -13,8 +13,6 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
   const totalPotAmount = poolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
 
-  console.log(poolMembers)
-  
     return (
       <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
         <h1 className="mt-4">{pool.name}</h1>
@@ -101,6 +99,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
           select: {
             id: true,
             user_id: true,
+            username: true,
             user: {
               select: {
                 email: true,

@@ -145,6 +145,7 @@ model PoolInvite {
 
 model PoolMember {
     id              Int       @id @default(autoincrement())
+    username        String?
     created_at      DateTime  @default(now())
     pool_id         Int
     pool            Pool      @relation(fields: [pool_id], references: [id])
