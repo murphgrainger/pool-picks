@@ -14,13 +14,13 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
   const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
 
     return (
-      <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
+      <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4 bg-black text-white">
         <h1 className="mt-4">{pool.name}</h1>
         <h3>{pool.tournament.name}</h3>
         <p>{pool.tournament.course}</p>
         <p>${pool.amount_entry} Ante | Total Pot: ${totalPotAmount} </p>
         { pool.tournament.external_id &&
-          <a href={tournamentExternalUrl} className="font-bold text-green-500 underline" target="_blank" rel="noreferrer">Full Leaderboard</a>
+          <a href={tournamentExternalUrl} className="font-bold text-yellow underline" target="_blank" rel="noreferrer">Full Leaderboard</a>
         }
         {pool.tournament.cut_line && <p>Projected Cut <strong>{pool.tournament.cut_line}</strong></p>}
         <CardPoolStatus status={pool.status}/>
@@ -39,7 +39,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
         })}
         { pool?.pool_invites?.map((invite : any) => {
           return (
-            <div className="w-full mt-6 p-6 rounded bg-gray-300 flex justify-between items-center" key={invite.id}>
+            <div className="w-full mt-6 p-6 rounded bg-grey-100 flex justify-between items-center" key={invite.id}>
              <p>{invite.nickname}</p>
              <span className="italic text-xs">Invited</span>
             </div>

@@ -37,7 +37,7 @@ export const CardPick: React.FC<Props> = ({ pick }) => {
     const showStatus = pick.status === 'CUT' || pick.status === 'WD' ? pick.status : '--'
 
     return (
-        <div key={pick.id} className="bg-blue-100 mb-4 rounded p-4">
+        <div key={pick.id} className="bg-grey-100 mb-4 rounded p-4">
             <div className="flex items-center">
                 <p className="flex-1 font-semibold text-base">{pick.full_name}</p>
                 <div className="flex-1 flex flex-col items-center justify-center">
@@ -49,11 +49,11 @@ export const CardPick: React.FC<Props> = ({ pick }) => {
                     <p className="text-xl">{ underParFormatted }</p>
                 </div>
                 <div className="accordion-header" onClick={ toggle }>
-                    <span className={`accordion-arrow text-blue-400 ${isOpen ? 'open' : ''}`}>&#9660;</span>
+                    <span className={`accordion-arrow text-grey-200 ${isOpen ? 'open' : ''}`}>&#9660;</span>
                 </div>
             </div>
             { isOpen &&
-            <div className="mt-4 flex justify-around bg-blue-200 p-4 rounded">
+            <div className="mt-4 flex justify-around bg-grey-200 p-4 rounded">
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Today</span>
                     <p className="">{ scoreTodayFormatted || "-" }</p>

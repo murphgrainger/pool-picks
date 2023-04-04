@@ -113,7 +113,7 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExtern
     <div className="w-full mt-6">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-blue-200"
+        className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-grey-100"
       >
         <h3>Submit Your Picks</h3>
        <ul className="list-none">
@@ -127,23 +127,24 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExtern
           <li>- Picks cannot be changed after submission.</li>
           <br></br>
           { tournamentExternalUrl &&
-          <li><a href={tournamentExternalUrl} className="font-bold text-green-700 underline" target="_blank" rel="noreferrer">Full Tournament Field</a></li>
+          <li><a href={tournamentExternalUrl} className="font-bold text-yellow underline" target="_blank" rel="noreferrer">Full Tournament Field</a></li>
         }
-        <li><a href='https://www.espn.com/golf/rankings' className="font-bold text-green-700 underline" target="_blank" rel="noreferrer">Official World Golf Rankings</a></li>
+        <li><a href='https://www.espn.com/golf/rankings' className="font-bold text-yellow underline" target="_blank" rel="noreferrer">Official World Golf Rankings</a></li>
        
         </ul>
         {Array.from({ length: 6 }, (_, index) => (
-          <div key={index}>
+          <div key={index} className="text-black">
             <label className="block">
-              <span className="text-gray-700">Pick {index + 1}</span>
+              <span className="text-white">Pick {index + 1}</span>
               <input
                 type="hidden"
+                className='text-black'
                 {...register(`picks.${index}.id`, { required: true })}
               />
               <Select
                 instanceId={`long-value-select-${index}`}
                 name={`pick-${index}`}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 color-black"
                 onChange={(option: SelectValues | null) =>
                   handlePickChange(option, index)
                 }
@@ -151,14 +152,14 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExtern
               />
             </label>
             {errors?.picks?.[index] && (
-              <p className="text-red-500">Pick {index + 1} is required</p>
+              <p className="text-yellow">Pick {index + 1} is required</p>
             )}
           </div>
         ))}
         <button
           disabled={isSubmitting}
           type="submit"
-          className="my-4 capitalize bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600"
+          className="my-4 capitalize bg-grey-200 text-white font-medium py-2 px-4 rounded-md hover:bg-yellow hover:text-black"
         >
                 {isSubmitting ? (
                     <span className="flex items-center justify-center">

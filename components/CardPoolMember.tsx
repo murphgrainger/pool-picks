@@ -42,7 +42,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
 
     if(poolStatus === "Open") {
         return (
-            <div className="w-full mt-6 p-6 rounded bg-blue-300" key={member.id}>
+            <div className="w-full mt-6 p-6 rounded bg-grey-200" key={member.id}>
                { !currentUserCard &&  
                 <div className="flex justify-between">
                     <h3 className="">{hasSubmittedUsername ? member.username : member?.nickname}</h3>
@@ -66,11 +66,14 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     />
                 }
 
-                { currentUserCard && member?.picks?.map((athlete:any) => {
+                { currentUserCard && member?.picks
+                ?.sort((a: any, b: any) => a.full_name.localeCompare(b.full_name))
+                ?.map((athlete:any) => {
                     return (
-                    <p key={athlete.id} className="p-2 mb-2 bg-blue-100 rounded">{athlete.full_name}</p>
+                    <p key={athlete.id} className="p-2 mb-2 bg-grey-100 rounded">{athlete.full_name}</p>
                     )
-                })}
+                })
+                }
          </div>  
         )
     }
@@ -85,11 +88,12 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     }
 
     return (
-        <div className="w-full mt-6 p-6 pb-2 rounded bg-blue-300" key={member.id}>
+        <div className="w-full mt-6 p-6 pb-2 rounded bg-grey-200" key={member.id}>
             <div className="flex items-center pb-4 pt-0">
+                <div className="flex-1">
                 {
                     member.member_score_under_par &&
-                    <div className="flex flex-col pr-4 bg-blue-100 rounded-lg p-3 mr-5">
+                    <div className="flex flex-col pr-4 bg-grey-100 rounded-lg p-3 mr-5">
                     <p className="text-sm">{ position } <sup>{ suffix }</sup></p>
                 </div>
                 }
@@ -101,9 +105,9 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                      <p className="text-xl rounded-lg bg-blue-100 p-2 pr-3 pl-3 font-bold">{ underParFormatted }</p>
                     </div>
                 }
-           
+            </div>
                 <div className="accordion-header" onClick={togglePicks}>
-                    <span className={`accordion-arrow text-blue-900 ${showPicks ? 'open' : ''}`}>&#9660;</span>
+                    <span className={`accordion-arrow text-yellow ${showPicks ? 'open' : ''}`}>&#9660;</span>
                 </div>
             </div>
             {showPicks &&

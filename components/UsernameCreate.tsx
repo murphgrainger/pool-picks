@@ -49,23 +49,21 @@ const UsernameCreate: React.FC<Props> = ({ memberId, onSubmitSuccess }) => {
       <Toaster />
          <form
         onSubmit={handleSubmit(handleFormSubmit)}
-        className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-blue-200">              
-        <h3>Create Your Pool Username</h3>
-              <p>First select your username and icon to get started. Then make your picks.</p>
+        className="grid grid-cols-1 gap-y-3 p-4 rounded-lg bg-grey-100">              
+        <h4>Set Your Pool Username:</h4>
               <label className="block">
-                <span className="text-gray-700">Username</span>
                 <input
-                    placeholder="ex: MurphyGee"
+                    placeholder="Username"
                     {...register('username', { required: true })}
                     name="username"
                     type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-black"
                 />
                 </label>
                 <button
                 disabled={loading}
                 type="submit"
-                className="my-4 capitalize bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600"
+                className="my-4 capitalize bg-green text-black font-medium py-2 px-4 rounded-md hover:bg-green-600"
                 >
                 {loading ? (
                     <span className="flex items-center justify-center">

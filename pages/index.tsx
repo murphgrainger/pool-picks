@@ -53,27 +53,18 @@ import { redirectToSignIn } from '../utils/utils';
         <title>Home</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      { !session &&
-      <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4 text-center">
-          <div className="w-full bg-green-100 rounded p-10">
-            <h1 className="">PoolPicks Beta</h1>
-            <p className="m-4">Only beta testers can login</p>
-            <button onClick={() => signIn()} className="rounded mt-4">Login</button>
-          </div>
-      </div>
-      }
 
       { session && 
-        <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
-           <div className="w-full mt-6 p-6 rounded bg-yellow-100">
+        <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4 bg-black">
+           <div className="w-full mt-6 p-6 rounded bg-grey-100 text-white">
               <p className="text-center">PoolPicks is currently in Alpha:</p>
               <p className="text-center">Only the app developer can be a commissioner.</p>
               <p className="text-center">Alpha testers (you!) can accept invitations to pools, make picks, and win the pool.</p>
             </div>
-        <div className="flex flex-col justify-center items-center flex-wrap rounded bg-blue-400 w-full mt-4 pt-8 px-6">
+        <div className="flex flex-col justify-center items-center flex-wrap rounded bg-grey-200 w-full mt-4 pt-8 px-6 text-white">
           <h3 className="mb-4">Active Pools</h3>
           { poolInvites?.map((invite:any) => (
-        <div className="p-4 bg-yellow-200 w-full rounded mb-6" key={invite.id}>
+        <div className="p-4 bg-yellow w-full rounded mb-6 text-black" key={invite.id}>
             <div className="text-center">
               <span>You have been invited to:</span>
               <h3>{invite?.pool?.name}</h3>
@@ -106,7 +97,7 @@ import { redirectToSignIn } from '../utils/utils';
                 </button>
                 <button
                 disabled={loadingButtonId !== null}
-                className="button-tertiary bg-green-500"
+                className="button-tertiary bg-green"
                 onClick={() => {
                   setLoadingButtonId(`${invite.id}-accept`);
                   updateInviteStatus(invite.id, "Accepted", invite.pool.id, invite.nickname, session.user?.email ?? '');
@@ -138,12 +129,12 @@ import { redirectToSignIn } from '../utils/utils';
             <p className="text-center pb-8">You currently aren't in any active pools. Ask your commissioner to invite you!</p>
           )}
           { poolMembers?.map((member:any) => (
-        <div className="p-4 mb-6 bg-blue-200 w-full rounded" key={member.id}>
+        <div className="p-4 mb-6 bg-grey-100 w-full rounded" key={member.id}>
             <div className="text-center">
               <h3 className="mb-2">{member?.pool?.name}</h3>
               <p className="mb-4">Status: {member?.pool?.status}</p>
               <div className="flex flex-wrap justify-center">
-                <Link href={`/pool/${member.pool.id}`}><button className="rounded  hover:bg-green-600">Go to Pool</button></Link>
+                <Link href={`/pool/${member.pool.id}`}><button className="rounded bg-grey-50  hover:bg-grey-200 hover:text-white text-black">Go to Pool</button></Link>
               </div>
             </div>
           </div>

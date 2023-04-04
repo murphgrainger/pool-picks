@@ -26,10 +26,10 @@ export default function SignIn({providers} : any, {csrfToken}: any) {
 
   return (
     <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
-      <div className="bg-gray-200 w-full max-w-md p-10 rounded flex flex-col items-center">
+      <div className="bg-grey-50 w-full max-w-md p-10 rounded flex flex-col items-center">
         <h1 className="mb-10">Sign In</h1>
     { googleProvider && (
-        <button onClick={() => signIn(googleProvider.id, { callbackUrl: '/' })} className="w-full mb-8 button-oauth hover:bg-gray-100 active:bg-gray-100">
+        <button onClick={() => signIn(googleProvider.id, { callbackUrl: '/' })} className="w-full mb-8 button-oauth rounded hover:bg-gray-100 active:bg-gray-100 h-14">
           <img src="/google_logo.svg" alt="Google Icon" className="oauth-logo"/>
             Continue with {googleProvider.name}
         </button>
@@ -48,10 +48,10 @@ export default function SignIn({providers} : any, {csrfToken}: any) {
           className="w-full rounded h-14"
           value={email}
           onChange={(e) => setEmail(e.target.value)}/>
-          <button type="submit" className="mt-4 hover:bg-slate-800" disabled={loading}>
+          <button type="submit" className="mt-4 bg-grey-200 text-white hover:bg-black rounded" disabled={loading}>
           {loading ? "Sending you an email..." : "Continue with Email"}
         </button>
-        {error && <p className="mt-2 text-red-600">{error}</p>}        </form>
+        {error && <p className="mt-2 text-yellow">{error}</p>}        </form>
       </div>
     </div>
   )
