@@ -72,6 +72,7 @@ export const typeDefs = `
         first_name: String
         last_name: String
         full_name: String
+        ranking: Int
     }
     
     type Query {

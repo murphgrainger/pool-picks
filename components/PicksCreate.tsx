@@ -72,10 +72,14 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExtern
   });
 
   const selectOptions: SelectValues[] = availableAthletes.map(
-    (athlete: any) => ({
-      value: athlete.id,
-      label: athlete.full_name,
-    })
+    (athlete: any) => {
+      const rankingLabel = athlete.ranking ? `(R:${athlete.ranking})`: '';
+      const group = athlete.ranking && athlete.ranking <=20 ? `(A)` : `(B)`;
+      return ({
+        value: athlete.id,
+        label: `${athlete.full_name} ${group}`,
+      })
+    }
   );
 
   const handlePickChange = (option: SelectValues | null, index: number) => {
@@ -118,7 +122,9 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExtern
         <h3>Submit Your Picks</h3>
        <ul className="list-none">
           <span className="font-bold">Pick 6, Use 4</span>
-          <li>- You can pick a max of 3 players in the Top 20 Offical Word Golf Ranking.</li>
+          <li>- A max of 3 picks can be picked from the A Group</li>
+          <li>- The A Group represents players in the top 20 Official World Golf Ranking</li>
+          <li>- Each player's group is labeled by their name.</li>
           <li>
             - The best 4 of your 6 player scores to par make up your total score.
           </li>
@@ -188,7 +194,8 @@ const GET_ATHLETES_BY_TOURNAMENT_ID = gql`
   query athletesByTournamentId($tournament_id: Int!) {
     athletesByTournamentId(tournament_id: $tournament_id) {
       id
-      full_name
+      full_name,
+      ranking
     }
   }
 `;
