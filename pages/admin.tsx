@@ -17,7 +17,6 @@ const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { data: session, status } = useSession();
   const { loading, error, data } = useQuery(GET_POOLS_QUERY);
-  console.log(data)
 
   useEffect(() => {
     if(status === "unauthenticated") Router.replace('/auth/signin')
