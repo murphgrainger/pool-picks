@@ -10,5 +10,20 @@ export const betaList = [
     },
     {
         "email": "murph.grainger+3@gmail.com"
+    },
+    {
+        "email": "kikigkruse@gmail.com"
+    },
+    {
+        "email": "jtg307@gmail.com"
+    },
+    {
+        "email": "betsy@tpg3@tpg3.com"
+    },
+    {
+        "email": "betsy.grainger@tpg3.com"
+    },
+    {
+        "email": "sa@tpg3.com"
     }
 ]
