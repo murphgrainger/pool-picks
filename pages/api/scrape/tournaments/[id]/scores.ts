@@ -154,54 +154,74 @@ async function updateGolfData(
 ) {
     if(!parsedAthleteData.length) throw new Error('No data available for this tournament!');
 
-    for (const { athlete, athleteInTournament } of parsedAthleteData) {
-      let existingAthlete = await prisma.athlete.findUnique({
-        where: { full_name: athlete.full_name },
-      });
-  
-      if (!existingAthlete) {
-        existingAthlete = await prisma.athlete.create({
-          data: {
-            full_name: athlete.full_name,
-          },
+    // Split parsedAthleteData into chunks for parallel processing
+    const chunkSize = 10;
+    const chunks = [];
+    for (let i = 0; i < parsedAthleteData.length; i += chunkSize) {
+      chunks.push(parsedAthleteData.slice(i, i + chunkSize));
+    }
+
+    // Process chunks of data in parallel
+    await Promise.all(chunks.map(async (chunk) => {
+      const promises = [];
+      for (const { athlete, athleteInTournament } of chunk) {
+        let existingAthletePromise = prisma.athlete.findUnique({
+          where: { full_name: athlete.full_name },
         });
+
+        promises.push(existingAthletePromise);
       }
-  
-      await prisma.athletesInTournaments.upsert({
-        where: {
-          tournament_id_athlete_id: {
+
+      const existingAthletes = await Promise.all(promises);
+
+      // Process existingAthletes in parallel
+      await Promise.all(existingAthletes.map(async (existingAthlete, index) => {
+        const { athlete, athleteInTournament } = chunk[index];
+
+        if (!existingAthlete) {
+          existingAthlete = await prisma.athlete.create({
+            data: {
+              full_name: athlete.full_name,
+            },
+          });
+        }
+
+        await prisma.athletesInTournaments.upsert({
+          where: {
+            tournament_id_athlete_id: {
+              tournament_id: tournamentId,
+              athlete_id: existingAthlete.id,
+            },
+          },
+          create: {
             tournament_id: tournamentId,
             athlete_id: existingAthlete.id,
+            score_round_one: athleteInTournament.score_round_one,
+            score_round_two: athleteInTournament.score_round_two,
+            score_round_three: athleteInTournament.score_round_three,
+            score_round_four: athleteInTournament.score_round_four,
+            score_sum: athleteInTournament.score_sum,
+            score_under_par: athleteInTournament.score_under_par,
+            score_today: athleteInTournament.score_today,
+            position: athleteInTournament.position,
+            thru: athleteInTournament.thru,
+            status: athleteInTournament.status
           },
-        },
-        create: {
-          tournament_id: tournamentId,
-          athlete_id: existingAthlete.id,
-          score_round_one: athleteInTournament.score_round_one,
-          score_round_two: athleteInTournament.score_round_two,
-          score_round_three: athleteInTournament.score_round_three,
-          score_round_four: athleteInTournament.score_round_four,
-          score_sum: athleteInTournament.score_sum,
-          score_under_par: athleteInTournament.score_under_par,
-          score_today: athleteInTournament.score_today,
-          position: athleteInTournament.position,
-          thru: athleteInTournament.thru,
-          status: athleteInTournament.status
-        },
-        update: {
-          score_round_one: athleteInTournament.score_round_one,
-          score_round_two: athleteInTournament.score_round_two,
-          score_round_three: athleteInTournament.score_round_three,
-          score_round_four: athleteInTournament.score_round_four,
-          score_under_par: athleteInTournament.score_under_par,
-          score_sum: athleteInTournament.score_sum,
-          score_today: athleteInTournament.score_today,
-          position: athleteInTournament.position,
-          thru: athleteInTournament.thru,
-          status: athleteInTournament.status
-        },
-      });
-    }
+          update: {
+            score_round_one: athleteInTournament.score_round_one,
+            score_round_two: athleteInTournament.score_round_two,
+            score_round_three: athleteInTournament.score_round_three,
+            score_round_four: athleteInTournament.score_round_four,
+            score_under_par: athleteInTournament.score_under_par,
+            score_sum: athleteInTournament.score_sum,
+            score_today: athleteInTournament.score_today,
+            position: athleteInTournament.position,
+            thru: athleteInTournament.thru,
+            status: athleteInTournament.status
+          },
+        });
+      }));
+    }));
 
     if(parsedTournamentData?.cut_line) {
       await prisma.tournament.update({

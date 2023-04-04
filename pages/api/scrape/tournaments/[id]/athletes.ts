@@ -22,53 +22,86 @@ async function fetchAthleteField(id: string) {
   const response = await axios.get(url);
   const $ = cheerio.load(response.data);
 
+  const athletePromises: Promise<Athlete>[] = [];
+
   $('tr.PlayerRow__Overview').each((index, element) => {
     const fullName = $(element).find('.leaderboard_player_name').text();
 
-    const athlete: Athlete = {
-      full_name: fullName,
-    };
+    const athletePromise = new Promise<Athlete>((resolve, reject) => {
+      setImmediate(async () => {
+        try {
+          const athlete: Athlete = {
+            full_name: fullName,
+          };
+          resolve(athlete);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    });
 
-    parsedAthletes.push(athlete);
+    athletePromises.push(athletePromise);
   });
-  
-  return parsedAthletes;
+
+  return Promise.all(athletePromises);
 }
 
 
 async function updateAthleteField(parsedAthletes: Athlete[], tournamentId: number) {
+  if (!parsedAthletes.length) {
+    throw new Error('No athlete data available for this tournament!');
+  }
 
-    if(!parsedAthletes.length) throw new Error('No athlete data available for this tournament!');
+  // Split parsedAthletes into chunks for parallel processing
+  const chunkSize = 10;
+  const chunks = [];
+  for (let i = 0; i < parsedAthletes.length; i += chunkSize) {
+    chunks.push(parsedAthletes.slice(i, i + chunkSize));
+  }
 
-    for (const athlete of parsedAthletes) {
-      let existingAthlete = await prisma.athlete.findUnique({
-        where: { full_name: athlete.full_name },
-      });
-  
-      if (!existingAthlete) {
-        existingAthlete = await prisma.athlete.create({
-          data: {
-            full_name: athlete.full_name,
-          },
+  // Process chunks of data in parallel
+  await Promise.all(
+    chunks.map(async (chunk) => {
+      const promises = [];
+      for (const athlete of chunk) {
+        let existingAthletePromise = prisma.athlete.findUnique({
+          where: { full_name: athlete.full_name },
         });
+
+        promises.push(existingAthletePromise);
       }
-  
-      await prisma.athletesInTournaments.upsert({
-        where: {
-          tournament_id_athlete_id: {
+
+      const existingAthletes = await Promise.all(promises);
+
+      for (let i = 0; i < existingAthletes.length; i++) {
+        let existingAthlete = existingAthletes[i];
+
+        if (!existingAthlete) {
+          existingAthlete = await prisma.athlete.create({
+            data: {
+              full_name: chunk[i].full_name,
+            },
+          });
+        }
+
+        await prisma.athletesInTournaments.upsert({
+          where: {
+            tournament_id_athlete_id: {
+              tournament_id: tournamentId,
+              athlete_id: existingAthlete.id,
+            },
+          },
+          create: {
             tournament_id: tournamentId,
             athlete_id: existingAthlete.id,
           },
-        },
-        create: {
-          tournament_id: tournamentId,
-          athlete_id: existingAthlete.id,
-        },
-        update: {
-        },
-      });
-    }
-  } 
+          update: {},
+        });
+      }
+    })
+  );
+}
+
 
   export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const id = req.query.id as string;
