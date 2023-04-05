@@ -77,5 +77,17 @@ export const Mutation = {
     throw new ApolloError(`Could not update username: ${error.message}`);
 
   }
+  },
+  updateTournament: async(_: any, args: any, context: any) => {
+    try {
+      await prisma.tournament.update({
+        where: { id: parseInt(args.id) },
+        data: { status: args.status }
+      });
+  } catch (error:any) {
+    throw new ApolloError(`Could not update username: ${error.message}`);
+
   }
+  },
+  
 }

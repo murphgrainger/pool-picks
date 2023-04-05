@@ -4,35 +4,50 @@ import prisma from '../../lib/prisma';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '../api/auth/[...nextauth]';
+import Select from 'react-select';
+import { useMutation, useQuery, gql } from '@apollo/client';
 
 import { redirectToSignIn, redirectToHome } from '../../utils/utils';
 
-const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  console.log(tournament)
-    const [status, setStatus] = useState(tournament.status);
-    const [cutLine, setCutLine] = useState(tournament.cut_line);
+interface SelectValues {
+  value: string;
+  label: string;
+}
 
-    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newStatus = e.target.value;
-      setStatus(newStatus);
+const UPDATE_TOURNAMENT_STATUS = gql`
+  mutation UpdateTournament($id: ID!, $status: String!) {
+    updateTournament(id: $id, status: $status) {
+        id
+        status
+    }
+  }
+`;
+
+const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [selectedOption, setSelectedOption] = useState({ value: tournament.status, label: tournament.status });
+  const [updateTournament] = useMutation(UPDATE_TOURNAMENT_STATUS);
+
+
+    const handleStatusChange = async (option: SelectValues | null) => {
+      setSelectedOption(option ?? { value: '', label: '' });
+      
+      try {
+        await updateTournament({
+          variables: { id: tournament.id, status: option?.value ?? '' },
+        });
+      } catch (error) {
+        console.log(error)
+    }
   }
 
-    const handleCutLineChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newCutLine = parseInt(e.target.value, 10);
-        setCutLine(newCutLine);
-        await updateTournament({
-            id: tournament.id,
-            cut_line: newCutLine,
-        });
-    }
+    const tournamentStatuses = ['Scheduled', 'Active', 'Completed']
 
-    const updateTournament = async (data: { id: number, status?: string, cut_line?: number }) => {
-        try {
-            console.log('hello')
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    const selectOptions: SelectValues[] = tournamentStatuses.map((el) => {
+      return ({
+        value: el,
+        label: el,
+      })
+    });
 
     return (
         <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
@@ -47,17 +62,13 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
                     <p>Starts: {tournament.start_date}</p>
                     <div>
                         <label htmlFor="status">Status:</label>
-                        <select id="status" value={status} onChange={handleStatusChange}>
-                            <option value="Scheduled">Scheduled</option>
-                            <option value="Open">Open</option>
-                            <option value="Locked">Locked</option>
-                            <option value="Active">Active</option>
-                            <option value="Complete">Complete</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor="cutLine">Cut Line:</label>
-                        <input type="number" id="cutLine" value={cutLine} onChange={handleCutLineChange} />
+                        <Select instanceId="status" name="status" 
+                        onChange={(option: SelectValues | null) =>
+                          handleStatusChange(option)}
+                          options={selectOptions}
+                          value={selectedOption}
+                        className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 color-black"
+                        />
                     </div>
                 </div>
             </div>
