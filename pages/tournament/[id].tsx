@@ -5,11 +5,10 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '../api/auth/[...nextauth]';
 import Select from 'react-select';
-import { useMutation, useQuery, gql } from '@apollo/client';
+import { useMutation, gql } from '@apollo/client';
 
 import { redirectToSignIn, redirectToHome } from '../../utils/utils';
 import { String } from 'aws-sdk/clients/acm';
-import { url } from 'inspector';
 
 interface SelectValues {
   value: string;

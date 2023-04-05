@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from "next/head";
 import prisma from '../../lib/prisma';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
@@ -6,10 +6,19 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from '../api/auth/[...nextauth]';
 import { CardPoolMember } from '../../components/CardPoolMember';
 import { CardPoolStatus } from '../../components/CardPoolStatus';
+import { PoolAdmin } from '../../components/PoolAdmin';
 
 import { redirectToSignIn, reformatPoolMembers } from '../../utils/utils';
 
-const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+
+const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [poolStatus, setPoolStatus] = useState(pool.status);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+
+  useEffect(() => {
+    
+  }, [poolStatus]);
+  
   const totalPotAmount = poolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
 
@@ -37,8 +46,15 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
           {pool.tournament.cut_line && <p>Projected Cut <strong>{pool.tournament.cut_line}</strong></p>}
           </div>
           </div>
-          <CardPoolStatus status={pool.status}/>
-
+          <CardPoolStatus status={poolStatus}/>
+          { isAdmin &&
+          <button onClick={() => setShowAdminPanel(prevState => !prevState)} className="rounded bg-gray-900 mt-2">
+            Admin Panel
+            <span className={`accordion-arrow text-grey-100 ml-2 mt-1 text-xs ${showAdminPanel ? 'open' : ''}`}>&#9660;</span>
+          </button>
+          }
+          {isAdmin && showAdminPanel &&
+          <PoolAdmin pool={pool} onStatusChange={setPoolStatus}/>}
         </div>
      
         { poolMembers?.map((member:any, i:number) => {
@@ -47,7 +63,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
             key={member.id}
             member={member}
             currentMemberId={currentUserPoolMemberId}
-            poolStatus={pool.status}
+            poolStatus={poolStatus}
             tournamentId={pool.tournament.id}
             tournamentExternalUrl={tournamentExternalUrl}
             position={i+1}
@@ -156,7 +172,8 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
     if(!pool) { return redirectToSignIn() }
 
     const currentUserPoolMember = pool!.pool_members.find((member) => member.user.email === email);
-    if(!currentUserPoolMember && session.role !== 'ADMIN') { return redirectToSignIn() }
+    const isAdmin = session.role === 'ADMIN';
+    if(!currentUserPoolMember && !isAdmin) { return redirectToSignIn() }
 
     const poolMembers = reformatPoolMembers(pool.pool_members, pool.tournament_id)
     return {
@@ -164,6 +181,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
         pool,
         poolMembers,
         currentUserPoolMemberId: currentUserPoolMember?.id || null,
+        isAdmin: isAdmin
       },
     };
   };

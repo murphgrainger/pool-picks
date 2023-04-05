@@ -52,8 +52,6 @@ import { ButtonLink } from '../components/ButtonLink';
         <title>Home | PoolPicks</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      { session && 
         <div className="container max-w-xl mx-auto flex flex-wrap items-center flex-col bg-black">
            <div className="w-full p-6 rounded bg-grey-100 text-white text-xs">
               <p className="text-center font-bold">PoolPicks is currently in Alpha</p>
@@ -144,8 +142,6 @@ import { ButtonLink } from '../components/ButtonLink';
           </div>
         </div>
       </div>
-      }
-      
     </div>
   );
 }

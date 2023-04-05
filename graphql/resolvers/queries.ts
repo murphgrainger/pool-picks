@@ -13,9 +13,7 @@ export const Query = {
           }
       }),
       tournamentsAndPools: async () => {
-        console.log('this is running????')
         const tournaments = await prisma.tournament.findMany({ include: { pools: true } })
-        console.log('tourneys', tournaments)
         return tournaments
       },
       pendingPoolInvites: () => prisma.poolInvite.findMany({
@@ -33,7 +31,6 @@ export const Query = {
             },
           });
                 
-          // Extract athletes from athletesInTournaments
           const athletes = athletesInTournaments.map((ait: any) => ait.athlete);
           athletes.sort((a: any, b: any) => a.full_name.localeCompare(b.full_name));
 

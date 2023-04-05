@@ -136,7 +136,6 @@ async function fetchGolfData(id: string) {
       }
 
     parsedAthleteData.push({ athlete, athleteInTournament });
-      console.log(parsedAthleteData)
   });
 
   const cutLine = $('.cut-score').text();

@@ -7,7 +7,6 @@ import { redirectToSignIn, redirectToHome } from '../utils/utils';
 
 const AdminPage = ({ tournaments }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
-  console.log(tournaments)
   return (
     <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
     <Head>        
@@ -20,18 +19,19 @@ const AdminPage = ({ tournaments }: InferGetServerSidePropsType<typeof getServer
         <h2 className="mb-2">Tournaments</h2>
         <ul>
           {tournaments.map((tournament:any) => (
-            <li key={tournament.id} className="bg-grey-200 rounded p-3 mb-2">
-              <div>{tournament.name}</div>
-              <div>Status: {tournament.status}</div>
+            <li key={tournament.id} className="bg-grey-200 rounded p-3 mb-2 mt-2">
+              <p className="text-lg font-bold">{tournament.name}</p>
+              <p>Status: {tournament.status}</p>
               <Link href={`/tournament/${tournament.id}`}>To Tournament</Link>
 
               {tournament.pools && tournament.pools.map((pool:any, i:number) => {
                 return (
-                  <div key={i} className="p-4 bg-grey-100 rounded">
-                    <h1>{pool.name}</h1>
-                    <p>Status: {pool.status}</p>
+                  <div key={i} className="p-4 mb-2 mt-2 bg-grey-100 rounded">
+                    <p className="font-bold">{pool.name}</p>
                     <p>Members: {pool.pool_members.length}</p>
                     <p>Pending Invites: {pool.pool_invites.length}</p>
+                    <p>Status: {pool.status}</p>
+                    <Link href={`/pool/${pool.id}`}>To Pool</Link>
                   </div>
                 )
               })
