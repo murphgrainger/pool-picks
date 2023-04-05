@@ -9,7 +9,6 @@ const ButtonLink = ( {href}:any, {children}:any ) =>  {
   useEffect(() => {
     const handleStart = (url:string) => {
       if (url === href) {
-        console.log('url', url)
         setLoading(true);
       }
     };

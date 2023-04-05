@@ -21,13 +21,13 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
           { showLogo && <div className="pl-4 pr-4">
           <img src="/logo_masters.png" className="w-24"></img>
           </div>}
-          <div className={`flex-1 flex-col ${!showLogo && 'text-center'}`}>
-          <h1 className="text-lg">{pool.name}</h1>
-          <h3 className="text-base">{pool.tournament.name}</h3>
-          <p>{pool.tournament.course}</p>
-          <p>${pool.amount_entry} Ante | Total Pot: ${totalPotAmount} </p>
+          <div className={`flex justify-center flex-1 flex-col align-center ${!showLogo ? 'text-center' : ''}`}>
+          <h1 className="text-lg font-bold">{pool.name}</h1>
+          <p className="text-base">{pool.tournament.name}</p>
+          <p className="text-base">{pool.tournament.course}</p>
+          <p className="text-xs">${pool.amount_entry} Ante | Total Pot: ${totalPotAmount} </p>
           { pool.tournament.external_id &&
-            <a href={tournamentExternalUrl} className="font-bold text-yellow underline" target="_blank" rel="noreferrer">Official Leaderboard</a>
+            <a href={tournamentExternalUrl} className="font-bold text-yellow underline mt-2" target="_blank" rel="noreferrer">Official Leaderboard</a>
           }
           {pool.tournament.cut_line && <p>Projected Cut <strong>{pool.tournament.cut_line}</strong></p>}
           </div>
