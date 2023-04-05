@@ -99,3 +99,36 @@ export const redirectToSignIn = () => ({
     }
     return `th`;
   }
+
+  export const formatTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diff = (now.getTime() - date.getTime()) / 1000 / 60; // difference in minutes
+    const rounded = Math.round(diff);
+    
+    if (rounded === 0) {
+      return "just now";
+    } else if (rounded === 1) {
+      return "1 minute ago";
+    } else if (rounded < 60) {
+      return `${rounded} minutes ago`;
+    } else if (rounded < 120) {
+      return "1 hour ago";
+    } else if (rounded < 1440) {
+      return `${Math.floor(rounded / 60)} hours ago`;
+    } else if (rounded < 2880) {
+      return "1 day ago";
+    } else {
+      return `${Math.floor(rounded / 1440)} days ago`;
+    }
+  }
+
+  export const formattedDate = (date: Date) => {
+    return date.toLocaleString('en-US', { 
+      month: '2-digit', 
+      day: '2-digit', 
+      year: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: true 
+    });
+};

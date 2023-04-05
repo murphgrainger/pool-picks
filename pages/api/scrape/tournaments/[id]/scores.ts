@@ -232,6 +232,15 @@ async function updateGolfData(
             cut_line: parsedTournamentData.cut_line
           }
       })
+    } else {
+      await prisma.tournament.update({
+        where: {
+          id: tournamentId
+        },
+          data: {
+            updated_at: new Date()
+          }
+      })
     }
   } 
 

@@ -7,7 +7,7 @@ import { authOptions } from '../api/auth/[...nextauth]';
 import Select from 'react-select';
 import { useMutation, gql } from '@apollo/client';
 
-import { redirectToSignIn, redirectToHome } from '../../utils/utils';
+import { redirectToSignIn, redirectToHome, formattedDate } from '../../utils/utils';
 import { String } from 'aws-sdk/clients/acm';
 
 interface SelectValues {
@@ -30,12 +30,14 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
   const [isActive, setActiveTournament] = useState(tournament.status === 'Active');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingButtonId, setLoadingButtonId] = useState<string | null>(null);
+  const [updatedAt, setUpdatedAt] = useState(tournament.updatedAt);
 
   useEffect(() => {
     if (tournament.status && tournament.status === 'Active') {
       setActiveTournament(true);
     }
-  }, [tournament.status]);
+    setUpdatedAt(tournament.updated_at);
+  }, [tournament.status, tournament.updated_at]);
 
     const handleStatusChange = async (option: SelectValues | null) => {
       setActiveTournament(option?.value === 'Active');
@@ -79,6 +81,7 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
           throw new Error(message);
         }
         console.log("Data updated successfully!");
+        setUpdatedAt(formattedDate(new Date()));
         setIsLoading(false)
 
       } catch (error) {
@@ -94,12 +97,12 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
-                <h1>Admin Home</h1>
                 <div className="w-full">
                     <h3>{tournament.name}</h3>
                     <p>Starts: {tournament.start_date}</p>
-                    <div>
-                        <label htmlFor="status">Status:</label>
+                    <p>Last Updated: {updatedAt}</p>
+                    <div className="mt-2">
+                        <label htmlFor="status">Update Status:</label>
                         <Select instanceId="status" name="status" 
                         onChange={(option: SelectValues | null) =>
                           handleStatusChange(option)}
@@ -109,7 +112,7 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
                         className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 color-black"
                         />
                         { isActive &&
-                        <div className="mt-10">
+                        <div className="mt-6 flex flex-col">
                           <button className="bg-grey-200 m-2 hover:bg-green-700"
                           onClick={() => {updateData('athletes')
                           setLoadingButtonId(`atheletes`);
@@ -163,8 +166,10 @@ export default Tournament;
         region: true,
         status: true,
         cut_line: true,
+        external_id: true,
         start_date: true,
-        external_id: true
+        updated_at:  true
+
       },
     });
   
@@ -175,6 +180,7 @@ export default Tournament;
         tournament: {
           ...tournament,
           start_date: tournament.start_date.toLocaleDateString(),
+          updated_at: formattedDate(tournament.updated_at)
         },
       },
     };

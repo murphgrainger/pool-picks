@@ -20,9 +20,15 @@ const AdminPage = ({ tournaments }: InferGetServerSidePropsType<typeof getServer
         <ul>
           {tournaments.map((tournament:any) => (
             <li key={tournament.id} className="bg-grey-200 rounded p-3 mb-2 mt-2">
-              <p className="text-lg font-bold">{tournament.name}</p>
-              <p>Status: {tournament.status}</p>
-              <Link href={`/tournament/${tournament.id}`}>To Tournament</Link>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-lg font-bold">⛳ {tournament.name}</p>
+                  <p>Status: {tournament.status}</p>
+                </div>
+                <div>
+                <Link href={`/tournament/${tournament.id}`} className="rounded p-2 bg-grey-100">View</Link>
+                </div>
+              </div>
 
               {tournament.pools && tournament.pools.map((pool:any, i:number) => {
                 return (
@@ -30,8 +36,8 @@ const AdminPage = ({ tournaments }: InferGetServerSidePropsType<typeof getServer
                     <p className="font-bold">{pool.name}</p>
                     <p>Members: {pool.pool_members.length}</p>
                     <p>Pending Invites: {pool.pool_invites.length}</p>
-                    <p>Status: {pool.status}</p>
-                    <Link href={`/pool/${pool.id}`}>To Pool</Link>
+                    <p className="mb-2">Status: {pool.status}</p>
+                    <Link href={`/pool/${pool.id}`} className="rounded p-2 bg-grey-200">To Pool</Link>
                   </div>
                 )
               })
