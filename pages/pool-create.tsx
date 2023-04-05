@@ -57,37 +57,36 @@ const PoolCreate = () => {
     return (
         <div className="container mx-auto max-w-md p-3">
          <Toaster />
-            <form className="grid grid-cols-1 gap-y-6 shadow-lg p-8 rounded-lg" onSubmit={handleSubmit(onSubmit)}>
-              <h1 className="text-3xl font-medium my-5">Create a Pool</h1>
-              <p>First create your pool, then invite members to join pool.</p>
+            <form className="grid grid-cols-1 gap-y-4 shadow-lg p-8 rounded-lg bg-grey-100 text-white" onSubmit={handleSubmit(onSubmit)}>
+              <h1 className="text-3xl font-medium">Create a Pool</h1>
               <label className="block">
-                <span className="text-gray-700">Name</span>
+                <span className="text-white">Name</span>
                 <input
                     placeholder="i.e. Grainger Masters 2023"
                     {...register('name', { required: true })}
                     name="name"
                     type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
                 </label>
                 <label className="block">
-                <span className="text-gray-700">Tournament</span>
+                <span className="text-white">Tournament</span>
                 <input
                     placeholder=""
                     {...register('tournament_id', { required: true })}
                     name="tournament_id"
                     type="number"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    className="mt-1 text-black block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
                 </label>
                 <label className="block">
-                <span className="text-gray-700">Entry Amount</span>
+                <span className="text-white">Entry Amount</span>
                 <input
                     {...register('amount_entry')}
                     name="amount_entry"
                     type="number"
                     inputMode='numeric'
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    className="mt-1 text-black block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
                 </label>
 

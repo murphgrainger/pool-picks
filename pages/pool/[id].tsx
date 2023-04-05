@@ -9,21 +9,33 @@ import { CardPoolStatus } from '../../components/CardPoolStatus';
 import { redirectToSignIn, reformatPoolMembers } from '../../utils/utils';
 
 const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  
   const totalPotAmount = poolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
 
+  const showLogo = pool.tournament.name === "Masters Tournament";
+
     return (
-      <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4 bg-black text-white">
-        <h1 className="mt-4">{pool.name}</h1>
-        <h3>{pool.tournament.name}</h3>
-        <p>{pool.tournament.course}</p>
-        <p>${pool.amount_entry} Ante | Total Pot: ${totalPotAmount} </p>
-        { pool.tournament.external_id &&
-          <a href={tournamentExternalUrl} className="font-bold text-yellow underline" target="_blank" rel="noreferrer">Full Leaderboard</a>
-        }
-        {pool.tournament.cut_line && <p>Projected Cut <strong>{pool.tournament.cut_line}</strong></p>}
-        <CardPoolStatus status={pool.status}/>
+      <div className="container mx-auto max-w-xl  flex flex-wrap items-center flex-col p-4 bg-black text-white">
+        <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
+        <div className="flex">
+          { showLogo && <div className="pl-4 pr-4">
+          <img src="/logo_masters.png" className="w-24"></img>
+          </div>}
+          <div className={`flex-1 flex-col ${!showLogo && 'text-center'}`}>
+          <h1 className="text-lg">{pool.name}</h1>
+          <h3 className="text-base">{pool.tournament.name}</h3>
+          <p>{pool.tournament.course}</p>
+          <p>${pool.amount_entry} Ante | Total Pot: ${totalPotAmount} </p>
+          { pool.tournament.external_id &&
+            <a href={tournamentExternalUrl} className="font-bold text-yellow underline" target="_blank" rel="noreferrer">Official Leaderboard</a>
+          }
+          {pool.tournament.cut_line && <p>Projected Cut <strong>{pool.tournament.cut_line}</strong></p>}
+          </div>
+          </div>
+          <CardPoolStatus status={pool.status}/>
+
+        </div>
+     
         { poolMembers?.map((member:any, i:number) => {
           return (
             <CardPoolMember

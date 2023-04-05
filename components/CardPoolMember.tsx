@@ -52,7 +52,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                 { currentUserCard && member.picks &&
                     <h3 className="mb-4">{member.username || member?.nickname}</h3>
                 }
-               { !hasSubmittedUsername &&
+               { currentUserCard && !hasSubmittedUsername &&
                 <UsernameCreate
                     memberId={currentMemberId}
                     onSubmitSuccess={handleUsernameSubmitSuccess}

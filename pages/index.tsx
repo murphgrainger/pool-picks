@@ -3,12 +3,11 @@ import { useState } from 'react';
 import { gql, useMutation } from "@apollo/client";
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import prisma from '../lib/prisma';
-import Link from "next/link";
-import { signIn } from "next-auth/react"
 import { getServerSession } from "next-auth/next";
 import { authOptions } from './api/auth/[...nextauth]';
 import { useRouter } from 'next/router';
 import { redirectToSignIn } from '../utils/utils';
+import ButtonLink from '../components/ButtonLink';
 
 
   const PoolInvitesAndMembers = ({ session, poolInvites: initialPoolInvites, poolMembers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
@@ -55,9 +54,9 @@ import { redirectToSignIn } from '../utils/utils';
       </Head>
 
       { session && 
-        <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4 bg-black">
-           <div className="w-full mt-6 p-6 rounded bg-grey-100 text-white">
-              <p className="text-center">PoolPicks is currently in Alpha:</p>
+        <div className="container max-w-xl mx-auto flex flex-wrap items-center flex-col p-4 bg-black">
+           <div className="w-full mt-6 p-6 rounded bg-grey-100 text-white text-xs">
+              <p className="text-center font-bold">PoolPicks is currently in Alpha</p>
               <p className="text-center">Only the app developer can be a commissioner.</p>
               <p className="text-center">Alpha testers (you!) can accept invitations to pools, make picks, and win the pool.</p>
             </div>
@@ -70,34 +69,9 @@ import { redirectToSignIn } from '../utils/utils';
               <h3>{invite?.pool?.name}</h3>
               <p className="pb-2">${invite?.pool?.amount_entry} Ante</p>
               <div className="flex flex-wrap justify-center">
-                <button
+              <button
                 disabled={loadingButtonId !== null}
-                className="button-tertiary bg-red-300"
-                onClick={() => {
-                  setLoadingButtonId(`${invite.id}-reject`);
-                  updateInviteStatus(invite.id, "Rejected", invite.pool.id, invite.nickname, session.user?.email ?? '');
-                }}
-              >
-                { loadingButtonId === `${invite.id}-reject` ? (
-                    <span className="flex items-center justify-center ">
-                      <svg
-                        className="w-6 h-6 animate-spin mr-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
-                      </svg>
-                      Rejecting...
-                    </span>
-                  ) : (
-                    <span>Reject</span>
-                  )
-                }
-                </button>
-                <button
-                disabled={loadingButtonId !== null}
-                className="button-tertiary bg-green"
+                className="button-tertiary bg-green-300"
                 onClick={() => {
                   setLoadingButtonId(`${invite.id}-accept`);
                   updateInviteStatus(invite.id, "Accepted", invite.pool.id, invite.nickname, session.user?.email ?? '');
@@ -120,6 +94,31 @@ import { redirectToSignIn } from '../utils/utils';
                   )
                 }
                 </button>
+                <button
+                disabled={loadingButtonId !== null}
+                className="button-tertiary bg-red-300"
+                onClick={() => {
+                  setLoadingButtonId(`${invite.id}-reject`);
+                  updateInviteStatus(invite.id, "Rejected", invite.pool.id, invite.nickname, session.user?.email ?? '');
+                }}
+              >
+                { loadingButtonId === `${invite.id}-reject` ? (
+                    <span className="flex items-center justify-center ">
+                      <svg
+                        className="w-6 h-6 animate-spin mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
+                      </svg>
+                      Declining...
+                    </span>
+                  ) : (
+                    <span>Decline</span>
+                  )
+                }
+                </button>
               </div>
             </div>
           </div>
@@ -134,7 +133,7 @@ import { redirectToSignIn } from '../utils/utils';
               <h3 className="mb-2">{member?.pool?.name}</h3>
               <p className="mb-4">Status: {member?.pool?.status}</p>
               <div className="flex flex-wrap justify-center">
-                <Link href={`/pool/${member.pool.id}`}><button className="rounded bg-grey-50  hover:bg-grey-200 hover:text-white text-black">Go to Pool</button></Link>
+              <ButtonLink href={`/pool/${member.pool.id}`}></ButtonLink>
               </div>
             </div>
           </div>

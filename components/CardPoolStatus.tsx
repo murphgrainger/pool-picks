@@ -6,6 +6,8 @@ interface Props {
 
 export const CardPoolStatus : React.FC<Props> = ({ status }) => {
 
+    if(status === "Active") return null;
+
     let statusDescription = "";
 
     if(status === "Open") {
@@ -19,8 +21,8 @@ export const CardPoolStatus : React.FC<Props> = ({ status }) => {
     }
 
     return (
-        <div className="w-full mt-6 p-6 rounded bg-grey-100 text-center">
-         <p className="text-white">{ statusDescription }</p>
+        <div className="w-full mt-4 p-4 rounded bg-grey-200">
+         <p className="text-white text-xs">⭐ { statusDescription }</p>
         </div>
     )
 }
