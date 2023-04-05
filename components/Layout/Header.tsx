@@ -7,7 +7,7 @@ const Header = () => {
   const [isLoading, setLoading] = useState(false)
 
   return (
-    <header className="body-font bg-green-500 text-white">
+    <header className="body-font bg-green-500">
       <div className="container mx-auto flex flex-wrap p-5 md:flex-row justify-between">
         <Link href="/" className="flex title-font font-medium items-center md:mb-0">
           <span className="pr-2 text-2xl">⛳</span>
@@ -17,7 +17,7 @@ const Header = () => {
           { session?.user && (
             <div className="flex items-center space-x-5">
               <button 
-              className="rounded bg-green-700 hover:bg-green-900" 
+              className="rounded bg-green-300 hover:bg-yellow" 
               onClick={() => {
                 signOut({ callbackUrl: '/' })
                 setLoading(true)

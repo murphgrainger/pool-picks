@@ -71,7 +71,7 @@ import ButtonLink from '../components/ButtonLink';
               <div className="flex flex-wrap justify-center">
               <button
                 disabled={loadingButtonId !== null}
-                className="button-tertiary bg-green-300"
+                className="button-tertiary bg-green-500"
                 onClick={() => {
                   setLoadingButtonId(`${invite.id}-accept`);
                   updateInviteStatus(invite.id, "Accepted", invite.pool.id, invite.nickname, session.user?.email ?? '');

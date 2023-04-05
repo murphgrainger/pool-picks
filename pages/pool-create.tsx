@@ -93,7 +93,7 @@ const PoolCreate = () => {
                 <button
                 disabled={loading}
                 type="submit"
-                className="my-4 capitalize bg-green-500 text-white font-medium py-2 px-4 rounded-md hover:bg-green-600"
+                className="my-4 capitalize bg-green-500 text-black font-medium py-2 px-4 rounded-md hover:bg-green-600"
                 >
                 {loading ? (
                     <span className="flex items-center justify-center">

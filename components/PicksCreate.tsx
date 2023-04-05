@@ -120,22 +120,19 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExtern
         className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-grey-100"
       >
         <h3>Submit Your Picks</h3>
-       <ul className="list-none">
+       <ul className="list-none text-lg">
           <span className="font-bold">Pick 6, Use 4</span>
           <li>- A max of 3 picks can be picked from the A Group</li>
-          <li>- The A Group represents players in the top 20 Official World Golf Ranking</li>
-          <li>- Each player's group is labeled by their name.</li>
-          <li>
-            - The best 4 of your 6 player scores to par make up your total score.
-          </li>
-          <li>- You are DQd if less than 4 players make the cut.</li>
-          <li>- The lowest total score wins.</li>
-          <li>- Picks cannot be changed after submission.</li>
+          <li>- Players in the top 20 OWGR are in the A Group</li>
+          <li>- The lowest 4 of your 6 player scores makes up your total</li>
+          <li>- The lowest total score wins</li>
+          <li>- You are DQd if less than 4 players make the cut</li>
+          <li>- Picks cannot be changed after submission</li>
           <br></br>
           { tournamentExternalUrl &&
           <li><a href={tournamentExternalUrl} className="font-bold text-yellow underline" target="_blank" rel="noreferrer">Full Tournament Field</a></li>
         }
-        <li><a href='https://www.espn.com/golf/rankings' className="font-bold text-yellow underline" target="_blank" rel="noreferrer">Official World Golf Rankings</a></li>
+        <li><a href='https://www.espn.com/golf/rankings' className="font-bold text-yellow underline" target="_blank" rel="noreferrer">Official World Golf Rankings (OWGR)</a></li>
        
         </ul>
         {Array.from({ length: 6 }, (_, index) => (

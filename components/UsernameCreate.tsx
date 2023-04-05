@@ -63,7 +63,7 @@ const UsernameCreate: React.FC<Props> = ({ memberId, onSubmitSuccess }) => {
                 <button
                 disabled={loading}
                 type="submit"
-                className="my-4 capitalize bg-grey-50 text-black font-medium py-2 px-4 rounded-md hover:bg-green-600"
+                className="my-4 capitalize bg-grey-50 text-black font-medium py-2 px-4 rounded-md hover:bg-yellow"
                 >
                 {loading ? (
                     <span className="flex items-center justify-center">
