@@ -15,6 +15,8 @@ export const typeDefs = `
         amount_sum: Int
         invite_code: String
         tournament: Tournament
+        poolMembers: [PoolMember]
+        poolInvites: [PoolInvite]
     } 
 
     type PoolInvite {
@@ -81,7 +83,7 @@ export const typeDefs = `
         pools: [Pool]!
         pool(id: ID!): Pool
         tournaments: [Tournament]!
-        tournamentAndPools: Tournament
+        tournamentsAndPools: [Tournament!]!
         tournament(id: ID!): Tournament
         poolMembers: [PoolMember]!
         poolInvites: [PoolInvite]!

@@ -1,39 +1,13 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from "react";
-import Router from 'next/router';
-import { gql, useQuery } from '@apollo/client';
-import { ButtonLink } from '../components/ButtonLink';
+import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from './api/auth/[...nextauth]';
+import { redirectToSignIn, redirectToHome } from '../utils/utils';
 
-const GET_TOURNAMENTS_AND_POOLS_QUERY = gql`
-  query tournamentAndPools {
-    tournaments {
-      id
-      name
-      status
-      start_date
-      pools {
-        id
-        name
-        status
-      }
-    }
-  }
-`;
+const AdminPage = ({ tournaments }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
-
-const AdminPage = () => {
-  const { data: session, status } = useSession();
-  const { loading, error, data } = useQuery(GET_TOURNAMENTS_AND_POOLS_QUERY);
-
-  useEffect(() => {
-    if(status === "unauthenticated") Router.replace('/auth/signin')
-    if (status === "authenticated" && session?.role !== "ADMIN") {
-      Router.replace('/');
-    }
-  }, [session, status]);
-
+  console.log(tournaments)
   return (
     <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
     <Head>        
@@ -45,11 +19,23 @@ const AdminPage = () => {
       <div className="w-full">
         <h2 className="mb-2">Tournaments</h2>
         <ul>
-          {data?.tournaments.map((tournament:any) => (
+          {tournaments.map((tournament:any) => (
             <li key={tournament.id} className="bg-grey-200 rounded p-3 mb-2">
               <div>{tournament.name}</div>
               <div>Status: {tournament.status}</div>
               <Link href={`/tournament/${tournament.id}`}>To Tournament</Link>
+
+              {tournament.pools && tournament.pools.map((pool:any, i:number) => {
+                return (
+                  <div key={i} className="p-4 bg-grey-100 rounded">
+                    <h1>{pool.name}</h1>
+                    <p>Status: {pool.status}</p>
+                    <p>Members: {pool.pool_members.length}</p>
+                    <p>Pending Invites: {pool.pool_invites.length}</p>
+                  </div>
+                )
+              })
+              }
             </li>
           ))}
         </ul>
@@ -60,3 +46,50 @@ const AdminPage = () => {
 };
 
 export default AdminPage;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+
+  const session = await getServerSession(context.req, context.res, authOptions)
+
+  if(!session) { return redirectToSignIn() };
+  if(session.role !== 'ADMIN') { return redirectToHome() };
+
+  const tournaments = await prisma.tournament.findMany({
+    select: {
+      id: true,
+      name: true,
+      course: true,
+      city: true,
+      region: true,
+      status: true,
+      cut_line: true,
+      external_id: true,
+      pools: {
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          pool_members: {
+            select: {
+              id: true
+            }
+          },
+          pool_invites: {
+            where:{
+              status: 'Invited'
+            },
+            select: {
+              id: true
+            }
+          }
+        }
+      }
+    },
+  });
+
+  return {
+    props: {
+      tournaments
+    },
+  };
+};

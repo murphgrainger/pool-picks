@@ -12,7 +12,12 @@ export const Query = {
               id: parseInt(args.id)
           }
       }),
-      tournamentAndPools: () => prisma.tournament.findMany({ include: { pools: true } }),
+      tournamentsAndPools: async () => {
+        console.log('this is running????')
+        const tournaments = await prisma.tournament.findMany({ include: { pools: true } })
+        console.log('tourneys', tournaments)
+        return tournaments
+      },
       pendingPoolInvites: () => prisma.poolInvite.findMany({
           where: {
               status: "Invited"
