@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { getCsrfToken, getProviders, signIn } from "next-auth/react"
+import { getProviders, signIn } from "next-auth/react"
 import { getSession } from "next-auth/react";
 
 
-export default function SignIn({providers} : any, {csrfToken}: any) {
+export default function SignIn({providers} : any) {
 
   const googleProvider = providers.google;
 
@@ -26,7 +26,7 @@ export default function SignIn({providers} : any, {csrfToken}: any) {
     };
 
   return (
-    <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
+    <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col">
       <div className="bg-grey-50 w-full max-w-md p-10 rounded flex flex-col items-center">
         <h1 className="mb-8">Sign In</h1>
     { googleProvider && (
@@ -60,7 +60,7 @@ export default function SignIn({providers} : any, {csrfToken}: any) {
       <hr className="mt-4 mb-4"></hr>
 
       <form onSubmit={handleSubmit} className="flex flex-col mt-6 w-full">
-          <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+          <input name="csrfToken" type="hidden" />
           <input
           type="email"
           id="email"
@@ -69,7 +69,7 @@ export default function SignIn({providers} : any, {csrfToken}: any) {
           className="w-full rounded h-14"
           value={email}
           onChange={(e) => setEmail(e.target.value)}/>
-          <button type="submit" className="mt-4 bg-grey-200 text-white hover:bg-black rounded" disabled={loading}>
+          <button type="submit" className="mt-4 bg-grey-200 text-white hover:bg-black rounded" disabled={loading || !email}>
           {loading ? "Sending you an email..." : "Continue with Email"}
         </button>
         {error && <p className="mt-2 text-yellow">{error}</p>}        </form>
@@ -89,10 +89,9 @@ export async function getServerSideProps(context:any) {
       },
     };
   }
-  const csrfToken = await getCsrfToken(context)
   const providers = await getProviders()
 
   return {
-    props: { providers, csrfToken },
+    props: { providers },
   }
 }

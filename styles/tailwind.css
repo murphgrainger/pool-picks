@@ -10,7 +10,8 @@ body {
 }
 
 .component-root {
-  min-height: 77vh;
+  min-height: 80vh;
+  padding: 1em;
 }
 
 h1, h2, h3 {
@@ -40,6 +41,11 @@ h3 {
 button, [type='submit'] {
     padding: .5em 2em;
     outline: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  pointer-events: all !important;
 }
 
 .button-tertiary {

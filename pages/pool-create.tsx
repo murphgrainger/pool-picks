@@ -55,7 +55,7 @@ const PoolCreate = () => {
       }
 
     return (
-        <div className="container mx-auto max-w-md p-3">
+        <div className="container mx-auto max-w-md">
          <Toaster />
             <form className="grid grid-cols-1 gap-y-4 shadow-lg p-8 rounded-lg bg-grey-100 text-white" onSubmit={handleSubmit(onSubmit)}>
               <h1 className="text-3xl font-medium">Create a Pool</h1>

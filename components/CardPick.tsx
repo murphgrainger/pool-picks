@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
-import { ordinalSuffix, formatToPar } from '../utils/utils';
+import { formatToPar } from '../utils/utils';
 
 interface Props {
+    index: number;
     pick: {
     id: number;
     full_name: string;
@@ -20,7 +21,7 @@ interface Props {
     }
   }
 
-export const CardPick: React.FC<Props> = ({ pick }) => {
+export const CardPick: React.FC<Props> = ({ pick, index }) => {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -32,12 +33,12 @@ export const CardPick: React.FC<Props> = ({ pick }) => {
     
     const underParFormatted = formatToPar(pick.score_under_par);
     const scoreTodayFormatted = formatToPar(pick.score_today);
-    const suffix = ordinalSuffix(pick.position);
 
     const showStatus = pick.status === 'CUT' || pick.status === 'WD' ? pick.status : '--'
+    const bgColorClass = (index > 3 || pick.score_under_par === null) ? "bg-black" : "bg-grey-100";
 
     return (
-        <div key={pick.id} className="bg-grey-100 mb-4 rounded p-4">
+        <div className={`${bgColorClass} mb-4 rounded p-4`}>
             <div className="flex items-center">
                 <p className="flex-1 font-semibold text-base">{pick.full_name}</p>
                 <div className="flex-1 flex flex-col items-center justify-center">

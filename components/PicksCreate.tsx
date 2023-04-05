@@ -73,14 +73,18 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExtern
 
   const selectOptions: SelectValues[] = availableAthletes.map(
     (athlete: any) => {
-      const rankingLabel = athlete.ranking ? `(R:${athlete.ranking})`: '';
-      const group = athlete.ranking && athlete.ranking <=20 ? `(A)` : `(B)`;
+      const rankingLabel = athlete.ranking ? `(R:${athlete.ranking})`: '(R: -)';
+      const group = athlete.ranking && athlete.ranking <=20 ? `(A Group)` : '';
       return ({
         value: athlete.id,
-        label: `${athlete.full_name} ${group}`,
+        label: `${removeSuffix(athlete.full_name)} ${group}`,
       })
     }
   );
+
+  function removeSuffix(str:string) {
+    return str.replace(/\s*\(a\)$/, '');
+  }
 
   const handlePickChange = (option: SelectValues | null, index: number) => {
     try {

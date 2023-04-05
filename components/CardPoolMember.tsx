@@ -80,7 +80,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
 
     if(!member.picks.length) {
         return (
-            <div className="w-full mt-6 p-6 rounded bg-red-100 flex justify-between items-center">
+            <div className="w-full mt-6 p-6 rounded bg-grey-200 flex justify-between items-center">
                 <h3 className="">{hasSubmittedUsername ? member.username : member?.nickname}</h3>
              <span className="italic text-xs">No Picks Submitted</span>
             </div>
@@ -90,21 +90,13 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     return (
         <div className="w-full mt-6 p-6 pb-2 rounded bg-grey-200" key={member.id}>
             <div className="flex items-center pb-4 pt-0">
-                <div className="flex-1">
-                {
-                    member.member_score_under_par &&
-                    <div className="flex flex-col pr-4 bg-grey-100 rounded-lg p-3 mr-5">
-                    <p className="text-sm">{ position } <sup>{ suffix }</sup></p>
-                </div>
-                }
-
+                <div className="flex-1 flex items-center">
+                 <p className="text-xl mr-4 text-yellow font-extrabold">{ member.member_sum_under_par ? position : '--' }</p>
                 <h3 className="">{hasSubmittedUsername ? member.username : member?.nickname}</h3>
 
-                { underParFormatted !== '--' &&
-                    <div className="flex-1 flex flex-col items-end pr-6 justify-center">
-                     <p className="text-xl rounded-lg bg-blue-100 p-2 pr-3 pl-3 font-bold">{ underParFormatted }</p>
-                    </div>
-                }
+                <div className="flex-1 flex flex-col items-end pr-6 justify-center">
+                    <p className="text-xl rounded-lg bg-grey-100 p-2 pr-3 pl-3 font-bold text-white">{ underParFormatted }</p>
+                </div>
             </div>
                 <div className="accordion-header" onClick={togglePicks}>
                     <span className={`accordion-arrow text-yellow ${showPicks ? 'open' : ''}`}>&#9660;</span>
@@ -123,7 +115,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                         return a.full_name.localeCompare(b.full_name);
                     }
                     })
-                    .map((athlete: any, i: number) => <CardPick key={i} pick={athlete} />)
+                    .map((athlete: any, i: number) => <CardPick key={i} pick={athlete} index={i} />)
                 }
         </div>
    )

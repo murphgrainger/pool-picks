@@ -6,7 +6,7 @@ interface Props {
 
 export const CardPoolStatus : React.FC<Props> = ({ status }) => {
 
-    if(status === "Active") return null;
+    if(status === "Active" || status === "Locked") return null;
 
     let statusDescription = "";
 

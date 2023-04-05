@@ -15,7 +15,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
   const showLogo = pool.tournament.name === "Masters Tournament";
 
     return (
-      <div className="container mx-auto max-w-xl  flex flex-wrap items-center flex-col p-4 bg-black text-white">
+      <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
         <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
         <div className="flex">
           { showLogo && <div className="pl-4 pr-4">

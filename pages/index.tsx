@@ -54,8 +54,8 @@ import ButtonLink from '../components/ButtonLink';
       </Head>
 
       { session && 
-        <div className="container max-w-xl mx-auto flex flex-wrap items-center flex-col p-4 bg-black">
-           <div className="w-full mt-6 p-6 rounded bg-grey-100 text-white text-xs">
+        <div className="container max-w-xl mx-auto flex flex-wrap items-center flex-col bg-black">
+           <div className="w-full p-6 rounded bg-grey-100 text-white text-xs">
               <p className="text-center font-bold">PoolPicks is currently in Alpha</p>
               <p className="text-center">Only the app developer can be a commissioner.</p>
               <p className="text-center">Alpha testers (you!) can accept invitations to pools, make picks, and win the pool.</p>

@@ -26,7 +26,7 @@ const AdminPage = () => {
   }, [session, status]);
 
   return (
-    <div className="container mx-auto max-w-md p-3">
+    <div className="container mx-auto max-w-md">
       <h1>Commish Home</h1>
       <h2>Pools:</h2>
       <ul>
