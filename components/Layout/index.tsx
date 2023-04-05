@@ -6,10 +6,13 @@ interface Props {
 }
 const Layout: React.FC<Props> = ({ children }) => {
   return (
-    <div className="bg-black min-h-screen">
-      <Header />
-      {children}
-    </div>
+<div className="bg-black flex flex-col">
+  <Header />
+  <div className="component-root">{children}</div>
+  <footer className="p-10 bg-green-500 mt-10">
+  </footer>
+</div>
+
   );
 };
 

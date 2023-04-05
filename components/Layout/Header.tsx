@@ -7,7 +7,7 @@ const Header = () => {
   const [isLoading, setLoading] = useState(false)
 
   return (
-    <header className="body-font bg-green-500">
+    <header className="body-font bg-green-500 mb-10">
       <div className="container mx-auto flex flex-wrap p-5 md:flex-row justify-between">
         <Link href="/" className="flex title-font font-medium items-center md:mb-0">
           <span className="pr-2 text-2xl">⛳</span>

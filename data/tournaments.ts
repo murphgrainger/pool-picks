@@ -53,7 +53,8 @@ export const tournaments = [
       "name": "Valero Texas Open",
       "course": "TPC San Antonio (Oaks Course)",
       "city": "San Antonio",
-      "region": "TX"
+      "region": "TX",
+      "external_id": 401465502
     },
     {
       "start_date": "4/6/2023",
