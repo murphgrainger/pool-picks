@@ -5,6 +5,13 @@ export const redirectToSignIn = () => ({
       }
   })
 
+  export const redirectToHome = () => ({
+    redirect: {
+      destination: '/',
+      permanent: false,
+    }
+})
+
   export const formatToPar = (score : number | null) => {
     const underParFormatted = score === null
     ? '--'

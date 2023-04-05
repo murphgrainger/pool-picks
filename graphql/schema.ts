@@ -43,6 +43,8 @@ export const typeDefs = `
         status: String
         cut_line: Int
         external_id: Int
+        start_date: DateTime
+        pools: [Pool]
     }
 
     type Pick {
@@ -79,6 +81,7 @@ export const typeDefs = `
         pools: [Pool]!
         pool(id: ID!): Pool
         tournaments: [Tournament]!
+        tournamentAndPools: Tournament
         tournament(id: ID!): Tournament
         poolMembers: [PoolMember]!
         poolInvites: [PoolInvite]!

@@ -2,8 +2,14 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import Link from "next/link";
 
-const ButtonLink = ( {href}:any, {children}:any ) =>  {
-  const router = useRouter();
+interface Props {
+  href: string,
+  buttonText: string,
+  loadingText: string,
+  background: string | ''
+}
+
+export const ButtonLink: React.FC<Props> = ({ href, buttonText, loadingText, background }) => {  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -32,7 +38,7 @@ const ButtonLink = ( {href}:any, {children}:any ) =>  {
 
   return (
     <Link href={href}>
-      <button className="rounded bg-grey-200 hover:bg-yellow hover:text-black">
+      <button className={`rounded ${background ? background : 'bg-grey-200'} hover:bg-yellow hover:text-black mr-2 ml-2`}>
         {loading ? (
           <span className="flex items-center justify-center ">
             <svg
@@ -43,14 +49,12 @@ const ButtonLink = ( {href}:any, {children}:any ) =>  {
             >
               <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
             </svg>
-            Going to Pool...
+            { loadingText }
           </span>
         ) : (
-          <span>Go To Pool</span>
+          <span>{ buttonText }</span>
         )}
       </button>
     </Link>
   );
 }
-
-export default ButtonLink;

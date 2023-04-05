@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link'
 import { useSession, signOut } from "next-auth/react";
+import { ButtonLink } from '../ButtonLink';
 
 const Header = () => {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [isLoading, setLoading] = useState(false)
+
+  const isAdmin = session?.role === "ADMIN";
 
   return (
     <header className="body-font bg-green-500">
@@ -14,6 +17,9 @@ const Header = () => {
           <h3>PoolPicks</h3>
         </Link>
         <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
+        { isAdmin &&
+        <ButtonLink href="/admin" buttonText="Admin" loadingText="Loading" background="bg-green-300"></ButtonLink>
+        }
           { session?.user && (
             <div className="flex items-center space-x-5">
               <button 
