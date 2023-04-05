@@ -123,12 +123,12 @@ const PicksCreate: React.FC<Props> = ({ memberId, tournamentId, tournamentExtern
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-grey-100"
       >
-        <h3>Submit Your Picks</h3>
+        <h3>Step 2: Submit Your Picks</h3>
        <ul className="list-none text-lg">
           <span className="font-bold">Pick 6, Use 4</span>
-          <li>- A max of 3 picks can be picked from the A Group</li>
-          <li>- Players in the top 20 OWGR are in the A Group</li>
-          <li>- The lowest 4 of your 6 player scores makes up your total</li>
+          <li>- Pick 3 players max from the A Group</li>
+          <li>- The A Group is the players in the top 20 OWGR</li>
+          <li>- The lowest 4 of your 6 player scores is your total score</li>
           <li>- The lowest total score wins</li>
           <li>- You are DQd if less than 4 players make the cut</li>
           <li>- Picks cannot be changed after submission</li>

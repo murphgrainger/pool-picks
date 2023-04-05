@@ -49,8 +49,9 @@ const UsernameCreate: React.FC<Props> = ({ memberId, onSubmitSuccess }) => {
       <Toaster />
          <form
         onSubmit={handleSubmit(handleFormSubmit)}
-        className="grid grid-cols-1 gap-y-3 p-4 rounded-lg bg-grey-100">              
-        <h4>Set Your Pool Username:</h4>
+        className="grid grid-cols-1 gap-y-3 p-4 rounded-lg bg-grey-100 mb-2">              
+        <h4 className="font-bold">Step 1: Set Your Pool Username</h4>
+        <span>So pool fellow members knows who you are!</span>
               <label className="block">
                 <input
                     placeholder="Username"
@@ -75,10 +76,10 @@ const UsernameCreate: React.FC<Props> = ({ memberId, onSubmitSuccess }) => {
                     >
                         <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
                     </svg>
-                    Submitting...
+                    Setting...
                     </span>
                 ) : (
-                    <span>Submit</span>
+                    <span>Set Username</span>
                 )}
                 </button>
             </form>

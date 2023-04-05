@@ -95,7 +95,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const url = 'https://www.espn.com/golf/rankings';
+    const url = `${process.env.RANKINGS_SCRAPE_URL}`
     const rankings = await fetchAthleteRankings(url);
     await updateAthleteRankings(rankings);
 
