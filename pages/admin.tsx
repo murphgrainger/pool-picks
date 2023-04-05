@@ -26,7 +26,6 @@ const GET_TOURNAMENTS_AND_POOLS_QUERY = gql`
 const AdminPage = () => {
   const { data: session, status } = useSession();
   const { loading, error, data } = useQuery(GET_TOURNAMENTS_AND_POOLS_QUERY);
-  console.log('data', data)
 
   useEffect(() => {
     if(status === "unauthenticated") Router.replace('/auth/signin')

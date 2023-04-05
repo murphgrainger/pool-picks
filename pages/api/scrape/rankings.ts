@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../lib/prisma';
+import { getSession } from 'next-auth/react';
 
 import axios from 'axios';
 import cheerio from 'cheerio';
@@ -90,7 +91,8 @@ async function updateAthleteRankings(parsedAthletes: Athlete[]) {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
-  if (!adminKey || req.headers.authorization !== `Bearer ${adminKey}`) {
+  const session = await getSession({ req });
+  if (!session || session.role !== 'ADMIN') {
     return res.status(401).json({ message: 'Unauthorized request' });
   }
 

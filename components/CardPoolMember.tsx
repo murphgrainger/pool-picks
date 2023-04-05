@@ -21,8 +21,6 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     const[showPicks, setShowPicks] = useState(false)
     const [hasSubmittedUsername, setHasSubmittedUsername] = useState(!!member.username); // initialize the state based on whether the member has a username
 
-    const [showUsernameCreate, setShowUsernameCreate] = useState(!member.username);
-
     const togglePicks = () => { setShowPicks(!showPicks) }
 
     const suffix = ordinalSuffix(position);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from "next/head";
 import prisma from '../../lib/prisma';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
@@ -8,6 +8,8 @@ import Select from 'react-select';
 import { useMutation, useQuery, gql } from '@apollo/client';
 
 import { redirectToSignIn, redirectToHome } from '../../utils/utils';
+import { String } from 'aws-sdk/clients/acm';
+import { url } from 'inspector';
 
 interface SelectValues {
   value: string;
@@ -26,11 +28,20 @@ const UPDATE_TOURNAMENT_STATUS = gql`
 const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [selectedOption, setSelectedOption] = useState({ value: tournament.status, label: tournament.status });
   const [updateTournament] = useMutation(UPDATE_TOURNAMENT_STATUS);
+  const [isActive, setActiveTournament] = useState(tournament.status === 'Active');
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingButtonId, setLoadingButtonId] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (tournament.status && tournament.status === 'Active') {
+      setActiveTournament(true);
+    }
+  }, [tournament.status]);
 
     const handleStatusChange = async (option: SelectValues | null) => {
+      setActiveTournament(option?.value === 'Active');
       setSelectedOption(option ?? { value: '', label: '' });
-      
+
       try {
         await updateTournament({
           variables: { id: tournament.id, status: option?.value ?? '' },
@@ -48,6 +59,34 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
         label: el,
       })
     });
+
+    const fetchOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include' as RequestCredentials,
+    }
+
+    const updateData = async (scrapeRoute : String) => {
+      setIsLoading(true);
+      console.log('Updating data...')
+
+      try {
+        const url = scrapeRoute === 'rankings' ?  `/api/scrape/${scrapeRoute}` : `/api/scrape/tournaments/${tournament.id}/${scrapeRoute}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          const { message } = await response.json();
+          throw new Error(message);
+        }
+        console.log("Data updated successfully!");
+        setIsLoading(false)
+
+      } catch (error) {
+        setIsLoading(false)
+        console.log(error)
+      }
+    }
 
     return (
         <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
@@ -67,8 +106,34 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
                           handleStatusChange(option)}
                           options={selectOptions}
                           value={selectedOption}
+                          isDisabled={isLoading}
                         className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 color-black"
                         />
+                        { isActive &&
+                        <div className="mt-10">
+                          <button className="bg-grey-200 m-2 hover:bg-green-700"
+                          onClick={() => {updateData('athletes')
+                          setLoadingButtonId(`atheletes`);
+                            }
+                          }
+                          disabled={isLoading}
+                          >{ isLoading && loadingButtonId ==='atheletes' ? 'Updating...' : 'Update Field'}</button>
+                          <button className="bg-grey-200 m-2 hover:bg-green-700"
+                            onClick={() => {updateData('rankings')
+                            setLoadingButtonId(`rankings`);
+                              }
+                            }                          
+                            disabled={isLoading}
+                          >{ isLoading && loadingButtonId ==='rankings' ? 'Updating...' : 'Update Rankings'}</button>
+
+                          <button className="bg-grey-200 m-2 hover:bg-green-700"
+                            onClick={() => {updateData('scores')
+                            setLoadingButtonId(`scores`);
+                              }
+                            }                            
+                            disabled={isLoading}
+                          >{ isLoading && loadingButtonId ==='scores' ? 'Updating...' : 'Update Scores'}</button>                        </div>
+                        }
                     </div>
                 </div>
             </div>
