@@ -1,7 +1,7 @@
+import Head from "next/head"
 import { useState } from "react";
 import { getProviders, signIn } from "next-auth/react"
 import { getSession } from "next-auth/react";
-
 
 export default function SignIn({providers} : any) {
 
@@ -27,6 +27,10 @@ export default function SignIn({providers} : any) {
 
   return (
     <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col">
+      <Head>        
+            <title>Sign In | PoolPicks</title>
+            <link rel="icon" href="/favicon.ico" />
+        </Head>
       <div className="bg-grey-50 w-full max-w-md p-10 rounded flex flex-col items-center">
         <h1 className="mb-8">Sign In</h1>
     { googleProvider && (

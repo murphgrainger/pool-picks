@@ -1,6 +1,12 @@
+import Head from "next/head";
+
 const JoinWaitlist = () => {
     return (
         <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col text-center">
+            <Head>        
+                <title>Join Waitlist | PoolPicks</title>
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
             <div className="bg-green-100 rounded m-6 p-10">
                 <h1 className="">Access Denied</h1>
                 <h3 className="mb-4">We're in Beta</h3>

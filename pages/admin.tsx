@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from "react";
 import Router from 'next/router';
@@ -27,6 +28,10 @@ const AdminPage = () => {
 
   return (
     <div className="container mx-auto max-w-md">
+      <Head>        
+        <title>Admin | PoolPicks</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <h1>Commish Home</h1>
       <h2>Pools:</h2>
       <ul>

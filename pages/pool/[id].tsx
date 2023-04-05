@@ -1,4 +1,5 @@
 import React from 'react';
+import Head from "next/head";
 import prisma from '../../lib/prisma';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { getServerSession } from "next-auth/next";
@@ -16,6 +17,10 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId }: InferGetServerSide
 
     return (
       <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
+        <Head>        
+            <title>Pool View | PoolPicks</title>
+            <link rel="icon" href="/favicon.ico" />
+        </Head>
         <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
         <div className="flex">
           { showLogo && <div className="pl-4 pr-4">

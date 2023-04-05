@@ -1,3 +1,4 @@
+import Head from "next/head";
 import React from 'react'
 import { type SubmitHandler, useForm } from 'react-hook-form'
 import { gql, useMutation } from '@apollo/client'
@@ -56,6 +57,10 @@ const PoolCreate = () => {
 
     return (
         <div className="container mx-auto max-w-md">
+          <Head>        
+            <title>Create Pool | PoolPicks</title>
+            <link rel="icon" href="/favicon.ico" />
+        </Head>
          <Toaster />
             <form className="grid grid-cols-1 gap-y-4 shadow-lg p-8 rounded-lg bg-grey-100 text-white" onSubmit={handleSubmit(onSubmit)}>
               <h1 className="text-3xl font-medium">Create a Pool</h1>
