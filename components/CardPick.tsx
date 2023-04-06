@@ -33,6 +33,8 @@ export const CardPick: React.FC<Props> = ({ pick, index }) => {
     
     const underParFormatted = formatToPar(pick.score_under_par);
     const scoreTodayFormatted = formatToPar(pick.score_today);
+    const thruIsTeeTime = pick.thru && (pick.thru.includes('AM') || pick.thru.includes('PM'));
+    const thruFormatted = thruIsTeeTime ? null : pick.thru;
 
     const showStatus = pick.status === 'CUT' || pick.status === 'WD' ? pick.status : '--'
     const bgColorClass = (index > 3 || pick.score_under_par === null) ? "bg-black" : "bg-grey-100";
@@ -55,14 +57,23 @@ export const CardPick: React.FC<Props> = ({ pick, index }) => {
             </div>
             { isOpen &&
             <div className="mt-4 flex justify-around bg-grey-200 p-4 rounded">
+                { scoreTodayFormatted && 
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Today</span>
-                    <p className="">{ scoreTodayFormatted || "-" }</p>
+                    <p className="">{ scoreTodayFormatted }</p>
                 </div>
-                <div className="flex-1 flex flex-col items-center justify-center">
+                 }
+
+                { thruFormatted && <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">Thru</span>
-                    <p className="">{ pick.thru || "-" }</p>
+                    <p className="">{ thruFormatted  || "-"}</p>
                 </div>
+                }
+                { thruIsTeeTime && <div className="flex-1 flex flex-col items-center justify-center">
+                    <span className="text-xs">Tee Time</span>
+                    <p className="">{ pick.thru  || "-"}</p>
+                </div>
+                }
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <span className="text-xs">R1</span>
                     <p className="">{ pick.score_round_one || "-" }</p>
