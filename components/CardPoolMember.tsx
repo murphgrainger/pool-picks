@@ -26,6 +26,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     const togglePicks = () => { setShowPicks(!showPicks) }
 
     const underParFormatted = formatToPar(member.member_sum_under_par);
+    const positionFormatted = member.tied ? `T ${member.member_position}` : member.member_position;
 
     useEffect(() => {
         if (member.username) {
@@ -90,7 +91,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
         <div className="w-full mt-6 p-6 pb-2 rounded bg-grey-200" key={member.id}>
             <div className="flex items-center pb-4 pt-0">
                 <div className="flex-1 flex items-center">
-                 <p className="text-xl mr-4 text-yellow font-extrabold">{ member.member_sum_under_par ? position : '--' }</p>
+                 <p className="text-xl mr-4 text-yellow font-extrabold">{ positionFormatted }</p>
                 <h3 className="">{hasSubmittedUsername ? member.username : member?.nickname}</h3>
 
                 <div className="flex-1 flex flex-col items-end pr-6 justify-center">

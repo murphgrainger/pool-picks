@@ -39,6 +39,16 @@ export const redirectToSignIn = () => ({
 
     return sum;
   }
+
+  interface PoolMemberFormatted {
+    id: number
+    nickname?: string
+    username?: string
+    member_sum_under_par?: number
+    member_position?: string,
+    tied?: boolean,
+    picks?: any,
+}
   
   export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) => {
     const reformattedMembers = poolMembers.map((member: any) => {
@@ -65,6 +75,7 @@ export const redirectToSignIn = () => ({
       });
       
       const sum = sumMemberPicks(picks);
+
       return {
         id: member.id,
         nickname: member.user.nickname,
@@ -73,18 +84,49 @@ export const redirectToSignIn = () => ({
         picks: picks,
       }
     })
+   
     const hasMemberSumUnderPar = reformattedMembers.some((member: any) => member.member_sum_under_par !== null);
-
-    return reformattedMembers.sort((a: any, b: any) => {
-      if(!a.picks.length) {
-        return a.member_sum_under_par - b.member_sum_under_par;
-      }
-      if (hasMemberSumUnderPar) {
-        return a.member_sum_under_par - b.member_sum_under_par;
+    reformattedMembers.sort((a, b) => a.member_sum_under_par! - b.member_sum_under_par!);
+  
+    let member_position: string | undefined = undefined;
+    let prevSumUnderPar: number | null | undefined = null;
+    let prevPosition: string | undefined = undefined;
+    
+    const membersWithPosition: PoolMemberFormatted[] = reformattedMembers.map((member, index) => {
+      if (member.member_sum_under_par === null) {
+        member_position = '--';
+      } else if (prevSumUnderPar !== member.member_sum_under_par) {
+        member_position = (index + 1).toString();
+        prevPosition = member_position;
       } else {
-        return a.nickname.localeCompare(b.nickname);
+        member_position = prevPosition as string;
+      }
+      const memberWithPosition = { ...member, member_position };
+      prevSumUnderPar = member.member_sum_under_par;
+      return memberWithPosition;
+    });
+  
+    let prevPositionStr: string | undefined;
+    membersWithPosition.forEach((member, index) => {
+      if (member.member_sum_under_par !== null && index > 0 && member.member_sum_under_par === membersWithPosition[index - 1].member_sum_under_par) {
+        member.tied = true;
+        member.member_position = prevPositionStr;
+      } else {
+        prevPositionStr = member.member_position as string;
       }
     });
+
+    membersWithPosition.forEach((member, index, array) => {
+      if (member.tied) {
+        array.forEach((otherMember, otherIndex) => {
+          if (otherIndex !== index && otherMember.member_sum_under_par === member.member_sum_under_par) {
+            otherMember.tied = true;
+          }
+        });
+      }
+    });
+    
+    return membersWithPosition;
   }
   
   export const ordinalSuffix = (i: number) => {
