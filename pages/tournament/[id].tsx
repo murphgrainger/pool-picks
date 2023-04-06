@@ -70,6 +70,7 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
     }
 
     const updateData = async (scrapeRoute : String) => {
+      setIsLoading(true)
       console.log('Updating data...')
 
       try {

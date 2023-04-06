@@ -3,7 +3,8 @@ import PicksCreate from './PicksCreate';
 import { CardPick } from './CardPick';
 import UsernameCreate  from './UsernameCreate';
 
-import { ordinalSuffix, formatToPar } from '../utils/utils';
+import { formatToPar } from '../utils/utils';
+import { Timestamp } from './Timestamp';
 
 interface Props {
     member: Record<string, any>;
@@ -12,10 +13,10 @@ interface Props {
     tournamentId: number,
     position: number,
     tournamentExternalUrl: string | null,
-    updatedAtFormatted: string
+    updatedAt: string
   }
 
-export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, tournamentId, position, tournamentExternalUrl, updatedAtFormatted }) => {
+export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, tournamentId, position, tournamentExternalUrl, updatedAt }) => {
     const currentUserCard = member.id === currentMemberId;
     const pickStatus = member.picks?.length ? "Picks Submitted" : "Awaiting Picks"
 
@@ -24,7 +25,6 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
 
     const togglePicks = () => { setShowPicks(!showPicks) }
 
-    const suffix = ordinalSuffix(position);
     const underParFormatted = formatToPar(member.member_sum_under_par);
 
     useEffect(() => {
@@ -116,7 +116,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     })
                     .map((athlete: any, i: number) => <CardPick key={i} pick={athlete} index={i} />)
                 }
-                { showPicks && <p className="pb-2 text-xs">Last Updated: {updatedAtFormatted}</p> }
+                { showPicks && <Timestamp timestamp={updatedAt}/> }
         </div>
    )
 }

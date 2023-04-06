@@ -135,3 +135,17 @@ export const redirectToSignIn = () => ({
     });
     return formatted.replace(',', '');
   };
+
+  export const timeAgo = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const elapsed = Math.floor((now.getTime() - time.getTime()) / 1000 / 60); // convert to minutes
+  
+    if (elapsed < 1) {
+      return 'just now';
+    } else if (elapsed === 1) {
+      return '1 minute ago';
+    } else {
+      return `${elapsed} minutes ago`;
+    }
+  }
