@@ -17,14 +17,14 @@ export const redirectToSignIn = () => ({
 
   export const formatToPar = (score : number | null) => {
     const underParFormatted = score === null
-    ? '--'
+    ? null
     : score === 0
     ? 'E'
     : score > 0
     ? `+${score}`
     : score < 0
     ? `${score}`
-    : ''
+    : null
 
     return underParFormatted;
   }
