@@ -13,10 +13,10 @@ interface Props {
     tournamentId: number,
     position: number,
     tournamentExternalUrl: string | null,
-    updatedAt: string
+    scoresUpdatedAt: string
   }
 
-export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, tournamentId, position, tournamentExternalUrl, updatedAt }) => {
+export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, tournamentId, tournamentExternalUrl, scoresUpdatedAt }) => {
     const currentUserCard = member.id === currentMemberId;
     const pickStatus = member.picks?.length ? "Picks Submitted" : "Awaiting Picks"
 
@@ -119,6 +119,10 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     })
                     .map((athlete: any, i: number) => <CardPick key={i} pick={athlete} index={i} />)
                 }
+                { showPicks &&
+                    <Timestamp timestamp={scoresUpdatedAt}/>
+                }
+
         </div>
    )
 }

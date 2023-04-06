@@ -40,13 +40,30 @@ query getPoolScores($pool_id: Int!) {
 }
 `;
 
-const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdatedAt }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
   const [poolStatus, setPoolStatus] = useState(pool.status);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [updatedPoolMembers, setUpdatedPoolMembers] = useState(poolMembers);  
   const [isLoading, setIsLoading] = useState(false);
+  const STALE_THRESHOLD = 30 * 1000; // 30 seconds
+  const [lastFetchTime, setLastFetchTime] = useState(0);
 
+  console.log('last fetch', lastFetchTime)
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      console.log('this is the outer')
+      const currentTime = Date.now();
+      const timeSinceLastFetch = currentTime - lastFetchTime;
+      if (timeSinceLastFetch >= STALE_THRESHOLD) {
+        console.log('need to refetch!!!')
+        handleRefresh()
+      }
+    }, 5 * 60 * 1000); // Poll every 5 minutes
+  
+    return () => clearInterval(intervalId);
+  }, [lastFetchTime]);
   const totalPotAmount = poolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
 
@@ -72,6 +89,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
       const updatedMembers = reformatPoolMembers(result.data.getPoolScores, pool.tournament.id)
       setUpdatedPoolMembers(updatedMembers);
       setIsLoading(false)
+      setLastFetchTime(Date.now());
     } catch(error) {
       console.log(error)
       setIsLoading(false)
@@ -110,6 +128,10 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
           {isAdmin && showAdminPanel &&
           <PoolAdmin pool={pool}/>}
         </div>
+
+        { lastFetchTime !== 0 && 
+          <p className="p-2 bg-gray-800 rounded mt-6">Scores Last Updated: {new Date(lastFetchTime).toLocaleString()}</p>
+        }
      
         { updatedPoolMembers?.map((member:any, i:number) => {
           return (
@@ -120,7 +142,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
             poolStatus={poolStatus}
             tournamentId={pool.tournament.id}
             tournamentExternalUrl={tournamentExternalUrl}
-            updatedAt={pool.tournament.updated_at}
+            scoresUpdatedAt={scoresUpdatedAt}
             position={i+1}
             />
           )
@@ -170,6 +192,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
             status: true,
             cut_line: true,
             external_id: true,
+            updated_at: true
           }
         },
         pool_invites: {
@@ -226,6 +249,11 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
 
     if(!pool) { return redirectToSignIn() }
 
+    const { tournament, ...poolWithoutTournament } = pool;
+    const { updated_at, ...tournamentWithoutUpdatedAt } = tournament;
+
+    const updatedAtISOString = updated_at.toISOString();
+
     const currentUserPoolMember = pool!.pool_members.find((member) => member.user.email === email);
     const isAdmin = session.role === 'ADMIN';
     if(!currentUserPoolMember && !isAdmin) { return redirectToSignIn() }
@@ -233,10 +261,14 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
     const poolMembers = reformatPoolMembers(pool.pool_members, pool.tournament_id)
     return {
       props: {
-        pool,
+        pool: {
+          ...poolWithoutTournament,
+          tournament: tournamentWithoutUpdatedAt,
+        },
         poolMembers,
         currentUserPoolMemberId: currentUserPoolMember?.id || null,
-        isAdmin: isAdmin
+        isAdmin: isAdmin,
+        scoresUpdatedAt: updatedAtISOString,
       },
     };
   };
