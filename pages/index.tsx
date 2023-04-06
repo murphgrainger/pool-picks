@@ -7,7 +7,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from './api/auth/[...nextauth]';
 import { useRouter } from 'next/router';
 import { redirectToSignIn } from '../utils/utils';
-import ButtonLink from '../components/ButtonLink';
+import { ButtonLink } from '../components/ButtonLink';
 
 
   const PoolInvitesAndMembers = ({ session, poolInvites: initialPoolInvites, poolMembers }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
@@ -52,8 +52,6 @@ import ButtonLink from '../components/ButtonLink';
         <title>Home | PoolPicks</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      { session && 
         <div className="container max-w-xl mx-auto flex flex-wrap items-center flex-col bg-black">
            <div className="w-full p-6 rounded bg-grey-100 text-white text-xs">
               <p className="text-center font-bold">PoolPicks is currently in Alpha</p>
@@ -133,7 +131,7 @@ import ButtonLink from '../components/ButtonLink';
               <h3 className="mb-2">{member?.pool?.name}</h3>
               <p className="mb-4">Status: {member?.pool?.status}</p>
               <div className="flex flex-wrap justify-center">
-              <ButtonLink href={`/pool/${member.pool.id}`}></ButtonLink>
+              <ButtonLink href={`/pool/${member.pool.id}`} buttonText={'Go To Pool'} loadingText={'Going to pool...'} background='bg-grey-200'></ButtonLink>
               </div>
             </div>
           </div>
@@ -144,8 +142,6 @@ import ButtonLink from '../components/ButtonLink';
           </div>
         </div>
       </div>
-      }
-      
     </div>
   );
 }

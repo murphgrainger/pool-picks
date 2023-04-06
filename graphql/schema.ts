@@ -15,6 +15,8 @@ export const typeDefs = `
         amount_sum: Int
         invite_code: String
         tournament: Tournament
+        poolMembers: [PoolMember]
+        poolInvites: [PoolInvite]
     } 
 
     type PoolInvite {
@@ -30,8 +32,15 @@ export const typeDefs = `
     type PoolMember {
         id: ID
         username: String
+        pool_id: Int
         pool: Pool
         user: User
+        athletes: [PoolMembersAthletes!]
+    }
+
+    type PoolMembersAthletes {
+        poolMember: PoolMember  
+        athlete: Athlete 
     }
 
     type Tournament {
@@ -43,6 +52,8 @@ export const typeDefs = `
         status: String
         cut_line: Int
         external_id: Int
+        start_date: DateTime
+        pools: [Pool]
     }
 
     type Pick {
@@ -63,6 +74,7 @@ export const typeDefs = `
         score_sum:           Int
         score_under_par:     Int
         updated_at:          DateTime
+        tournament_id:       Int
         tournament:          Tournament!
         athlete:             Athlete!
     }
@@ -73,12 +85,14 @@ export const typeDefs = `
         last_name: String
         full_name: String
         ranking: Int
+        tournaments: [AthletesInTournaments!]!
     }
     
     type Query {
         pools: [Pool]!
         pool(id: ID!): Pool
         tournaments: [Tournament]!
+        tournamentsAndPools: [Tournament!]!
         tournament(id: ID!): Tournament
         poolMembers: [PoolMember]!
         poolInvites: [PoolInvite]!
@@ -88,6 +102,8 @@ export const typeDefs = `
         pendingPoolInvites: [PoolInvite]
         picks(pool_member_id: ID!): [Pick]
         allPicks: [Pick!]
+        getPoolScores(pool_id: Int!): [PoolMember!]
+        getPoolMembers(pool_id: ID!): [PoolMember!]
     }
 
     type Mutation {
@@ -99,5 +115,7 @@ export const typeDefs = `
         createPicks(poolMemberId: Int!, athleteIds: [Int!]!): [Pick!]
         updateInviteStatus(id: ID!, status: String!, pool_id: Int!, nickname: String!, email: String!): PoolMember
         updatePoolMemberUsername(id:ID!, username: String!): PoolMember
+        updateTournament(id:ID!, status: String!): Tournament
+        updatePool(id:ID!, status: String!): Pool
     }
 `

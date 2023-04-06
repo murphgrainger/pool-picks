@@ -5,6 +5,13 @@ export const redirectToSignIn = () => ({
       }
   })
 
+  export const redirectToHome = () => ({
+    redirect: {
+      destination: '/',
+      permanent: false,
+    }
+})
+
   export const formatToPar = (score : number | null) => {
     const underParFormatted = score === null
     ? '--'
@@ -35,7 +42,9 @@ export const redirectToSignIn = () => ({
   
   export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) => {
     const reformattedMembers = poolMembers.map((member: any) => {
+
       const picks = member.athletes.map((athletePick: any) => {
+
         const tournament = athletePick.athlete.tournaments.find((t: any) => t.tournament_id === tournamentId);
         
         return {
@@ -91,4 +100,52 @@ export const redirectToSignIn = () => ({
       return `rd`;
     }
     return `th`;
+  }
+
+  export const formatTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diff = (now.getTime() - date.getTime()) / 1000 / 60; // difference in minutes
+    const rounded = Math.round(diff);
+    
+    if (rounded === 0) {
+      return "just now";
+    } else if (rounded === 1) {
+      return "1 minute ago";
+    } else if (rounded < 60) {
+      return `${rounded} minutes ago`;
+    } else if (rounded < 120) {
+      return "1 hour ago";
+    } else if (rounded < 1440) {
+      return `${Math.floor(rounded / 60)} hours ago`;
+    } else if (rounded < 2880) {
+      return "1 day ago";
+    } else {
+      return `${Math.floor(rounded / 1440)} days ago`;
+    }
+  }
+
+  export const formattedDate = (date: Date) => {
+    const formatted = new Date(date).toLocaleString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+    return formatted.replace(',', '');
+  };
+
+  export const timeAgo = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const elapsed = Math.floor((now.getTime() - time.getTime()) / 1000 / 60); // convert to minutes
+  
+    if (elapsed < 1) {
+      return 'just now';
+    } else if (elapsed === 1) {
+      return '1 minute ago';
+    } else {
+      return `${elapsed} minutes ago`;
+    }
   }

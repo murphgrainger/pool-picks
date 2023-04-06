@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../../lib/prisma';
+import { getSession } from 'next-auth/react';
 
 import axios from 'axios';
 import cheerio from 'cheerio';
@@ -135,7 +136,6 @@ async function fetchGolfData(id: string) {
       }
 
     parsedAthleteData.push({ athlete, athleteInTournament });
-  
   });
 
   const cutLine = $('.cut-score').text();
@@ -232,16 +232,26 @@ async function updateGolfData(
             cut_line: parsedTournamentData.cut_line
           }
       })
+    } else {
+      await prisma.tournament.update({
+        where: {
+          id: tournamentId
+        },
+          data: {
+            updated_at: new Date()
+          }
+      })
     }
   } 
 
   export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const id = req.query.id as string;
-    if(!id) return res.status(500).json({message: 'No key found!'})
-
-    if (!adminKey || req.headers.authorization !== `Bearer ${adminKey}`) {
+    const session = await getSession({ req });
+    if (!session || session.role !== 'ADMIN') {
       return res.status(401).json({ message: 'Unauthorized request' });
     }
+
+    const id = req.query.id as string;
+    if(!id) return res.status(500).json({message: 'No key found!'})
 
     try {
       const golfData = await fetchGolfData(id);

@@ -1,4 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { getSession } from 'next-auth/react';
+
 import prisma from '../../../../../lib/prisma';
 
 import axios from 'axios';
@@ -104,12 +106,13 @@ async function updateAthleteField(parsedAthletes: Athlete[], tournamentId: numbe
 
 
   export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const id = req.query.id as string;
-    if(!id) return res.status(500).json({message: 'No key found!'})
-
-    if (!adminKey || req.headers.authorization !== `Bearer ${adminKey}`) {
+    const session = await getSession({ req });
+    if (!session || session.role !== 'ADMIN') {
       return res.status(401).json({ message: 'Unauthorized request' });
     }
+
+    const id = req.query.id as string;
+    if(!id) return res.status(500).json({message: 'No key found!'})
 
     try {
       const field = await fetchAthleteField(id);
