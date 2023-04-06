@@ -41,7 +41,6 @@ export const authOptions: NextAuthOptions = {
       return "/join-waitlist";
     },
     async session({ session, token, user }) {
-      console.log('DEBUG SESSION CB::', session, user)
         if (user) {
         const userData = await prisma.user.findUnique({
           where: { email: user.email! },
