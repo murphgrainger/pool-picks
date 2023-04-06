@@ -1,9 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-
-import prisma from '../../../../../lib/prisma';
-import { getSession } from 'next-auth/react';
 import { unstable_getServerSession } from "next-auth/next"
 import { authOptions } from "../../../../api/auth/[...nextauth]"
+import prisma from '../../../../../lib/prisma';
 
 import axios from 'axios';
 import cheerio from 'cheerio';
