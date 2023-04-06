@@ -26,7 +26,10 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
     const togglePicks = () => { setShowPicks(!showPicks) }
 
     const underParFormatted = formatToPar(member.member_sum_under_par);
-    const positionFormatted = member.isTied ? `T ${member.member_position}` : member.member_position;
+    let positionFormatted = member.member_position ?? '--';
+    if (member.isTied) {
+      positionFormatted = `T${positionFormatted}`;
+    }
 
     useEffect(() => {
         if (member.username) {
