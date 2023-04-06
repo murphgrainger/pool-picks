@@ -42,7 +42,9 @@ export const redirectToSignIn = () => ({
   
   export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) => {
     const reformattedMembers = poolMembers.map((member: any) => {
+
       const picks = member.athletes.map((athletePick: any) => {
+
         const tournament = athletePick.athlete.tournaments.find((t: any) => t.tournament_id === tournamentId);
         
         return {
@@ -123,12 +125,13 @@ export const redirectToSignIn = () => ({
   }
 
   export const formattedDate = (date: Date) => {
-    return date.toLocaleString('en-US', { 
-      month: '2-digit', 
-      day: '2-digit', 
-      year: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      hour12: true 
+    const formatted = new Date(date).toLocaleString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
     });
-};
+    return formatted.replace(',', '');
+  };

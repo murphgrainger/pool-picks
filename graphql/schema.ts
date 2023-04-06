@@ -32,8 +32,15 @@ export const typeDefs = `
     type PoolMember {
         id: ID
         username: String
+        pool_id: Int
         pool: Pool
         user: User
+        athletes: [PoolMembersAthletes!]
+    }
+
+    type PoolMembersAthletes {
+        poolMember: PoolMember  
+        athlete: Athlete 
     }
 
     type Tournament {
@@ -67,6 +74,7 @@ export const typeDefs = `
         score_sum:           Int
         score_under_par:     Int
         updated_at:          DateTime
+        tournament_id:       Int
         tournament:          Tournament!
         athlete:             Athlete!
     }
@@ -77,6 +85,7 @@ export const typeDefs = `
         last_name: String
         full_name: String
         ranking: Int
+        tournaments: [AthletesInTournaments!]!
     }
     
     type Query {
@@ -93,6 +102,8 @@ export const typeDefs = `
         pendingPoolInvites: [PoolInvite]
         picks(pool_member_id: ID!): [Pick]
         allPicks: [Pick!]
+        getPoolScores(pool_id: Int!): [PoolMember!]
+        getPoolMembers(pool_id: ID!): [PoolMember!]
     }
 
     type Mutation {

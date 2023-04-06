@@ -9,8 +9,7 @@ interface SelectValues {
 }
 
 interface Props {
-  pool: Pool,
-  onStatusChange: (status: string) => void;
+  pool: Pool
 }
 
 const UPDATE_POOL_STATUS = gql`
@@ -22,7 +21,7 @@ const UPDATE_POOL_STATUS = gql`
   }
 `;
 
-export const PoolAdmin: React.FC<Props> = ({ pool, onStatusChange }) => {
+export const PoolAdmin: React.FC<Props> = ({ pool }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [updatePool] = useMutation(UPDATE_POOL_STATUS);
   const [selectedOption, setSelectedOption] = useState({
@@ -37,7 +36,6 @@ export const PoolAdmin: React.FC<Props> = ({ pool, onStatusChange }) => {
       await updatePool({
         variables: { id: pool.id, status: option?.value ?? '' },
       });
-      onStatusChange(option?.value ?? '');
     } catch (error) {
       console.log(error)
   }

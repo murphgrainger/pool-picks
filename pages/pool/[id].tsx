@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { gql, useLazyQuery } from '@apollo/client';
 import Head from "next/head";
 import prisma from '../../lib/prisma';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
@@ -7,24 +8,81 @@ import { authOptions } from '../api/auth/[...nextauth]';
 import { CardPoolMember } from '../../components/CardPoolMember';
 import { CardPoolStatus } from '../../components/CardPoolStatus';
 import { PoolAdmin } from '../../components/PoolAdmin';
+import { LoadingLayout } from '../../components/LoadingLayout';
+import { redirectToSignIn, reformatPoolMembers, formattedDate } from '../../utils/utils';
 
-import { redirectToSignIn, reformatPoolMembers } from '../../utils/utils';
-
+const GET_SCORES = `
+query getPoolScores($pool_id: Int!) {
+  getPoolScores(pool_id: $pool_id) {
+      id
+      username
+      user {
+        nickname
+      }
+      athletes {
+        athlete {
+          id
+          full_name
+          tournaments {
+            status
+            position
+            thru
+            score_today
+            score_round_one
+            score_round_two
+            score_round_three
+            score_round_four
+            score_sum
+            score_under_par
+            tournament_id
+          }
+        }
+      }
+    }
+}
+`;
 
 const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+
   const [poolStatus, setPoolStatus] = useState(pool.status);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [updatedPoolMembers, setUpdatedPoolMembers] = useState(poolMembers);  
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    
-  }, [poolStatus]);
-  
   const totalPotAmount = poolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
 
   const showLogo = pool.tournament.name === "Masters Tournament";
+  const updatedAtFormatted = formattedDate(pool.tournament.updated_at)
 
-    return (
+  const handleRefresh = async () => {
+    setIsLoading(true)
+    const variables = { pool_id: pool.id };
+
+    try {
+      const response = await fetch('/api/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_SCORES,
+          variables
+        }),
+      });
+      const result = await response.json();
+      if(!result || !result.data) throw new Error('Error fetching updated scores')
+      const updatedMembers = reformatPoolMembers(result.data.getPoolScores, pool.tournament.id)
+      setUpdatedPoolMembers(updatedMembers);
+      console.log(updatedPoolMembers)
+      setIsLoading(false)
+    } catch(error) {
+      console.log(error)
+      setIsLoading(false)
+    }
+  };
+
+  return (
       <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
         <Head>        
             <title>Pool View | PoolPicks</title>
@@ -44,20 +102,25 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
             <a href={tournamentExternalUrl} className="font-bold text-yellow underline mt-2" target="_blank" rel="noreferrer">Official Leaderboard</a>
           }
           {pool.tournament.cut_line && <p>Projected Cut <strong>{pool.tournament.cut_line}</strong></p>}
+            {poolStatus === 'Active' && 
+            <div>
+              <button onClick={handleRefresh} className="bg-grey-100 p-1 pr-2 pl-2 mt-2 max-w-[125px] rounded" disabled={isLoading}>{ isLoading ? 'Refreshing...' : 'Refresh Scores'}</button>
+            </div>
+            }
           </div>
           </div>
           <CardPoolStatus status={poolStatus}/>
           { isAdmin &&
-          <button onClick={() => setShowAdminPanel(prevState => !prevState)} className="rounded bg-gray-900 mt-2">
+          <button onClick={() => setShowAdminPanel(prevState => !prevState)} className="p-1 pr-2 pl-2 mt-2 bg-gray-500 rounded">
             Admin Panel
-            <span className={`accordion-arrow text-grey-100 ml-2 mt-1 text-xs ${showAdminPanel ? 'open' : ''}`}>&#9660;</span>
+            <span className={`accordion-arrow text-grey-50 ml-2 mt-1 text-xs ${showAdminPanel ? 'open' : ''}`}>&#9660;</span>
           </button>
           }
           {isAdmin && showAdminPanel &&
-          <PoolAdmin pool={pool} onStatusChange={setPoolStatus}/>}
+          <PoolAdmin pool={pool}/>}
         </div>
      
-        { poolMembers?.map((member:any, i:number) => {
+        { updatedPoolMembers?.map((member:any, i:number) => {
           return (
             <CardPoolMember
             key={member.id}
@@ -66,6 +129,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
             poolStatus={poolStatus}
             tournamentId={pool.tournament.id}
             tournamentExternalUrl={tournamentExternalUrl}
+            updatedAtFormatted={updatedAtFormatted}
             position={i+1}
             />
           )
@@ -114,7 +178,8 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
             region: true,
             status: true,
             cut_line: true,
-            external_id: true
+            external_id: true,
+            updated_at: true
           }
         },
         pool_invites: {
@@ -168,7 +233,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
         }
       },
     });
-  
+
     if(!pool) { return redirectToSignIn() }
 
     const currentUserPoolMember = pool!.pool_members.find((member) => member.user.email === email);

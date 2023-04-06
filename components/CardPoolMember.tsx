@@ -11,12 +11,13 @@ interface Props {
     poolStatus: string,
     tournamentId: number,
     position: number,
-    tournamentExternalUrl: string | null
+    tournamentExternalUrl: string | null,
+    updatedAtFormatted: string
   }
 
-export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, tournamentId, position, tournamentExternalUrl }) => {
+export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolStatus, tournamentId, position, tournamentExternalUrl, updatedAtFormatted }) => {
     const currentUserCard = member.id === currentMemberId;
-    const pickStatus = member.picks.length ? "Picks Submitted" : "Awaiting Picks"
+    const pickStatus = member.picks?.length ? "Picks Submitted" : "Awaiting Picks"
 
     const[showPicks, setShowPicks] = useState(false)
     const [hasSubmittedUsername, setHasSubmittedUsername] = useState(!!member.username); // initialize the state based on whether the member has a username
@@ -76,7 +77,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
         )
     }
 
-    if(!member.picks.length) {
+    if(!member.picks?.length) {
         return (
             <div className="w-full mt-6 p-6 rounded bg-grey-200 flex justify-between items-center">
                 <h3 className="">{hasSubmittedUsername ? member.username : member?.nickname}</h3>
@@ -115,6 +116,7 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     })
                     .map((athlete: any, i: number) => <CardPick key={i} pick={athlete} index={i} />)
                 }
+                { showPicks && <p className="pb-2 text-xs">Last Updated: {updatedAtFormatted}</p> }
         </div>
    )
 }

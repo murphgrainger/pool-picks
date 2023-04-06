@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma';
+import { ApolloError } from 'apollo-server-micro';
 
 export const Query = {
       tournaments: () => prisma.tournament.findMany(),
@@ -38,5 +39,43 @@ export const Query = {
         } catch (error) {
           console.log(error);
         }
-      }
+      },
+      getPoolScores: async (_: any, args: any, context: any) => {
+        try {
+          const poolMembers = await prisma.poolMember.findMany({
+            where: {
+              pool_id: parseInt(args.pool_id),
+            },
+            include: {
+              user: true,
+              athletes: {
+                include: {
+                  athlete: {
+                    include: {
+                      tournaments: true
+                    }
+                  }
+                }
+              }
+            }
+          });
+      
+          return poolMembers;
+        } catch (error) {
+          throw new ApolloError(`Could not get scores: ${args.pool_id}`);
+        }
+      },    
+      getPoolMembers: async (_: any, args: any, context: any) => {
+        try {
+          const poolMembers = await prisma.poolMember.findMany({
+            where: {
+              pool_id: 1,
+            },
+          })
+
+          return poolMembers
+        } catch(error) {
+          throw new ApolloError(`Could not get members: ${error}`);
+        }
+      }  
 }
