@@ -116,7 +116,6 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     })
                     .map((athlete: any, i: number) => <CardPick key={i} pick={athlete} index={i} />)
                 }
-                { showPicks && <Timestamp timestamp={updatedAt}/> }
         </div>
    )
 }

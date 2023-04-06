@@ -170,7 +170,6 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
             status: true,
             cut_line: true,
             external_id: true,
-            updated_at: true
           }
         },
         pool_invites: {
