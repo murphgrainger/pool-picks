@@ -167,9 +167,6 @@ export default Tournament;
         status: true,
         cut_line: true,
         external_id: true,
-        start_date: true,
-        updated_at:  true
-
       },
     });
   
@@ -178,9 +175,7 @@ export default Tournament;
     return {
       props: {
         tournament: {
-          ...tournament,
-          start_date: tournament.start_date.toLocaleDateString(),
-          updated_at: formattedDate(tournament.updated_at)
+          ...tournament
         },
       },
     };
