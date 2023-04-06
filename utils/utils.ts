@@ -1,3 +1,6 @@
+import { PoolMember } from '@prisma/client';
+import { AnyNsRecord } from 'dns';
+ 
 export const redirectToSignIn = () => ({
       redirect: {
         destination: '/auth/signin',
@@ -42,19 +45,16 @@ export const redirectToSignIn = () => ({
 
   interface PoolMemberFormatted {
     id: number
-    nickname?: string
     username?: string
-    member_sum_under_par?: number
+    member_sum_under_par?: number | null
     member_position?: string,
     tied?: boolean,
     picks?: any,
 }
   
 export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) => {
-  const reformattedMembers = poolMembers.map((member: any) => {
-
+  const reformattedMembers : PoolMemberFormatted[] = poolMembers.map((member: any) => {
     const picks = member.athletes.map((athletePick: any) => {
-
       const tournament = athletePick.athlete.tournaments.find((t: any) => t.tournament_id === tournamentId);
       
       return {
@@ -84,57 +84,43 @@ export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) =>
       picks: picks,
     }
   })
- 
-  const hasMemberSumUnderPar = reformattedMembers.some((member: any) => member.member_sum_under_par !== null);
-  const sortedMembers = reformattedMembers.sort((a, b) => (a.member_sum_under_par === null || b.member_sum_under_par === null) ? 1 : a.member_sum_under_par - b.member_sum_under_par);
 
-  let currentPosition: string | undefined = undefined;
-  let prevScore: number | null = null;
-  let ties: { [score: number]: string } = {};
+  const membersWithPositions = calculateMemberPosition(reformattedMembers);
+  return membersWithPositions
+}
 
-  const membersWithPosition: PoolMemberFormatted[] = sortedMembers.map((member, index) => {
-    if (member.member_sum_under_par === null) {
-      currentPosition = '--';
-    } else if (prevScore === null) {
-      currentPosition = '1';
-      prevScore = member.member_sum_under_par;
-    } else if (member.member_sum_under_par !== prevScore) {
-      currentPosition = (index + 1 - Object.keys(ties).length).toString();
-      ties = {};
-      prevScore = member.member_sum_under_par;
-    } else {
-      currentPosition = ties[member.member_sum_under_par];
-    }
+const calculateMemberPosition = (members: PoolMemberFormatted[]) => {
 
-    if (currentPosition !== undefined) {
-      ties[member.member_sum_under_par] = currentPosition;
-    }
+  const nonNullMembers = members.filter(member => member.member_sum_under_par !== null);
+  const nullMembers = members.filter(member => member.member_sum_under_par === null);
 
-    const memberWithPosition = { ...member, member_position: currentPosition };
-    return memberWithPosition;
-  });
+  const nonNullMembersWithPosition = nonNullMembers.map((member:any, i:number) => {
+    let member_position = 1;
+    let isTied = false;
 
-  let prevPositionStr: string | undefined;
-  membersWithPosition.forEach((member, index) => {
-    if (member.member_sum_under_par !== null && index > 0 && member.member_sum_under_par === membersWithPosition[index - 1].member_sum_under_par) {
-      member.tied = true;
-      member.member_position = prevPositionStr;
-    } else {
-      prevPositionStr = member.member_position as string;
-    }
-  });
-
-  membersWithPosition.forEach((member, index, array) => {
-    if (member.tied) {
-      array.forEach((otherMember, otherIndex) => {
-        if (otherIndex !== index && otherMember.member_sum_under_par === member.member_sum_under_par) {
-          otherMember.tied = true;
+    members.forEach((el:any) => {
+      const notSelf = member.id !== el.id;
+      if(notSelf) {
+        if(member.member_sum_under_par > el.member_sum_under_par) {
+          member_position++
+        } else if(member.member_sum_under_par === el.member_sum_under_par) {
+          isTied = true;
         }
-      });
-    }
-  });
-  
-  return membersWithPosition;
+      } 
+    })
+
+    return ({
+      ...member, member_position, isTied
+    })
+  }).sort((a,b) => a.member_position - b.member_position);
+
+  const nullMembersWithPosition = nullMembers.map(member => ({
+    ...member,
+    member_position: null,
+    isTied: false
+  }));
+
+  return nonNullMembersWithPosition.concat(nullMembersWithPosition)
 }
 
   
