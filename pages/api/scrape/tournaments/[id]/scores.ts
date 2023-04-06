@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../../lib/prisma';
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "../../../auth/[...nextauth]"
+import { getSession } from 'next-auth/react';
 
 import axios from 'axios';
 import cheerio from 'cheerio';
@@ -246,9 +245,9 @@ async function updateGolfData(
   } 
 
   export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const session = await getServerSession(req, res, authOptions)
+    const session = await getSession({ req });
+    console.log('DEBUG:', session)
     if (!session || session.role !== 'ADMIN') {
-      console.log('debug', session)
       return res.status(401).json({ message: 'Unauthorized request' });
     }
 
