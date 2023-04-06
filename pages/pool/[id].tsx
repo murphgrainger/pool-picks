@@ -51,7 +51,6 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
   const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
 
   const showLogo = pool.tournament.name === "Masters Tournament";
-  const updatedAtFormatted = formattedDate(pool.tournament.updated_at)
 
   const handleRefresh = async () => {
     setIsLoading(true)
@@ -72,7 +71,6 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
       if(!result || !result.data) throw new Error('Error fetching updated scores')
       const updatedMembers = reformatPoolMembers(result.data.getPoolScores, pool.tournament.id)
       setUpdatedPoolMembers(updatedMembers);
-      console.log(updatedMembers)
       setIsLoading(false)
     } catch(error) {
       console.log(error)
@@ -100,12 +98,6 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
             <a href={tournamentExternalUrl} className="font-bold text-yellow underline mt-2" target="_blank" rel="noreferrer">Official Leaderboard</a>
           }
           {pool.tournament.cut_line && <p>Projected Cut <strong>{pool.tournament.cut_line}</strong></p>}
-
-            {poolStatus === 'Active' && 
-            <div>
-              <button onClick={handleRefresh} className="bg-grey-100 p-1 pr-2 pl-2 mt-2 max-w-[125px] rounded" disabled={isLoading}>{ isLoading ? 'Refreshing...' : 'Refresh Pool'}</button>
-            </div>
-            }
           </div>
           </div>
           <CardPoolStatus status={poolStatus}/>
