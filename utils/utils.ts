@@ -50,84 +50,93 @@ export const redirectToSignIn = () => ({
     picks?: any,
 }
   
-  export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) => {
-    const reformattedMembers = poolMembers.map((member: any) => {
+export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) => {
+  const reformattedMembers = poolMembers.map((member: any) => {
 
-      const picks = member.athletes.map((athletePick: any) => {
+    const picks = member.athletes.map((athletePick: any) => {
 
-        const tournament = athletePick.athlete.tournaments.find((t: any) => t.tournament_id === tournamentId);
-        
-        return {
-          id: athletePick.athlete.id,
-          full_name: athletePick.athlete.full_name,
-          status: tournament?.status ?? '',
-          position: tournament?.position ?? '',
-          score_today: tournament?.score_today ?? null,
-          score_round_one: tournament?.score_round_one ?? null,
-          score_round_two: tournament?.score_round_two ?? null,
-          score_round_three: tournament?.score_round_three ?? null,
-          score_round_four: tournament?.score_round_four ?? null,
-          score_sum: tournament?.score_sum ?? null,
-          score_under_par: tournament?.score_under_par ?? null,
-          thru: tournament?.thru ?? null,
-          tournament_id: tournament?.tournament_id ?? null,
+      const tournament = athletePick.athlete.tournaments.find((t: any) => t.tournament_id === tournamentId);
+      
+      return {
+        id: athletePick.athlete.id,
+        full_name: athletePick.athlete.full_name,
+        status: tournament?.status ?? '',
+        position: tournament?.position ?? '',
+        score_today: tournament?.score_today ?? null,
+        score_round_one: tournament?.score_round_one ?? null,
+        score_round_two: tournament?.score_round_two ?? null,
+        score_round_three: tournament?.score_round_three ?? null,
+        score_round_four: tournament?.score_round_four ?? null,
+        score_sum: tournament?.score_sum ?? null,
+        score_under_par: tournament?.score_under_par ?? null,
+        thru: tournament?.thru ?? null,
+        tournament_id: tournament?.tournament_id ?? null,
+      }
+    });
+    
+    const sum = sumMemberPicks(picks);
+
+    return {
+      id: member.id,
+      nickname: member.user.nickname,
+      username: member.username,
+      member_sum_under_par: sum,
+      picks: picks,
+    }
+  })
+ 
+  const hasMemberSumUnderPar = reformattedMembers.some((member: any) => member.member_sum_under_par !== null);
+  const sortedMembers = reformattedMembers.sort((a, b) => (a.member_sum_under_par === null || b.member_sum_under_par === null) ? 1 : a.member_sum_under_par - b.member_sum_under_par);
+
+  let currentPosition: string | undefined = undefined;
+  let prevScore: number | null = null;
+  let ties: { [score: number]: string } = {};
+
+  const membersWithPosition: PoolMemberFormatted[] = sortedMembers.map((member, index) => {
+    if (member.member_sum_under_par === null) {
+      currentPosition = '--';
+    } else if (prevScore === null) {
+      currentPosition = '1';
+      prevScore = member.member_sum_under_par;
+    } else if (member.member_sum_under_par !== prevScore) {
+      currentPosition = (index + 1 - Object.keys(ties).length).toString();
+      ties = {};
+      prevScore = member.member_sum_under_par;
+    } else {
+      currentPosition = ties[member.member_sum_under_par];
+    }
+
+    if (currentPosition !== undefined) {
+      ties[member.member_sum_under_par] = currentPosition;
+    }
+
+    const memberWithPosition = { ...member, member_position: currentPosition };
+    return memberWithPosition;
+  });
+
+  let prevPositionStr: string | undefined;
+  membersWithPosition.forEach((member, index) => {
+    if (member.member_sum_under_par !== null && index > 0 && member.member_sum_under_par === membersWithPosition[index - 1].member_sum_under_par) {
+      member.tied = true;
+      member.member_position = prevPositionStr;
+    } else {
+      prevPositionStr = member.member_position as string;
+    }
+  });
+
+  membersWithPosition.forEach((member, index, array) => {
+    if (member.tied) {
+      array.forEach((otherMember, otherIndex) => {
+        if (otherIndex !== index && otherMember.member_sum_under_par === member.member_sum_under_par) {
+          otherMember.tied = true;
         }
       });
-      
-      const sum = sumMemberPicks(picks);
-
-      return {
-        id: member.id,
-        nickname: member.user.nickname,
-        username: member.username,
-        member_sum_under_par: sum,
-        picks: picks,
-      }
-    })
-   
-    const hasMemberSumUnderPar = reformattedMembers.some((member: any) => member.member_sum_under_par !== null);
-    reformattedMembers.sort((a, b) => a.member_sum_under_par! - b.member_sum_under_par!);
+    }
+  });
   
-    let member_position: string | undefined = undefined;
-    let prevSumUnderPar: number | null | undefined = null;
-    let prevPosition: string | undefined = undefined;
-    
-    const membersWithPosition: PoolMemberFormatted[] = reformattedMembers.map((member, index) => {
-      if (member.member_sum_under_par === null) {
-        member_position = '--';
-      } else if (prevSumUnderPar !== member.member_sum_under_par) {
-        member_position = (index + 1).toString();
-        prevPosition = member_position;
-      } else {
-        member_position = prevPosition as string;
-      }
-      const memberWithPosition = { ...member, member_position };
-      prevSumUnderPar = member.member_sum_under_par;
-      return memberWithPosition;
-    });
-  
-    let prevPositionStr: string | undefined;
-    membersWithPosition.forEach((member, index) => {
-      if (member.member_sum_under_par !== null && index > 0 && member.member_sum_under_par === membersWithPosition[index - 1].member_sum_under_par) {
-        member.tied = true;
-        member.member_position = prevPositionStr;
-      } else {
-        prevPositionStr = member.member_position as string;
-      }
-    });
+  return membersWithPosition;
+}
 
-    membersWithPosition.forEach((member, index, array) => {
-      if (member.tied) {
-        array.forEach((otherMember, otherIndex) => {
-          if (otherIndex !== index && otherMember.member_sum_under_par === member.member_sum_under_par) {
-            otherMember.tied = true;
-          }
-        });
-      }
-    });
-    
-    return membersWithPosition;
-  }
   
   export const ordinalSuffix = (i: number) => {
     const j = i % 10;
