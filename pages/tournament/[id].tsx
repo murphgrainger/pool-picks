@@ -75,7 +75,7 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
 
       try {
         const url = scrapeRoute === 'rankings' ?  `/api/scrape/${scrapeRoute}` : `/api/scrape/tournaments/${tournament.id}/${scrapeRoute}`;
-        const response = await fetch(url);
+        const response = await fetch(url, fetchOptions);
         if (!response.ok) {
           const { message } = await response.json();
           throw new Error(message);
@@ -113,13 +113,16 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
                         />
                         { isActive &&
                         <div className="mt-6 flex flex-col">
+                        { tournament.status === 'Scheduled' && 
                           <button className="bg-grey-200 m-2 hover:bg-green-700"
-                          onClick={() => {updateData('athletes')
-                          setLoadingButtonId(`atheletes`);
+                            onClick={() => {updateData('athletes')
+                            setLoadingButtonId(`atheletes`);
+                              }
                             }
+                           disabled={isLoading}
+                           >{ isLoading && loadingButtonId ==='atheletes' ? 'Updating...' : 'Update Field'}</button>
                           }
-                          disabled={isLoading}
-                          >{ isLoading && loadingButtonId ==='atheletes' ? 'Updating...' : 'Update Field'}</button>
+                        { tournament.status === 'Scheduled' && 
                           <button className="bg-grey-200 m-2 hover:bg-green-700"
                             onClick={() => {updateData('rankings')
                             setLoadingButtonId(`rankings`);
@@ -127,7 +130,7 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
                             }                          
                             disabled={isLoading}
                           >{ isLoading && loadingButtonId ==='rankings' ? 'Updating...' : 'Update Rankings'}</button>
-
+                          }
                           <button className="bg-grey-200 m-2 hover:bg-green-700"
                             onClick={() => {updateData('scores')
                             setLoadingButtonId(`scores`);
