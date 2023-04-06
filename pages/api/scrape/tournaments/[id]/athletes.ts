@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
-
+import { unstable_getServerSession } from "next-auth/next";
+import { authOptions } from "../../../../api/auth/[...nextauth]";
 import prisma from '../../../../../lib/prisma';
 
 import axios from 'axios';
@@ -106,7 +106,7 @@ async function updateAthleteField(parsedAthletes: Athlete[], tournamentId: numbe
 
 
   export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const session = await getSession({ req });
+    const session = await unstable_getServerSession(req, res, authOptions)
     if (!session || session.role !== 'ADMIN') {
       return res.status(401).json({ message: 'Unauthorized request' });
     }

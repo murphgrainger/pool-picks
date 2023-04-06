@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { unstable_getServerSession } from "next-auth/next";
+import { authOptions } from "../../api/auth/[...nextauth]";
 import prisma from '../../../lib/prisma';
-import { getSession } from 'next-auth/react';
 
 import axios from 'axios';
 import cheerio from 'cheerio';
@@ -90,8 +91,7 @@ async function updateAthleteRankings(parsedAthletes: Athlete[]) {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-
-  const session = await getSession({ req });
+  const session = await unstable_getServerSession(req, res, authOptions)
   if (!session || session.role !== 'ADMIN') {
     return res.status(401).json({ message: 'Unauthorized request' });
   }
