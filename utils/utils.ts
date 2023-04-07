@@ -190,4 +190,3 @@ const calculateMemberPosition = (members: PoolMemberFormatted[]) => {
       return `${days} day${days === 1 ? '' : 's'} ago`;
     }
   }
-  

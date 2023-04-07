@@ -41,6 +41,9 @@ query getPoolScores($pool_id: Int!) {
             score_sum
             score_under_par
             tournament_id
+            tournament {
+              updated_at
+            }
           }
         }
       }
@@ -55,7 +58,8 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
   const [updatedPoolMembers, setUpdatedPoolMembers] = useState(poolMembers);  
   const [lastScoreUpdateTime, setLastScoreUpdateTime] = useState(scoresUpdatedAt);
   const [needsRefresh, setNeedsRefresh] = useState(false);
-  const [elapsed, setElapsed] = useState('');
+  const [elapsedTime, setElapsed] = useState('');
+  console.log
 
   const totalPotAmount = poolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
@@ -65,6 +69,26 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
   useEffect(() => {
     handleRefresh();
   }, []);
+
+  const useElapsedTime = () => {
+  
+    setInterval(() => {
+      const now = new Date();
+      const updated = new Date(lastScoreUpdateTime)
+      const diff = Math.floor((now.getTime() - updated.getTime()) / 1000);
+      if (diff < 60) {
+        setElapsed(`just now`);
+      } else if (diff < 3600) {
+        setElapsed(`${Math.floor(diff / 60)} minutes ago`);
+      } else if (diff < 86400) {
+        setElapsed(`${Math.floor(diff / 3600)} hours ago`);
+      } else {
+        setElapsed(`${Math.floor(diff / 86400)} days ago`);
+      }
+    }, 30000);
+  
+    return elapsedTime;
+  };
 
   const fetchData = async () => {
     console.log('fetching!!')
@@ -95,8 +119,6 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
   const useFetchData = () => {
     useEffect(() => {
       const interval = setInterval(async () => {
-        const diff = timeAgo(lastScoreUpdateTime)
-        setElapsed(diff);
 
         const lastUpdatedTime = await fetchData();
 
@@ -107,7 +129,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
         }
 
       return () => clearInterval(interval);
-      }, 5000);
+      }, 30000);
 
       return () => clearInterval(interval);
     }, [lastScoreUpdateTime]);
@@ -115,6 +137,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
 
   if(pool.tournament?.status.includes('In Progress')) {
     useFetchData();
+    useElapsedTime();
   }
 
   const handleRefresh = async () => {
@@ -135,9 +158,10 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
       const result = await response.json();
 
       if(!result || !result.data) throw new Error('Error fetching updated scores')
-
+      console.log(result)
       const updatedMembers = reformatPoolMembers(result.data.getPoolScores, pool.tournament.id)
       setUpdatedPoolMembers(updatedMembers);
+    
       
     } catch(error) {
       console.log(error)
@@ -189,8 +213,8 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
           </div>
         <div className="mt-6">
          <span className="bg-yellow text-black p-2 text-xs mr-2 rounded">{pool.tournament.status}</span>
-          { elapsed.length > 0 && 
-          <span className="bg-grey-200 p-2  rounded text-xs">Scores updated {elapsed}</span>
+          { elapsedTime.length > 0 && 
+          <span className="bg-grey-200 p-2  rounded text-xs">Scores updated {elapsedTime}</span>
           }
         </div>
 
