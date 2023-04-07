@@ -53,6 +53,7 @@ export const typeDefs = `
         cut_line: Int
         external_id: Int
         start_date: DateTime
+        updated_at: DateTime
         pools: [Pool]
     }
 

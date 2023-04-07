@@ -248,9 +248,9 @@ async function updateGolfData(
   export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const session = await unstable_getServerSession(req, res, authOptions)
 
-    if (!session || session.role !== 'ADMIN') {
-      return res.status(401).json({ message: 'Unauthorized request' });
-    }
+    // if (!session || session.role !== 'ADMIN') {
+    //   return res.status(401).json({ message: 'Unauthorized request' });
+    // }
 
     const id = req.query.id as string;
     if(!id) return res.status(500).json({message: 'No key found!'})

@@ -9,6 +9,14 @@ import { CardPoolStatus } from '../../components/CardPoolStatus';
 import { PoolAdmin } from '../../components/PoolAdmin';
 import { redirectToSignIn, reformatPoolMembers, formattedDate } from '../../utils/utils';
 
+const GET_TOURNAMENT_UPDATED_TIME = `
+query getTournament($id: ID!) {
+  tournament(id: $id) {
+    updated_at
+  }
+}`
+
+
 const GET_SCORES = `
 query getPoolScores($pool_id: Int!) {
   getPoolScores(pool_id: $pool_id) {
@@ -46,31 +54,68 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [updatedPoolMembers, setUpdatedPoolMembers] = useState(poolMembers);  
   const [isLoading, setIsLoading] = useState(false);
-  const STALE_THRESHOLD = 30 * 1000; // 30 seconds
-  const [lastFetchTime, setLastFetchTime] = useState(0);
+  const [lastScoreUpdateTime, setLastScoreUpdateTime] = useState(scoresUpdatedAt);
+  const [initialDataFetched, setInitialDataFetched] = useState(false);
 
-  console.log('last fetch', lastFetchTime)
-  
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      console.log('this is the outer')
-      const currentTime = Date.now();
-      const timeSinceLastFetch = currentTime - lastFetchTime;
-      if (timeSinceLastFetch >= STALE_THRESHOLD) {
-        console.log('need to refetch!!!')
-        handleRefresh()
-      }
-    }, 5 * 60 * 1000); // Poll every 5 minutes
-  
-    return () => clearInterval(intervalId);
-  }, [lastFetchTime]);
   const totalPotAmount = poolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = `https://www.espn.com/golf/leaderboard/_/tournamentId/${pool.tournament.external_id}`
 
   const showLogo = pool.tournament.name === "Masters Tournament";
 
+  useEffect(() => {
+    (async () => {
+
+    const fetchData = async () => {
+      console.log('state value for time', lastScoreUpdateTime)
+
+      const variables = { id: pool.tournament_id };
+  
+      try {
+        const response = await fetch('/api/graphql', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: GET_TOURNAMENT_UPDATED_TIME,
+            variables,
+          }),
+        });
+  
+        const result = await response.json();
+        if(!result || !result.data) throw new Error('Error fetching tournament last updated time!')
+        if (result.data.tournament.updated_at !== lastScoreUpdateTime && !isLoading) {
+          await handleRefresh();
+          setLastScoreUpdateTime(result.data.tournament.updated_at);
+        }
+        // Start polling for updates if initial data has been fetched
+        if (initialDataFetched) {
+          setTimeout(fetchData, 10000); // Poll every 10 seconds
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  
+    // Fetch initial data and mark it as fetched
+    if (!initialDataFetched) {
+      setUpdatedPoolMembers(poolMembers);
+      setInitialDataFetched(true);
+    }
+  
+    // Start polling for updates if initial data has been fetched
+    if (initialDataFetched) {
+      setTimeout(fetchData, 5000); // Poll every 5 seconds
+    }
+  })();
+
+  }, [initialDataFetched, lastScoreUpdateTime]);
+  
+
+
   const handleRefresh = async () => {
     setIsLoading(true)
+
     const variables = { pool_id: pool.id };
 
     try {
@@ -85,11 +130,12 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
         }),
       });
       const result = await response.json();
+
       if(!result || !result.data) throw new Error('Error fetching updated scores')
       const updatedMembers = reformatPoolMembers(result.data.getPoolScores, pool.tournament.id)
       setUpdatedPoolMembers(updatedMembers);
+      
       setIsLoading(false)
-      setLastFetchTime(Date.now());
     } catch(error) {
       console.log(error)
       setIsLoading(false)
@@ -104,6 +150,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
         </Head>
         <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
         <div className="flex">
+          <button onClick={() => handleRefresh()}>Refresh</button>
           { showLogo && <div className="pl-4 pr-4">
           <img src="/logo_masters.png" className="w-24"></img>
           </div>}
@@ -128,11 +175,6 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
           {isAdmin && showAdminPanel &&
           <PoolAdmin pool={pool}/>}
         </div>
-
-        { lastFetchTime !== 0 && 
-          <p className="p-2 bg-gray-800 rounded mt-6">Scores Last Updated: {new Date(lastFetchTime).toLocaleString()}</p>
-        }
-     
         { updatedPoolMembers?.map((member:any, i:number) => {
           return (
             <CardPoolMember

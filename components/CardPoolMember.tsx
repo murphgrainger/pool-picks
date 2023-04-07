@@ -4,7 +4,6 @@ import { CardPick } from './CardPick';
 import UsernameCreate  from './UsernameCreate';
 
 import { formatToPar } from '../utils/utils';
-import { Timestamp } from './Timestamp';
 
 interface Props {
     member: Record<string, any>;
@@ -119,10 +118,6 @@ export const CardPoolMember: React.FC<Props> = ({ member, currentMemberId, poolS
                     })
                     .map((athlete: any, i: number) => <CardPick key={i} pick={athlete} index={i} />)
                 }
-                { showPicks &&
-                    <Timestamp timestamp={scoresUpdatedAt}/>
-                }
-
         </div>
    )
 }
