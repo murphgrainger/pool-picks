@@ -180,9 +180,14 @@ const calculateMemberPosition = (members: PoolMemberFormatted[]) => {
   
     if (elapsed < 1) {
       return 'just now';
-    } else if (elapsed === 1) {
-      return '1 minute ago';
+    } else if (elapsed < 60) {
+      return `${elapsed} minute${elapsed === 1 ? '' : 's'} ago`;
+    } else if (elapsed < 1440) { // 1440 minutes = 1 day
+      const hours = Math.floor(elapsed / 60);
+      return `${hours} hour${hours === 1 ? '' : 's'} ago`;
     } else {
-      return `${elapsed} minutes ago`;
+      const days = Math.floor(elapsed / 1440);
+      return `${days} day${days === 1 ? '' : 's'} ago`;
     }
   }
+  

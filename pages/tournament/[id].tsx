@@ -8,6 +8,8 @@ import Select from 'react-select';
 import { useMutation, gql } from '@apollo/client';
 
 import { redirectToSignIn, redirectToHome, formattedDate } from '../../utils/utils';
+import { tournamentStatuses } from '../../utils/constants';
+
 import { String } from 'aws-sdk/clients/acm';
 
 interface SelectValues {
@@ -25,22 +27,24 @@ const UPDATE_TOURNAMENT_STATUS = gql`
 `;
 
 const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const liveTournament = tournament?.status?.includes('In Progress' || tournament.status === "Active");
   const [selectedOption, setSelectedOption] = useState({ value: tournament.status, label: tournament.status });
   const [updateTournament] = useMutation(UPDATE_TOURNAMENT_STATUS);
-  const [isActive, setActiveTournament] = useState(tournament.status === 'Active');
+  const [isActive, setActiveTournament] = useState(liveTournament);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingButtonId, setLoadingButtonId] = useState<string | null>(null);
-  const [updatedAt, setUpdatedAt] = useState(tournament.updatedAt);
+  const [updatedAt, setUpdatedAt] = useState(tournament.updated_at);
 
   useEffect(() => {
-    if (tournament.status && tournament.status === 'Active') {
+    if (liveTournament) {
       setActiveTournament(true);
     }
     setUpdatedAt(tournament.updated_at);
   }, [tournament.status, tournament.updated_at]);
 
     const handleStatusChange = async (option: SelectValues | null) => {
-      setActiveTournament(option?.value === 'Active');
+      const inProgress = option?.value.includes('In Progress');
+      setActiveTournament(option?.value === 'Active' || (inProgress || false));
       setSelectedOption(option ?? { value: '', label: '' });
 
       try {
@@ -51,8 +55,6 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
         console.log(error)
     }
   }
-
-    const tournamentStatuses = ['Scheduled', 'Active', 'Completed']
 
     const selectOptions: SelectValues[] = tournamentStatuses.map((el) => {
       return ({
@@ -90,6 +92,8 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
       }
     }
 
+    const updatedFormatted = formattedDate(updatedAt);
+
     return (
         <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
             <Head>
@@ -100,7 +104,7 @@ const Tournament = ({ tournament }: InferGetServerSidePropsType<typeof getServer
                 <div className="w-full">
                     <h3>{tournament.name}</h3>
                     <p>Starts: {tournament.start_date}</p>
-                    <p>Last Updated: {updatedAt}</p>
+                    <p>Last Updated: {updatedFormatted}</p>
                     <div className="mt-2">
                         <label htmlFor="status">Update Status:</label>
                         <Select instanceId="status" name="status" 
@@ -170,6 +174,7 @@ export default Tournament;
         status: true,
         cut_line: true,
         external_id: true,
+        updated_at: true
       },
     });
   
@@ -178,7 +183,8 @@ export default Tournament;
     return {
       props: {
         tournament: {
-          ...tournament
+          ...tournament,
+          updated_at: tournament.updated_at.toISOString()
         },
       },
     };
