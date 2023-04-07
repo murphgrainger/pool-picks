@@ -62,7 +62,12 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
 
   const showLogo = pool.tournament.name === "Masters Tournament";
 
+  useEffect(() => {
+    handleRefresh();
+  }, []);
+
   const fetchData = async () => {
+    console.log('fetching!!')
     const variables = { id: pool.tournament_id };
 
     try {
@@ -101,10 +106,8 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
           setNeedsRefresh(true);
         }
 
-      const interval = setInterval(fetchData, 5000);
-
       return () => clearInterval(interval);
-      }, 6 * 1000);
+      }, 5000);
 
       return () => clearInterval(interval);
     }, [lastScoreUpdateTime]);
@@ -115,6 +118,7 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
   }
 
   const handleRefresh = async () => {
+    console.log('getting new db data')
     const variables = { pool_id: pool.id };
 
     try {
@@ -273,31 +277,6 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
                 nickname: true
               }
             },
-            athletes: {
-              select: {
-                athlete: {
-                  select: {
-                    id: true,
-                    full_name: true,
-                    tournaments: {
-                      select: {
-                        status: true,
-                        position: true,
-                        thru: true,
-                        score_today: true,
-                        score_round_one: true,
-                        score_round_two: true,
-                        score_round_three: true,
-                        score_round_four: true,
-                        score_sum: true,
-                        score_under_par: true,
-                        tournament_id: true,
-                      }
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       },
@@ -314,14 +293,13 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin, scoresUpdat
     const isAdmin = session.role === 'ADMIN';
     if(!currentUserPoolMember && !isAdmin) { return redirectToSignIn() }
 
-    const poolMembers = reformatPoolMembers(pool.pool_members, pool.tournament_id)
     return {
       props: {
         pool: {
           ...poolWithoutTournament,
           tournament: tournamentWithoutUpdatedAt,
         },
-        poolMembers,
+        poolMembers: pool.pool_members,
         currentUserPoolMemberId: currentUserPoolMember?.id || null,
         isAdmin: isAdmin,
         scoresUpdatedAt: updatedAtISOString,
