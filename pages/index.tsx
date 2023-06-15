@@ -6,7 +6,7 @@ import prisma from '../lib/prisma';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from './api/auth/[...nextauth]';
 import { useRouter } from 'next/router';
-import { redirectToSignIn } from '../utils/utils';
+import { redirectToSignIn, sortPoolMembersByPoolStatus } from '../utils/utils';
 import { ButtonLink } from '../components/ButtonLink';
 
 
@@ -59,7 +59,6 @@ import { ButtonLink } from '../components/ButtonLink';
               <p className="text-center">Alpha testers (you!) can accept invitations to pools, make picks, and win the pool.</p>
             </div>
         <div className="flex flex-col justify-center items-center flex-wrap rounded bg-grey-200 w-full mt-4 pt-8 px-6 text-white">
-          <h3 className="mb-4">Active Pools</h3>
           { poolInvites?.map((invite:any) => (
         <div className="p-4 bg-yellow w-full rounded mb-6 text-black" key={invite.id}>
             <div className="text-center">
@@ -126,10 +125,13 @@ import { ButtonLink } from '../components/ButtonLink';
             <p className="text-center pb-8">You currently aren't in any active pools. Ask your commissioner to invite you!</p>
           )}
           { poolMembers?.map((member:any) => (
-        <div className="p-4 mb-6 bg-grey-100 w-full rounded" key={member.id}>
+        <div  className={`p-4 mb-6 ${
+          member.pool.status === 'Active' ? 'bg-grey-100' : 'bg-grey-100'
+        } w-full rounded`} 
+        key={member.id}>
             <div className="text-center">
               <h3 className="mb-2">{member?.pool?.name}</h3>
-              <p className="mb-4">Status: {member?.pool?.status}</p>
+              <p className="mb-4">{member?.pool?.status}</p>
               <div className="flex flex-wrap justify-center">
               <ButtonLink href={`/pool/${member.pool.id}`} buttonText={'Go To Pool'} loadingText={'Going to pool...'} background='bg-grey-200'></ButtonLink>
               </div>
@@ -176,7 +178,7 @@ export const getServerSideProps: GetServerSideProps = async ( context ) => {
     },
   });
 
-  const poolMembers = await prisma.poolMember.findMany({
+  const unsortedPoolMembers = await prisma.poolMember.findMany({
     where: {
       user: {
         email: String(email)
@@ -199,6 +201,8 @@ export const getServerSideProps: GetServerSideProps = async ( context ) => {
       }
     }
   });
+
+  const poolMembers = sortPoolMembersByPoolStatus(unsortedPoolMembers)
 
   if (!poolInvites && !poolMembers) return {
     notFound: true

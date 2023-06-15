@@ -97,7 +97,6 @@ const Pool = ({ pool, poolMembers, currentUserPoolMemberId, isAdmin }: InferGetS
           { pool.tournament.external_id &&
             <a href={tournamentExternalUrl} className="font-bold text-yellow underline mt-2" target="_blank" rel="noreferrer">Official Leaderboard</a>
           }
-       
           </div>
           </div>
           <CardPoolStatus status={poolStatus}/>
