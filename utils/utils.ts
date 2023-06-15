@@ -186,3 +186,32 @@ const calculateMemberPosition = (members: PoolMemberFormatted[]) => {
       return `${elapsed} minutes ago`;
     }
   }
+
+  export const sortPoolMembersByPoolStatus = (poolMembers:any) => {
+    const statusOrder = ['Active', 'Open', 'Locked', 'Complete', 'Setup'];
+  
+    poolMembers.sort((a:any, b:any) => {
+      const statusA = a.pool.status;
+      const statusB = b.pool.status;
+  
+      const indexA = statusOrder.indexOf(statusA);
+      const indexB = statusOrder.indexOf(statusB);
+  
+      if (indexA < indexB) {
+        return -1;
+      } else if (indexA > indexB) {
+        return 1;
+      }
+  
+      if (a.updatedAt > b.updatedAt) {
+        return -1;
+      } else if (a.updatedAt < b.updatedAt) {
+        return 1;
+      }
+  
+      return 0;
+    });
+  
+    return poolMembers;
+  }
+  
