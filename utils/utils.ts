@@ -44,13 +44,14 @@ export const redirectToSignIn = () => ({
   }
 
   interface PoolMemberFormatted {
-    id: number
-    username?: string
-    member_sum_under_par?: number | null
-    member_position?: string,
-    tied?: boolean,
-    picks?: any,
-}
+    id: number;
+    username?: string;
+    member_sum_under_par?: number | null;
+    tied?: boolean;
+    picks?: any;
+    member_position?: number; // added
+    isTied?: boolean; // added
+  }
   
 export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) => {
   const reformattedMembers : PoolMemberFormatted[] = poolMembers.map((member: any) => {
@@ -89,38 +90,47 @@ export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) =>
   return membersWithPositions
 }
 
-const calculateMemberPosition = (members: PoolMemberFormatted[]) => {
+const calculateMemberPosition = (members: PoolMemberFormatted[]): PoolMemberFormatted[] => {
+  const nonNullMembers = members.filter(member => member.member_sum_under_par !== null) as (PoolMemberFormatted & { member_sum_under_par: number })[];
 
-  const nonNullMembers = members.filter(member => member.member_sum_under_par !== null);
-  const nullMembers = members.filter(member => member.member_sum_under_par === null);
+  const sortedNonNullMembers = nonNullMembers.sort((a, b) => a.member_sum_under_par - b.member_sum_under_par);
 
-  const nonNullMembersWithPosition = nonNullMembers.map((member:any, i:number) => {
-    let member_position = 1;
-    let isTied = false;
+  let lastPosition = 1;
+  let lastScore: number | null = sortedNonNullMembers[0].member_sum_under_par;
 
-    members.forEach((el:any) => {
-      const notSelf = member.id !== el.id;
-      if(notSelf) {
-        if(member.member_sum_under_par > el.member_sum_under_par) {
-          member_position++
-        } else if(member.member_sum_under_par === el.member_sum_under_par) {
-          isTied = true;
-        }
-      } 
-    })
+  const nonNullMembersWithPosition = sortedNonNullMembers.map((member, i) => {
+    const isTiedWithNext = member.member_sum_under_par === sortedNonNullMembers[i+1]?.member_sum_under_par;
+    if(i===0) {
+      return {
+        ...member,
+        member_position: lastPosition,
+        isTied: isTiedWithNext
+      }
+    } else if (i>0 && member.member_sum_under_par == lastScore) {
+      return {
+        ...member,
+        member_position: lastPosition,
+        isTied: true
+      };
+    } else {
+      lastScore = member.member_sum_under_par
+      lastPosition++
 
-    return ({
-      ...member, member_position, isTied
-    })
-  }).sort((a,b) => a.member_position - b.member_position);
+      return {
+        ...member,
+        member_position: lastPosition,
+        isTied: isTiedWithNext
+      }
+    }
+  });
 
-  const nullMembersWithPosition = nullMembers.map(member => ({
+  const nullMembers = members.filter(member => member.member_sum_under_par === null).map(member => ({
     ...member,
-    member_position: null,
+    member_position: nonNullMembersWithPosition.length,
     isTied: false
   }));
 
-  return nonNullMembersWithPosition.concat(nullMembersWithPosition)
+  return [...nonNullMembersWithPosition, ...nullMembers] as PoolMemberFormatted[];
 }
 
   
