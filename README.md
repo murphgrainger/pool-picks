@@ -22,3 +22,6 @@ To match your dev work in production:
 1. Update the `DATABASE_URL` in your .env file to the production database.
 2. Run `npx prisma migrate dev` and name the migration for your work. This will push your changes to the production databse.
 3. Switch the `DATABASE_URL` in your .env back to the local database! 
+
+## Deployment
+Deploy directly through the CLI to Vercel
