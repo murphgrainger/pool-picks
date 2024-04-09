@@ -91,12 +91,12 @@ export const reformatPoolMembers = (poolMembers: any[], tournamentId: number) =>
 }
 
 const calculateMemberPosition = (members: PoolMemberFormatted[]): PoolMemberFormatted[] => {
-  const nonNullMembers = members.filter(member => member.member_sum_under_par !== null) as (PoolMemberFormatted & { member_sum_under_par: number })[];
+  const nonNullMembers =  members.filter(member => member.member_sum_under_par !== null) as (PoolMemberFormatted & { member_sum_under_par: number })[];
 
-  const sortedNonNullMembers = nonNullMembers.sort((a, b) => a.member_sum_under_par - b.member_sum_under_par);
+  const sortedNonNullMembers = nonNullMembers?.sort((a, b) => a.member_sum_under_par - b.member_sum_under_par);
 
   let lastPosition = 1;
-  let lastScore: number | null = sortedNonNullMembers[0].member_sum_under_par;
+  let lastScore: number | null = sortedNonNullMembers[0]?.member_sum_under_par;
 
   const nonNullMembersWithPosition = sortedNonNullMembers.map((member, i) => {
     const isTiedWithNext = member.member_sum_under_par === sortedNonNullMembers[i+1]?.member_sum_under_par;
