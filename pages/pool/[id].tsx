@@ -7,7 +7,6 @@ import { authOptions } from "../api/auth/[...nextauth]";
 import { CardPoolMember } from "../../components/CardPoolMember";
 import { CardPoolStatus } from "../../components/CardPoolStatus";
 import { PoolAdmin } from "../../components/PoolAdmin";
-import PoolInviteForm from "../../components/PoolInviteForm";
 import {
   redirectToSignIn,
   reformatPoolMembers,
@@ -148,9 +147,8 @@ const Pool = ({
             </span>
           </button>
         )}
-        {isAdmin && showAdminPanel && <PoolAdmin pool={pool} />}
-        {isAdmin && poolStatus === "Setup" && (
-          <PoolInviteForm poolId={pool.id} onInviteCreated={handleNewInvite} />
+        {isAdmin && showAdminPanel && (
+          <PoolAdmin pool={pool} onInviteCreated={handleNewInvite} />
         )}
       </div>
 
