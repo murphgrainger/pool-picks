@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.component-root {
+  min-height: 80vh;
+  padding: 1em;
+}
+
+h1, h2, h3 {
+  font-family: 'Montserrat', sans-serif;
+}
+
+p {
+  font-family: 'Montserrat', sans-serif;
+}
+
+h1 {
+  font-size: 30px;
+  font-weight: 500;
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+button, [type='submit'] {
+  padding: .5em 2em;
+  outline: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  pointer-events: all !important;
+}
+
+.button-tertiary {
+  color: black;
+  padding: .5em 1em;
+  margin: 0 1em;
+  border-radius: 20px;
+  font-size: 16px;
+}
+
+.button-oauth {
+  background: white;
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #888;
+}
+
+.button-oauth .oauth-logo {
+  width: 22px;
+  margin-right: 20px;
+}
+
+.accordion-arrow {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.5em;
+  transition: transform 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.accordion-arrow.open {
+  transform: rotate(180deg);
+}
+
+sup {
+  margin-left: -4px;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #888;
+  display: block;
+  margin: 2rem auto 1rem;
+  overflow: visible;
+  width: 100%;
+}
+
+hr::before {
+  background: rgb(229 231 235 / var(--tw-bg-opacity));
+  color: #888;
+  content: "or";
+  padding: 0 0.4rem;
+  position: relative;
+  top: -0.8rem;
+  left: 50%;
+}
+
+[type='text']:focus, [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus {
+  box-shadow: none;
+}

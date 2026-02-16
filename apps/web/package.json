@@ -1,0 +1,44 @@
+{
+  "name": "@pool-picks/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@pool-picks/api": "*",
+    "@pool-picks/db": "*",
+    "@pool-picks/utils": "*",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.47.0",
+    "@tanstack/react-query": "^5.62.0",
+    "@trpc/client": "^11.0.0-rc.608",
+    "@trpc/react-query": "^11.0.0-rc.608",
+    "@trpc/server": "^11.0.0-rc.608",
+    "axios": "^1.7.0",
+    "cheerio": "^1.0.0",
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-hook-form": "^7.53.0",
+    "react-hot-toast": "^2.4.1",
+    "react-select": "^5.8.0",
+    "superjson": "^2.2.1",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@pool-picks/tailwind-config": "*",
+    "@pool-picks/typescript-config": "*",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.6.0"
+  }
+}
