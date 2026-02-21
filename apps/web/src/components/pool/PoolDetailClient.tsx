@@ -20,9 +20,9 @@ interface PoolDetailClientProps {
     tournament: {
       id: number;
       name: string;
-      course: string;
-      city: string;
-      region: string;
+      course: string | null;
+      city: string | null;
+      region: string | null;
       status: string;
       cut_line: number | null;
       external_id: number | null;
@@ -104,7 +104,9 @@ export function PoolDetailClient({
           >
             <h1 className="text-lg font-bold">{pool.name}</h1>
             <p className="text-base">{pool.tournament.name}</p>
-            <p className="text-base">{pool.tournament.course}</p>
+            {pool.tournament.course && (
+              <p className="text-base">{pool.tournament.course}</p>
+            )}
             <p className="text-xs">
               ${pool.amount_entry} Ante | Total Pot: ${totalPotAmount}
             </p>

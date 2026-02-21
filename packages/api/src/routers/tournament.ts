@@ -48,6 +48,23 @@ export const tournamentRouter = router({
       });
     }),
 
+  listSelectable: protectedProcedure.query(async () => {
+    return prisma.tournament.findMany({
+      where: { end_date: { gte: new Date() } },
+      orderBy: { start_date: "asc" },
+      select: {
+        id: true,
+        name: true,
+        course: true,
+        city: true,
+        region: true,
+        start_date: true,
+        end_date: true,
+        status: true,
+      },
+    });
+  }),
+
   updateStatus: systemAdminProcedure
     .input(
       z.object({

@@ -27,7 +27,7 @@ model Tournament {
   id          Int                    @id @default(autoincrement())
   created_at  DateTime               @default(now())
   updated_at  DateTime               @updatedAt
-  name        String                 @unique
+  name        String
   start_date  DateTime               @db.Date
   end_date    DateTime               @db.Date
   course      String
@@ -35,7 +35,7 @@ model Tournament {
   region      String
   status      String                 @default("Scheduled")
   cut_line    Int?
-  external_id Int?
+  external_id Int?                   @unique
   athletes    AthletesInTournaments[]
   pools       Pool[]
 }

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { trpc } from "@/lib/trpc/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type FormValues = {
   name: string;
@@ -13,10 +13,30 @@ type FormValues = {
   tournament_id: string;
 };
 
+function formatDateRange(start: Date, end: Date): string {
+  const s = new Date(start);
+  const e = new Date(end);
+  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+  const startStr = s.toLocaleDateString("en-US", opts);
+  const endStr = e.toLocaleDateString("en-US", opts);
+  return `${startStr} - ${endStr}`;
+}
+
 export default function PoolCreatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tournamentId = searchParams?.get("tournament_id") ?? null;
+  const tournamentIdParam = searchParams?.get("tournament_id") ?? null;
+
+  const [searchText, setSearchText] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedTournament, setSelectedTournament] = useState<{
+    id: number;
+    name: string;
+    course: string;
+    start_date: Date;
+    end_date: Date;
+  } | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
@@ -26,11 +46,46 @@ export default function PoolCreatePage() {
     setValue,
   } = useForm<FormValues>();
 
+  const { data: tournaments, isLoading: tournamentsLoading } =
+    trpc.tournament.listSelectable.useQuery();
+
+  // Pre-select tournament from query param
   useEffect(() => {
-    if (tournamentId) {
-      setValue("tournament_id", tournamentId);
+    if (tournamentIdParam && tournaments) {
+      const match = tournaments.find(
+        (t) => t.id === parseInt(tournamentIdParam, 10)
+      );
+      if (match) {
+        setSelectedTournament({
+          id: match.id,
+          name: match.name,
+          course: match.course,
+          start_date: match.start_date,
+          end_date: match.end_date,
+        });
+        setSearchText(match.name);
+        setValue("tournament_id", String(match.id));
+      }
     }
-  }, [tournamentId, setValue]);
+  }, [tournamentIdParam, tournaments, setValue]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredTournaments = tournaments?.filter((t) =>
+    t.name.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const createPool = trpc.pool.create.useMutation({
     onSuccess: (data) => {
@@ -51,6 +106,19 @@ export default function PoolCreatePage() {
     });
   };
 
+  const handleSelectTournament = (tournament: NonNullable<typeof tournaments>[number]) => {
+    setSelectedTournament({
+      id: tournament.id,
+      name: tournament.name,
+      course: tournament.course,
+      start_date: tournament.start_date,
+      end_date: tournament.end_date,
+    });
+    setSearchText(tournament.name);
+    setValue("tournament_id", String(tournament.id));
+    setIsOpen(false);
+  };
+
   return (
     <div className="container mx-auto max-w-md">
       <Toaster />
@@ -59,6 +127,7 @@ export default function PoolCreatePage() {
         onSubmit={handleSubmit(onSubmit)}
       >
         <h1 className="text-3xl font-medium">Create a Pool</h1>
+
         <label className="block">
           <span className="text-white">Name</span>
           <input
@@ -69,16 +138,52 @@ export default function PoolCreatePage() {
             className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         </label>
-        <label className="block">
-          <span className="text-white">Tournament ID</span>
+
+        {/* Tournament Typeahead */}
+        <div className="block" ref={dropdownRef}>
+          <span className="text-white">Tournament</span>
+          <input type="hidden" {...register("tournament_id", { required: true })} />
           <input
-            placeholder=""
-            {...register("tournament_id", { required: true })}
-            name="tournament_id"
-            type="number"
-            className="mt-1 text-black block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            type="text"
+            placeholder={tournamentsLoading ? "Loading tournaments..." : "Search tournaments..."}
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setIsOpen(true);
+              if (selectedTournament) {
+                setSelectedTournament(null);
+                setValue("tournament_id", "");
+              }
+            }}
+            onFocus={() => setIsOpen(true)}
+            className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
-        </label>
+          {isOpen && filteredTournaments && filteredTournaments.length > 0 && (
+            <ul className="mt-1 max-h-60 overflow-y-auto rounded-md bg-grey-200 border border-grey-75 shadow-lg">
+              {filteredTournaments.map((t) => (
+                <li
+                  key={t.id}
+                  onClick={() => handleSelectTournament(t)}
+                  className={`px-3 py-2 cursor-pointer hover:bg-grey-75 ${
+                    selectedTournament?.id === t.id ? "bg-grey-75" : ""
+                  }`}
+                >
+                  <p className="font-medium">{t.name}</p>
+                  <p className="text-xs text-gray-400">
+                    {t.course} &middot;{" "}
+                    {formatDateRange(t.start_date, t.end_date)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+          {isOpen && filteredTournaments && filteredTournaments.length === 0 && searchText && (
+            <div className="mt-1 px-3 py-2 rounded-md bg-grey-200 border border-grey-75 text-gray-400 text-sm">
+              No tournaments found
+            </div>
+          )}
+        </div>
+
         <label className="block">
           <span className="text-white">Entry Amount</span>
           <input

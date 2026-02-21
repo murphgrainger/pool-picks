@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createServerCaller } from "@/lib/trpc/server";
 import { prisma } from "@pool-picks/db";
+import { SyncScheduleButton } from "@/components/admin/SyncScheduleButton";
 
 export default async function SystemAdminPage() {
   const supabase = createClient();
@@ -36,6 +37,7 @@ export default async function SystemAdminPage() {
     <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
       <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
         <h1>System Admin</h1>
+        <SyncScheduleButton />
         <div className="w-full">
           <h2 className="mb-2">Tournaments</h2>
           <ul>
