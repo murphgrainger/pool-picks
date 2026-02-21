@@ -6,6 +6,8 @@ import { Header } from "@/components/layout/Header";
 import { DevBanner } from "@/components/layout/DevBanner";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "PoolPicks",
   description: "Golf pool wagering app",

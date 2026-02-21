@@ -14,7 +14,7 @@ interface SelectValues {
 
 export default function TournamentAdminPage() {
   const params = useParams();
-  const id = Number(params.id);
+  const id = Number(params?.id);
 
   const { data: tournament, isLoading: tournamentLoading } =
     trpc.tournament.getById.useQuery({ id });

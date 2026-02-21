@@ -16,7 +16,7 @@ type FormValues = {
 export default function PoolCreatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tournamentId = searchParams.get("tournament_id");
+  const tournamentId = searchParams?.get("tournament_id") ?? null;
 
   const {
     register,
