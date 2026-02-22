@@ -1,15 +1,12 @@
 import { createServerCaller } from "@/lib/trpc/server";
 import { InviteActions } from "@/components/pool/InviteActions";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/auth";
 import { sortPoolMembersByPoolStatus } from "@pool-picks/utils";
 
 export default async function HomePage() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { email } = await getAuthUser();
 
-  if (!user?.email) return null;
+  if (!email) return null;
 
   const caller = await createServerCaller();
   const [invites, unsortedMembers] = await Promise.all([
@@ -23,7 +20,7 @@ export default async function HomePage() {
     <InviteActions
       initialInvites={invites}
       poolMembers={poolMembers}
-      userEmail={user.email}
+      userEmail={email}
     />
   );
 }
