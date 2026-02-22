@@ -1,27 +1,48 @@
 # Pool Picks
-An application that allows users to create pools, add members, pick atheletes, and win the pool.
 
-## Tech
-TypeScript
-Next.js
-GraphQL
-Prisma
-Postgresql
+A golf pool/wagering app. Users create pools for PGA tournaments, invite members, pick athletes, and compete based on real tournament scores scraped from ESPN.
 
+## Tech Stack
 
-## Migrations Flow
-This app has two database environments: local and production. Each environment has it's own database but specific scripts are yet setup to manage each separately without swapping out your `DATABASE_URL`.
+- **Monorepo:** Turborepo (packages + apps)
+- **Framework:** Next.js 14 (App Router) with TypeScript
+- **API:** tRPC (end-to-end type-safe)
+- **Database:** PostgreSQL (Supabase) via Prisma
+- **Auth:** Supabase Auth (Google OAuth + Email OTP)
+- **Styling:** Tailwind CSS
+- **Scraping:** Axios + Cheerio (ESPN leaderboard/rankings)
 
-To work in development mode:
-1. Make sure you `DATABASE_URL` is your local database.
-2. Update schema.prisma file with your changes.
-3. Run `npx prisma db push` to send the changes to the local database
-4. Run `npx prisma generate` for the client to see the changes.
+## Project Structure
 
-To match your dev work in production:
-1. Update the `DATABASE_URL` in your .env file to the production database.
-2. Run `npx prisma migrate dev` and name the migration for your work. This will push your changes to the production databse.
-3. Switch the `DATABASE_URL` in your .env back to the local database! 
+```
+packages/
+  db/             # Prisma schema + client
+  api/            # tRPC routers + middleware
+  utils/          # Scoring, formatting, sorting
+  tailwind-config/
+  typescript-config/
+apps/
+  web/            # Next.js App Router
+```
+
+## Development
+
+```bash
+yarn dev          # Start all apps
+yarn build        # Build everything
+yarn db:generate  # Regenerate Prisma client
+yarn db:migrate   # Create a new migration
+```
+
+## Database Migrations
+
+When you change `packages/db/prisma/schema.prisma`:
+
+1. Run `yarn db:migrate` to create and apply a migration locally
+2. Run `yarn db:generate` to update the Prisma client
+3. Commit the migration file
+4. Migrations run automatically on deploy via `prisma migrate deploy`
 
 ## Deployment
-Deploy directly through the CLI to Vercel
+
+Merging a PR to the `production` branch triggers a Vercel deploy. The build runs migrations automatically before building the app.
