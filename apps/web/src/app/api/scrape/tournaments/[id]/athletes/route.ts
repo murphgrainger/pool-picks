@@ -17,7 +17,7 @@ async function fetchAthleteField(id: string): Promise<Athlete[]> {
   if (!tournament || !tournament.external_id)
     throw new Error("Invalid tournament ID requested.");
 
-  const url = `${https://www.espn.com/golf/leaderboard/_/tournamentId}/${tournament.external_id}`;
+  const url = `https://www.espn.com/golf/leaderboard/_/tournamentId/${tournament.external_id}`;
   const response = await axios.get(url);
   const $ = cheerio.load(response.data);
   const athletes: Athlete[] = [];
