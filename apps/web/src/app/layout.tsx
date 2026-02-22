@@ -16,7 +16,15 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { email, isAdmin } = await getAuthUser();
+  let email: string | null = null;
+  let isAdmin = false;
+  try {
+    const auth = await getAuthUser();
+    email = auth.email;
+    isAdmin = auth.isAdmin;
+  } catch {
+    // Auth unavailable during static generation (e.g. /_not-found at build time)
+  }
 
   return (
     <html lang="en">
