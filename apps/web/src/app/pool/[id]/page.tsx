@@ -5,16 +5,17 @@ import { reformatPoolMembers } from "@pool-picks/utils";
 import { PoolDetailClient } from "@/components/pool/PoolDetailClient";
 
 interface PoolPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function PoolPage({ params }: PoolPageProps) {
+  const { id } = await params;
   const { supabaseUser } = await getAuthUser();
 
   if (!supabaseUser) redirect("/auth/sign-in");
 
   const caller = await createServerCaller();
-  const pool = await caller.pool.getById({ id: Number(params.id) });
+  const pool = await caller.pool.getById({ id: Number(id) });
 
   if (!pool) notFound();
 

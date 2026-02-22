@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@pool-picks/db";
 import { createRouteHandlerClient } from "@/lib/supabase/route";

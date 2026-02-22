@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { prisma } from "@pool-picks/db";
 import { createRouteHandlerClient } from "@/lib/supabase/route";
@@ -15,7 +17,7 @@ async function fetchAthleteField(id: string): Promise<Athlete[]> {
   if (!tournament || !tournament.external_id)
     throw new Error("Invalid tournament ID requested.");
 
-  const url = `${process.env.SCRAPE_URL}/${tournament.external_id}`;
+  const url = `https://www.espn.com/golf/leaderboard/_/tournamentId/${tournament.external_id}`;
   const response = await axios.get(url);
   const $ = cheerio.load(response.data);
   const athletes: Athlete[] = [];
@@ -73,7 +75,7 @@ async function updateAthleteField(
 
 export async function POST(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = createRouteHandlerClient();
 
@@ -92,7 +94,7 @@ export async function POST(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const id = params.id;
+  const { id } = await params;
   if (!id)
     return NextResponse.json({ message: "No ID provided" }, { status: 400 });
 

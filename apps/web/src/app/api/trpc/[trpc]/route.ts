@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter, createContext } from "@pool-picks/api";
 import { prisma } from "@pool-picks/db";
