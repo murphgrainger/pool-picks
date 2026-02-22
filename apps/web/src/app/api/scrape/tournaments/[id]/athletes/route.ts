@@ -73,7 +73,7 @@ async function updateAthleteField(
 
 export async function POST(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = createRouteHandlerClient();
 
@@ -92,7 +92,7 @@ export async function POST(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const id = params.id;
+  const { id } = await params;
   if (!id)
     return NextResponse.json({ message: "No ID provided" }, { status: 400 });
 
