@@ -72,7 +72,7 @@ export async function POST() {
   }
 
   try {
-    const url = process.env.RANKINGS_SCRAPE_URL!;
+    const url = "https://www.espn.com/golf/rankings";
     const rankings = await fetchAthleteRankings(url);
     await updateAthleteRankings(rankings);
     return NextResponse.json({ message: "Success updating athlete rankings!" });
