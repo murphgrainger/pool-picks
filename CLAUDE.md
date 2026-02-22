@@ -18,16 +18,30 @@ Pool Picks is a golf pool/wagering application. Users create pools for PGA tourn
 ## Commands
 
 - `yarn dev` — Start all apps in development (via Turborepo)
-- `yarn build` — Build all packages and apps
+- `yarn build` — Build all packages and apps (runs migrations automatically)
 - `yarn db:generate` — Regenerate Prisma client
-- `yarn db:push` — Push schema changes to database
+- `yarn db:migrate` — Create a new migration (interactive, dev only)
 
 ### From `packages/db/`:
-- `npx prisma db push` — Push schema changes
-- `npx prisma generate` — Regenerate Prisma client
 - `npx prisma migrate dev --name <name>` — Create a migration
+- `npx prisma generate` — Regenerate Prisma client
 - `npx prisma studio` — Open Prisma database browser
 - `npx prisma db seed` — Seed database
+
+## Database Migrations
+
+Migrations run automatically on deploy via the web app's build step (`prisma migrate deploy`). You should never need to manually run migrations in production.
+
+**When you change `schema.prisma`:**
+1. Edit `packages/db/prisma/schema.prisma`
+2. Run `yarn db:migrate` (or `npx prisma migrate dev --name <name>` from `packages/db/`) — this creates a migration file and applies it locally
+3. Run `yarn db:generate` to update the Prisma client
+4. Commit the migration file in `packages/db/prisma/migrations/`
+5. On deploy, `prisma migrate deploy` runs automatically before `next build`
+
+**Do not use `prisma db push` for schema changes** — it doesn't create migration files and leads to drift between environments. Use `prisma migrate dev` instead.
+
+**Environment note:** The root `.env` has `DATABASE_URL` and `DIRECT_URL`. Make sure these point to your **local** Supabase project for development, not production.
 
 ## Monorepo Structure
 
