@@ -119,3 +119,14 @@ Server Components fetch data via tRPC server caller (`lib/trpc/server.ts`). Clie
 - All code should be readable and debuggable by a human
 - Server Components by default; `'use client'` only for interactive parts
 - Strong preference for readable code over minimalistic abstractions
+
+## Git Workflow
+
+All new work should follow this branching strategy:
+
+1. Pull down the latest from `main`
+2. Create a feature branch off of `main` (e.g. `feat/my-feature`, `fix/bug-name`, `chore/cleanup-task`)
+3. Do your work on the feature branch
+4. When done, submit a PR to `main`
+
+**At the start of a new session**, before beginning any work, prompt the user: **"Pull down main and create a new feature branch?"** — unless we are already mid-session with work in progress on an existing branch.
