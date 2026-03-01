@@ -5,7 +5,10 @@ import { Spinner } from "@/components/ui/Spinner";
 
 export function SyncScheduleButton() {
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<{
+    message: string;
+    isError: boolean;
+  } | null>(null);
 
   const handleSync = async () => {
     setIsLoading(true);
@@ -16,15 +19,23 @@ export function SyncScheduleButton() {
         method: "POST",
         credentials: "include",
       });
-      const data = await res.json();
 
-      if (res.ok) {
-        setResult(data.message);
-      } else {
-        setResult(`Error: ${data.message}`);
+      if (!res.ok) {
+        const message =
+          res.status === 504
+            ? "Request timed out. The sync may have partially completed — try again to finish."
+            : `Server error (${res.status}). Please try again.`;
+        setResult({ message, isError: true });
+        return;
       }
-    } catch (error: any) {
-      setResult(`Error: ${error.message}`);
+
+      const data = await res.json();
+      setResult({ message: data.message, isError: false });
+    } catch {
+      setResult({
+        message: "Network error. Please check your connection and try again.",
+        isError: true,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -48,9 +59,9 @@ export function SyncScheduleButton() {
       </button>
       {result && (
         <p
-          className={`text-sm ${result.startsWith("Error") ? "text-red-400" : "text-green-400"}`}
+          className={`text-sm ${result.isError ? "text-red-400" : "text-green-400"}`}
         >
-          {result}
+          {result.message}
         </p>
       )}
     </div>
