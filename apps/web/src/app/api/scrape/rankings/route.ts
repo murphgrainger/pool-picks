@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 import { NextResponse } from "next/server";
 import { prisma } from "@pool-picks/db";
@@ -34,23 +35,14 @@ async function updateAthleteRankings(parsedAthletes: Athlete[]) {
     throw new Error("No athlete data available!");
   }
 
-  const chunkSize = 10;
-  for (let i = 0; i < parsedAthletes.length; i += chunkSize) {
-    const chunk = parsedAthletes.slice(i, i + chunkSize);
-    await Promise.all(
-      chunk.map(async (athlete) => {
-        const existing = await prisma.athlete.findUnique({
-          where: { full_name: athlete.full_name },
-        });
-        if (existing) {
-          await prisma.athlete.update({
-            where: { full_name: existing.full_name },
-            data: { ranking: athlete.ranking },
-          });
-        }
+  await Promise.all(
+    parsedAthletes.map((athlete) =>
+      prisma.athlete.updateMany({
+        where: { full_name: athlete.full_name },
+        data: { ranking: athlete.ranking },
       })
-    );
-  }
+    )
+  );
 }
 
 export async function POST() {

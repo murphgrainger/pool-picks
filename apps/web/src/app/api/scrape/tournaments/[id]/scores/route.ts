@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 import { NextResponse } from "next/server";
 import { prisma } from "@pool-picks/db";
@@ -168,58 +169,43 @@ async function updateGolfData(
   if (!parsedAthleteData.length)
     throw new Error("No data available for this tournament!");
 
-  const chunkSize = 10;
-  for (let i = 0; i < parsedAthleteData.length; i += chunkSize) {
-    const chunk = parsedAthleteData.slice(i, i + chunkSize);
-    await Promise.all(
-      chunk.map(async ({ athlete, athleteInTournament }) => {
-        let existingAthlete = await prisma.athlete.findUnique({
-          where: { full_name: athlete.full_name },
-        });
+  await Promise.all(
+    parsedAthleteData.map(async ({ athlete, athleteInTournament }) => {
+      const existingAthlete = await prisma.athlete.upsert({
+        where: { full_name: athlete.full_name },
+        create: { full_name: athlete.full_name },
+        update: {},
+      });
 
-        if (!existingAthlete) {
-          existingAthlete = await prisma.athlete.create({
-            data: { full_name: athlete.full_name },
-          });
-        }
+      const scoreData = {
+        score_round_one: athleteInTournament.score_round_one as number | null,
+        score_round_two: athleteInTournament.score_round_two as number | null,
+        score_round_three: athleteInTournament.score_round_three as number | null,
+        score_round_four: athleteInTournament.score_round_four as number | null,
+        score_sum: athleteInTournament.score_sum as number | null,
+        score_under_par: athleteInTournament.score_under_par as number | null,
+        score_today: athleteInTournament.score_today as number | null,
+        position: athleteInTournament.position as number | null,
+        thru: athleteInTournament.thru as string | null,
+        status: athleteInTournament.status as string,
+      };
 
-        await prisma.athletesInTournaments.upsert({
-          where: {
-            tournament_id_athlete_id: {
-              tournament_id: tournamentId,
-              athlete_id: existingAthlete.id,
-            },
-          },
-          create: {
+      await prisma.athletesInTournaments.upsert({
+        where: {
+          tournament_id_athlete_id: {
             tournament_id: tournamentId,
             athlete_id: existingAthlete.id,
-            score_round_one: athleteInTournament.score_round_one as number | null,
-            score_round_two: athleteInTournament.score_round_two as number | null,
-            score_round_three: athleteInTournament.score_round_three as number | null,
-            score_round_four: athleteInTournament.score_round_four as number | null,
-            score_sum: athleteInTournament.score_sum as number | null,
-            score_under_par: athleteInTournament.score_under_par as number | null,
-            score_today: athleteInTournament.score_today as number | null,
-            position: athleteInTournament.position as number | null,
-            thru: athleteInTournament.thru as string | null,
-            status: athleteInTournament.status as string,
           },
-          update: {
-            score_round_one: athleteInTournament.score_round_one as number | null,
-            score_round_two: athleteInTournament.score_round_two as number | null,
-            score_round_three: athleteInTournament.score_round_three as number | null,
-            score_round_four: athleteInTournament.score_round_four as number | null,
-            score_under_par: athleteInTournament.score_under_par as number | null,
-            score_sum: athleteInTournament.score_sum as number | null,
-            score_today: athleteInTournament.score_today as number | null,
-            position: athleteInTournament.position as number | null,
-            thru: athleteInTournament.thru as string | null,
-            status: athleteInTournament.status as string,
-          },
-        });
-      })
-    );
-  }
+        },
+        create: {
+          tournament_id: tournamentId,
+          athlete_id: existingAthlete.id,
+          ...scoreData,
+        },
+        update: scoreData,
+      });
+    })
+  );
 
   if (parsedTournamentData?.cut_line) {
     await prisma.tournament.update({
