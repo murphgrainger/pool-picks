@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@pool-picks/db";
@@ -135,18 +136,11 @@ function parseDateRange(
 }
 
 async function upsertTournaments(tournaments: ParsedTournament[]) {
-  let created = 0;
-  let updated = 0;
-
-  for (const t of tournaments) {
-    const existing = await prisma.tournament.findFirst({
-      where: { external_id: t.external_id },
-    });
-
-    if (existing) {
-      await prisma.tournament.update({
-        where: { id: existing.id },
-        data: {
+  const results = await Promise.all(
+    tournaments.map((t) =>
+      prisma.tournament.upsert({
+        where: { external_id: t.external_id },
+        update: {
           name: t.name,
           course: t.course,
           city: t.city,
@@ -154,11 +148,7 @@ async function upsertTournaments(tournaments: ParsedTournament[]) {
           start_date: t.start_date,
           end_date: t.end_date,
         },
-      });
-      updated++;
-    } else {
-      await prisma.tournament.create({
-        data: {
+        create: {
           name: t.name,
           external_id: t.external_id,
           course: t.course,
@@ -168,12 +158,11 @@ async function upsertTournaments(tournaments: ParsedTournament[]) {
           end_date: t.end_date,
           status: "Scheduled",
         },
-      });
-      created++;
-    }
-  }
+      })
+    )
+  );
 
-  return { created, updated, total: tournaments.length };
+  return { total: results.length };
 }
 
 export async function POST(request: NextRequest) {
@@ -218,7 +207,7 @@ export async function POST(request: NextRequest) {
 
     const result = await upsertTournaments(tournaments);
     return NextResponse.json({
-      message: `Synced ${result.total} tournaments (${result.created} created, ${result.updated} updated)`,
+      message: `Synced ${result.total} tournaments`,
       ...result,
     });
   } catch (error: any) {

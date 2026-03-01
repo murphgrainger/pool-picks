@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 import { NextResponse } from "next/server";
 import { prisma } from "@pool-picks/db";
@@ -40,37 +41,29 @@ async function updateAthleteField(
     throw new Error("No athlete data available for this tournament!");
   }
 
-  const chunkSize = 10;
-  for (let i = 0; i < parsedAthletes.length; i += chunkSize) {
-    const chunk = parsedAthletes.slice(i, i + chunkSize);
-    await Promise.all(
-      chunk.map(async (athlete) => {
-        let existingAthlete = await prisma.athlete.findUnique({
-          where: { full_name: athlete.full_name },
-        });
+  await Promise.all(
+    parsedAthletes.map(async (athlete) => {
+      const existingAthlete = await prisma.athlete.upsert({
+        where: { full_name: athlete.full_name },
+        create: { full_name: athlete.full_name },
+        update: {},
+      });
 
-        if (!existingAthlete) {
-          existingAthlete = await prisma.athlete.create({
-            data: { full_name: athlete.full_name },
-          });
-        }
-
-        await prisma.athletesInTournaments.upsert({
-          where: {
-            tournament_id_athlete_id: {
-              tournament_id: tournamentId,
-              athlete_id: existingAthlete.id,
-            },
-          },
-          create: {
+      await prisma.athletesInTournaments.upsert({
+        where: {
+          tournament_id_athlete_id: {
             tournament_id: tournamentId,
             athlete_id: existingAthlete.id,
           },
-          update: {},
-        });
-      })
-    );
-  }
+        },
+        create: {
+          tournament_id: tournamentId,
+          athlete_id: existingAthlete.id,
+        },
+        update: {},
+      });
+    })
+  );
 }
 
 export async function POST(

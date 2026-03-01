@@ -29,6 +29,10 @@ export default function TournamentAdminPage() {
   const [isScraping, setIsScraping] = useState(false);
   const [loadingButtonId, setLoadingButtonId] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string>("");
+  const [scrapeResult, setScrapeResult] = useState<{
+    message: string;
+    isError: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (tournament) {
@@ -66,9 +70,18 @@ export default function TournamentAdminPage() {
     label: el,
   }));
 
+  const scrapeLabels: Record<string, string> = {
+    athletes: "athlete field",
+    rankings: "rankings",
+    scores: "scores",
+  };
+
   const updateData = async (scrapeRoute: string) => {
     setIsScraping(true);
     setLoadingButtonId(scrapeRoute);
+    setScrapeResult(null);
+
+    const label = scrapeLabels[scrapeRoute] || scrapeRoute;
 
     try {
       const url =
@@ -83,13 +96,25 @@ export default function TournamentAdminPage() {
       });
 
       if (!response.ok) {
-        const { message } = await response.json();
-        throw new Error(message);
+        const message =
+          response.status === 504
+            ? `Timed out updating ${label}. It may have partially completed — try again.`
+            : `Failed to update ${label} (${response.status}). Please try again.`;
+        setScrapeResult({ message, isError: true });
+        return;
       }
 
+      const data = await response.json();
+      setScrapeResult({
+        message: data.message || `Successfully updated ${label}!`,
+        isError: false,
+      });
       setUpdatedAt(formattedDate(new Date()));
-    } catch (error) {
-      console.error(error);
+    } catch {
+      setScrapeResult({
+        message: `Network error updating ${label}. Please check your connection and try again.`,
+        isError: true,
+      });
     } finally {
       setIsScraping(false);
       setLoadingButtonId(null);
@@ -148,6 +173,13 @@ export default function TournamentAdminPage() {
                     ? "Updating..."
                     : "Update Scores"}
                 </button>
+                {scrapeResult && (
+                  <p
+                    className={`text-sm mt-2 text-center ${scrapeResult.isError ? "text-red-400" : "text-green-400"}`}
+                  >
+                    {scrapeResult.message}
+                  </p>
+                )}
               </div>
             )}
           </div>
