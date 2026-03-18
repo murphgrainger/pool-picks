@@ -189,13 +189,13 @@ export function InviteActions({
           <div className="-mx-6 w-[calc(100%+3rem)] mb-6 overflow-hidden">
             <button
               onClick={() => setCompletedOpen(!completedOpen)}
-              className="w-full flex items-center justify-between px-6 py-3 text-left bg-grey-200 hover:bg-grey-75 transition-colors"
+              className="group w-full flex items-center justify-between px-6 py-3 text-left bg-grey-200"
             >
-              <h4 className="text-xs uppercase tracking-wider text-grey-50">
+              <h4 className="text-xs uppercase tracking-wider text-grey-75">
                 Completed ({completedPools.length})
               </h4>
               <svg
-                className={`w-4 h-4 text-grey-50 transform transition-transform ${completedOpen ? "" : "rotate-180"}`}
+                className={`w-4 h-4 transition-transform transform group-hover:text-white ${completedOpen ? "text-white" : "text-grey-75 rotate-180"}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
