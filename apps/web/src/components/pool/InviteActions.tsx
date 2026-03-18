@@ -34,6 +34,26 @@ interface InviteActionsProps {
   userEmail: string;
 }
 
+const STATUS_GROUP_ORDER = ["Active", "Locked", "Open", "Setup"] as const;
+
+const STATUS_LABELS: Record<string, string> = {
+  Active: "Active",
+  Locked: "Locked",
+  Open: "Open",
+  Setup: "Setup",
+  Complete: "Completed",
+};
+
+function groupPoolsByStatus(pools: PoolMembership[]) {
+  const groups: Record<string, PoolMembership[]> = {};
+  for (const member of pools) {
+    const status = member.pool.status;
+    if (!groups[status]) groups[status] = [];
+    groups[status].push(member);
+  }
+  return groups;
+}
+
 export function InviteActions({
   initialInvites,
   poolMembers,
@@ -41,6 +61,7 @@ export function InviteActions({
 }: InviteActionsProps) {
   const [poolInvites, setPoolInvites] = useState(initialInvites);
   const [loadingButtonId, setLoadingButtonId] = useState<string | null>(null);
+  const [completedOpen, setCompletedOpen] = useState(false);
   const router = useRouter();
 
   const updateInviteStatus = trpc.poolInvite.updateStatus.useMutation({
@@ -59,10 +80,7 @@ export function InviteActions({
     },
   });
 
-  const handleInvite = (
-    invite: Invite,
-    status: string
-  ) => {
+  const handleInvite = (invite: Invite, status: string) => {
     const buttonId = `${invite.id}-${status === "Accepted" ? "accept" : "reject"}`;
     setLoadingButtonId(buttonId);
     updateInviteStatus.mutate({
@@ -74,15 +92,26 @@ export function InviteActions({
     });
   };
 
+  const grouped = groupPoolsByStatus(poolMembers);
+  const completedPools = grouped["Complete"] || [];
+  const hasActivePools = STATUS_GROUP_ORDER.some(
+    (s) => grouped[s] && grouped[s].length > 0
+  );
+
   return (
     <div className="container max-w-xl mx-auto flex flex-wrap items-center flex-col bg-black">
-      <div className="w-full p-6 rounded bg-grey-100 text-white text-xs">
-        <p className="text-center font-bold">PoolPicks</p>
-        <p className="text-center">
-          Create a pool or accept an invitation to get started.
-        </p>
-      </div>
       <div className="flex flex-col justify-center items-center flex-wrap rounded bg-grey-200 w-full mt-4 pt-8 px-6 text-white">
+        {/* Create a Pool — top */}
+        <div className="w-full flex justify-center pb-6">
+          <Link
+            href="/pool/create"
+            className="rounded bg-green-500 text-black font-medium px-6 py-2 hover:bg-green-300"
+          >
+            Create a Pool
+          </Link>
+        </div>
+
+        {/* Pending Invites */}
         {poolInvites.map((invite) => (
           <div
             className="p-4 bg-yellow w-full rounded mb-6 text-black"
@@ -126,41 +155,93 @@ export function InviteActions({
           </div>
         ))}
 
-        {!poolMembers.length && !poolInvites.length && (
+        {/* Empty state */}
+        {!hasActivePools && !poolInvites.length && !completedPools.length && (
           <p className="text-center pb-8">
-            You currently aren't in any active pools. Create one or ask a
+            You currently aren&apos;t in any active pools. Create one or ask a
             commissioner to invite you!
           </p>
         )}
 
-        {poolMembers.map((member) => (
-          <div
-            className="p-4 mb-6 bg-grey-100 w-full rounded"
-            key={member.id}
-          >
-            <div className="text-center">
-              <h3 className="mb-2">{member.pool.name}</h3>
-              <p className="mb-4">{member.pool.status}</p>
-              <div className="flex flex-wrap justify-center">
-                <Link
-                  href={`/pool/${member.pool.id}`}
-                  className="rounded bg-grey-200 hover:bg-yellow hover:text-black px-4 py-2"
+        {/* Pool groups by status */}
+        {STATUS_GROUP_ORDER.map((status) => {
+          const pools = grouped[status];
+          if (!pools || pools.length === 0) return null;
+          return (
+            <div key={status} className="w-full mb-2">
+              <h4 className="text-grey-75 text-xs uppercase tracking-wider mb-3">
+                {STATUS_LABELS[status]}
+              </h4>
+              {pools.map((member) => (
+                <div
+                  className="p-4 mb-4 bg-grey-100 w-full rounded"
+                  key={member.id}
                 >
-                  Go To Pool
-                </Link>
-              </div>
+                  <div className="text-center">
+                    <h3 className="mb-2">{member.pool.name}</h3>
+                    <div className="flex flex-wrap justify-center">
+                      <Link
+                        href={`/pool/${member.pool.id}`}
+                        className="rounded bg-grey-200 hover:bg-yellow hover:text-black px-4 py-2"
+                      >
+                        Go To Pool
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        ))}
+          );
+        })}
 
-        <div className="w-full flex justify-center pb-6">
-          <Link
-            href="/pool/create"
-            className="rounded bg-green-500 text-black font-medium px-6 py-2 hover:bg-green-300"
-          >
-            Create a Pool
-          </Link>
-        </div>
+        {/* Completed pools accordion */}
+        {completedPools.length > 0 && (
+          <div className="-mx-6 w-[calc(100%+3rem)] mb-6 overflow-hidden">
+            <button
+              onClick={() => setCompletedOpen(!completedOpen)}
+              className="w-full flex items-center justify-between px-6 py-3 text-left bg-grey-200 hover:bg-grey-75 transition-colors"
+            >
+              <h4 className="text-xs uppercase tracking-wider text-grey-50">
+                Completed ({completedPools.length})
+              </h4>
+              <svg
+                className={`w-4 h-4 text-grey-50 transform transition-transform ${completedOpen ? "" : "rotate-180"}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            {completedOpen && (
+              <div className="bg-grey-200 px-6 pb-4 pt-2">
+                {completedPools.map((member, index) => (
+                  <div
+                    className={`p-4 bg-grey-100 w-full rounded ${index < completedPools.length - 1 ? "mb-4" : ""}`}
+                    key={member.id}
+                  >
+                    <div className="text-center">
+                      <h3 className="mb-2">{member.pool.name}</h3>
+                      <div className="flex flex-wrap justify-center">
+                        <Link
+                          href={`/pool/${member.pool.id}`}
+                          className="rounded bg-grey-200 hover:bg-yellow hover:text-black px-4 py-2"
+                        >
+                          Go To Pool
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
