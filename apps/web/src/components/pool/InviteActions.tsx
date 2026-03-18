@@ -101,16 +101,6 @@ export function InviteActions({
   return (
     <div className="container max-w-xl mx-auto flex flex-wrap items-center flex-col bg-black">
       <div className="flex flex-col justify-center items-center flex-wrap rounded bg-grey-200 w-full mt-4 pt-8 px-6 text-white">
-        {/* Create a Pool — top */}
-        <div className="w-full flex justify-center pb-6">
-          <Link
-            href="/pool/create"
-            className="rounded bg-green-500 text-black font-medium px-6 py-2 hover:bg-green-300"
-          >
-            Create a Pool
-          </Link>
-        </div>
-
         {/* Pending Invites */}
         {poolInvites.map((invite) => (
           <div
