@@ -5,6 +5,7 @@ import {
   protectedProcedure,
   commissionerProcedure,
 } from "../trpc";
+import { sendPoolInviteEmail } from "../lib/email";
 
 export const poolInviteRouter = router({
   list: protectedProcedure.query(async () => {
@@ -41,14 +42,73 @@ export const poolInviteRouter = router({
         nickname: z.string().min(1),
       })
     )
-    .mutation(async ({ input }) => {
-      return prisma.poolInvite.create({
+    .mutation(async ({ input, ctx }) => {
+      const invite = await prisma.poolInvite.create({
         data: {
           email: input.email,
           nickname: input.nickname,
           pool: { connect: { id: input.pool_id } },
         },
       });
+
+      // Send invite email (non-blocking — invite is saved even if email fails)
+      let emailSent = false;
+      const pool = await prisma.pool.findUnique({
+        where: { id: input.pool_id },
+        select: { name: true },
+      });
+
+      if (pool) {
+        const result = await sendPoolInviteEmail({
+          to: input.email,
+          poolName: pool.name,
+          inviterEmail: ctx.user.email,
+          appBaseUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        });
+        emailSent = result.success;
+        if (!result.success) {
+          console.error(
+            `Failed to send invite email to ${input.email}:`,
+            result.error
+          );
+        }
+      }
+
+      return { ...invite, emailSent };
+    }),
+
+  pastEmails: commissionerProcedure
+    .input(
+      z.object({
+        pool_id: z.number(),
+      })
+    )
+    .query(async ({ ctx }) => {
+      // Find all pools where this user is commissioner
+      const commissionerPools = await prisma.poolMember.findMany({
+        where: {
+          user_id: ctx.user.id,
+          role: "COMMISSIONER",
+        },
+        select: { pool_id: true },
+      });
+
+      const poolIds = commissionerPools.map((p) => p.pool_id);
+
+      // Get distinct emails from all invites across commissioner's pools
+      const invites = await prisma.poolInvite.findMany({
+        where: {
+          pool_id: { in: poolIds },
+        },
+        select: {
+          email: true,
+          nickname: true,
+        },
+        distinct: ["email"],
+        orderBy: { created_at: "desc" },
+      });
+
+      return invites;
     }),
 
   updateStatus: protectedProcedure
