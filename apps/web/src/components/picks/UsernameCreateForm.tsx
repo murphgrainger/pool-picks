@@ -42,7 +42,6 @@ export function UsernameCreateForm({
 
   return (
     <div className="w-full mt-6">
-      <Toaster />
       <form
         onSubmit={handleSubmit(handleFormSubmit)}
         className="grid grid-cols-1 gap-y-3 p-4 rounded-lg bg-grey-100 mb-2"
@@ -58,6 +57,9 @@ export function UsernameCreateForm({
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-black"
           />
         </label>
+        <div className="relative">
+          <Toaster containerStyle={{ position: "absolute" }} />
+        </div>
         <button
           disabled={updateUsername.isPending}
           type="submit"

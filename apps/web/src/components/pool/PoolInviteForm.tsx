@@ -38,8 +38,8 @@ export function PoolInviteForm({ poolId, onInviteCreated }: PoolInviteFormProps)
         toast.success("Invite created! Email could not be sent.");
       }
     },
-    onError: () => {
-      toast.error("Error creating invite");
+    onError: (err) => {
+      toast.error(err.message === "User already invited" ? err.message : "Error creating invite");
     },
   });
 
@@ -92,7 +92,6 @@ export function PoolInviteForm({ poolId, onInviteCreated }: PoolInviteFormProps)
 
   return (
     <div className="w-full bg-grey-100 rounded p-4 mt-4">
-      <Toaster />
       <h3 className="text-lg font-bold mb-4">Create Pool Invite</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
@@ -143,6 +142,9 @@ export function PoolInviteForm({ poolId, onInviteCreated }: PoolInviteFormProps)
             className="w-full rounded p-2 text-black"
             placeholder="Enter nickname"
           />
+        </div>
+        <div className="relative">
+          <Toaster containerStyle={{ position: "absolute" }} />
         </div>
         <button
           type="submit"

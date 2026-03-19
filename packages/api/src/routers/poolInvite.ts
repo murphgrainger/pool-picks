@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "@pool-picks/db";
 import {
@@ -43,6 +44,20 @@ export const poolInviteRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const existing = await prisma.poolInvite.findFirst({
+        where: {
+          pool_id: input.pool_id,
+          email: input.email,
+        },
+      });
+
+      if (existing) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "User already invited",
+        });
+      }
+
       const invite = await prisma.poolInvite.create({
         data: {
           email: input.email,

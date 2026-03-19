@@ -121,7 +121,6 @@ export default function PoolCreatePage() {
 
   return (
     <div className="container mx-auto max-w-md">
-      <Toaster />
       <form
         className="grid grid-cols-1 gap-y-4 shadow-lg p-8 rounded-lg bg-grey-100 text-white"
         onSubmit={handleSubmit(onSubmit)}
@@ -195,6 +194,9 @@ export default function PoolCreatePage() {
           />
         </label>
 
+        <div className="relative">
+          <Toaster containerStyle={{ position: "absolute" }} />
+        </div>
         <button
           disabled={createPool.isPending}
           type="submit"
