@@ -18,7 +18,10 @@ export const poolInviteRouter = router({
       where: {
         email: ctx.user.email,
         status: "Invited",
-        pool: { status: { in: ["Open", "Setup"] } },
+        pool: {
+          status: { in: ["Open", "Setup"] },
+          tournament: { end_date: { gte: new Date() } },
+        },
       },
       select: {
         id: true,
@@ -70,14 +73,30 @@ export const poolInviteRouter = router({
       let emailSent = false;
       const pool = await prisma.pool.findUnique({
         where: { id: input.pool_id },
-        select: { name: true },
+        select: {
+          name: true,
+          tournament: {
+            select: { name: true, start_date: true, end_date: true },
+          },
+        },
       });
 
       if (pool) {
+        const startStr = pool.tournament.start_date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        const endStr = pool.tournament.end_date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+
         const result = await sendPoolInviteEmail({
           to: input.email,
           poolName: pool.name,
-          inviterEmail: ctx.user.email,
+          tournamentName: pool.tournament.name,
+          tournamentDates: `${startStr} – ${endStr}`,
           appBaseUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
         });
         emailSent = result.success;
