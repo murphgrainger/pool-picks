@@ -45,7 +45,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const magicLink = data.properties.action_link;
+    // Build our own magic link using the hashed_token so we can verify it
+    // server-side. Using action_link directly fails because PKCE code verifier
+    // is never stored in the user's browser.
+    const tokenHash = data.properties.hashed_token;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const magicLink = `${appUrl}/auth/callback?token_hash=${tokenHash}&type=magiclink`;
 
     const result = await sendAuthEmail({ to: email, magicLink });
 
