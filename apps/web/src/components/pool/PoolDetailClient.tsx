@@ -162,6 +162,7 @@ export function PoolDetailClient({
           <PoolAdminPanel
             poolId={pool.id}
             currentStatus={poolStatus}
+            existingInviteEmails={poolInvites.map((i) => i.email)}
             onInviteCreated={handleNewInvite}
           />
         )}

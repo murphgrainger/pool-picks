@@ -31,18 +31,22 @@ export default function SignInPage() {
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const res = await fetch("/api/auth/send-magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      setEmailSent(true);
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Failed to send sign-in email");
+      } else {
+        setEmailSent(true);
+      }
+    } catch {
+      setError("Failed to send sign-in email");
+    } finally {
       setLoading(false);
     }
   };

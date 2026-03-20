@@ -7,6 +7,7 @@ import { Spinner } from "@/components/ui/Spinner";
 
 interface PoolInviteFormProps {
   poolId: number;
+  existingInviteEmails: string[];
   onInviteCreated: (invite: {
     id: number;
     email: string;
@@ -15,7 +16,11 @@ interface PoolInviteFormProps {
   }) => void;
 }
 
-export function PoolInviteForm({ poolId, onInviteCreated }: PoolInviteFormProps) {
+export function PoolInviteForm({
+  poolId,
+  existingInviteEmails,
+  onInviteCreated,
+}: PoolInviteFormProps) {
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -46,17 +51,24 @@ export function PoolInviteForm({ poolId, onInviteCreated }: PoolInviteFormProps)
   const filteredSuggestions = useMemo(() => {
     if (!pastEmails || email.length < 1) return [];
     const lower = email.toLowerCase();
-    return pastEmails.filter(
-      (p) =>
-        p.email.toLowerCase().includes(lower) ||
-        p.nickname.toLowerCase().includes(lower)
-    );
-  }, [pastEmails, email]);
+    return pastEmails
+      .filter(
+        (p) =>
+          p.email.toLowerCase().includes(lower) ||
+          p.nickname.toLowerCase().includes(lower)
+      )
+      .map((p) => ({
+        ...p,
+        alreadyInvited: existingInviteEmails.includes(p.email),
+      }));
+  }, [pastEmails, email, existingInviteEmails]);
 
   const handleSelectSuggestion = (suggestion: {
     email: string;
     nickname: string;
+    alreadyInvited: boolean;
   }) => {
+    if (suggestion.alreadyInvited) return;
     setEmail(suggestion.email);
     setNickname(suggestion.nickname);
     setShowSuggestions(false);
@@ -78,7 +90,10 @@ export function PoolInviteForm({ poolId, onInviteCreated }: PoolInviteFormProps)
       );
     } else if (e.key === "Enter" && highlightedIndex >= 0) {
       e.preventDefault();
-      handleSelectSuggestion(filteredSuggestions[highlightedIndex]);
+      const selected = filteredSuggestions[highlightedIndex];
+      if (!selected.alreadyInvited) {
+        handleSelectSuggestion(selected);
+      }
     } else if (e.key === "Escape") {
       setShowSuggestions(false);
       setHighlightedIndex(-1);
@@ -119,14 +134,20 @@ export function PoolInviteForm({ poolId, onInviteCreated }: PoolInviteFormProps)
                 <li
                   key={s.email}
                   onMouseDown={() => handleSelectSuggestion(s)}
-                  className={`px-3 py-2 cursor-pointer text-sm ${
-                    i === highlightedIndex
-                      ? "bg-green-100 text-black"
-                      : "text-black hover:bg-gray-100"
+                  className={`px-3 py-2 text-sm ${
+                    s.alreadyInvited
+                      ? "text-gray-400 cursor-not-allowed"
+                      : i === highlightedIndex
+                        ? "bg-green-100 text-black cursor-pointer"
+                        : "text-black hover:bg-gray-100 cursor-pointer"
                   }`}
                 >
-                  <span className="font-medium">{s.email}</span>
-                  <span className="text-gray-500 ml-2">({s.nickname})</span>
+                  <span className={s.alreadyInvited ? "font-normal" : "font-medium"}>
+                    {s.email}
+                  </span>
+                  <span className={s.alreadyInvited ? "text-gray-400 ml-2" : "text-gray-500 ml-2"}>
+                    ({s.alreadyInvited ? "already invited" : s.nickname})
+                  </span>
                 </li>
               ))}
             </ul>

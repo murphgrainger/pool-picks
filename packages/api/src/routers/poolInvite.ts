@@ -18,7 +18,7 @@ export const poolInviteRouter = router({
       where: {
         email: ctx.user.email,
         status: "Invited",
-        pool: { status: "Open" },
+        pool: { status: { in: ["Open", "Setup"] } },
       },
       select: {
         id: true,
