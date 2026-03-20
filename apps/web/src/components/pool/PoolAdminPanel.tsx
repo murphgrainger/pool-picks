@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Select from "react-select";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { trpc } from "@/lib/trpc/client";
 import { PoolInviteForm } from "./PoolInviteForm";
 import { Spinner } from "@/components/ui/Spinner";
@@ -83,9 +83,6 @@ export function PoolAdminPanel({
           isDisabled={updatePool.isPending}
           className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 color-black"
         />
-        <div className="relative">
-          <Toaster containerStyle={{ position: "absolute" }} />
-        </div>
         {selectedOption.value === "Setup" && (
           <div className="mt-8">
             <PoolInviteForm

@@ -2,7 +2,7 @@
 
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { trpc } from "@/lib/trpc/client";
 import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useRef, useState } from "react";
@@ -194,9 +194,6 @@ export default function PoolCreatePage() {
           />
         </label>
 
-        <div className="relative">
-          <Toaster containerStyle={{ position: "absolute" }} />
-        </div>
         <button
           disabled={createPool.isPending}
           type="submit"

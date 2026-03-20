@@ -3,6 +3,7 @@ import { getAuthUser } from "@/lib/supabase/auth";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import { Header } from "@/components/layout/Header";
 import { DevBanner } from "@/components/layout/DevBanner";
+import { GlobalToaster } from "@/components/ui/GlobalToaster";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default async function RootLayout({
         <TRPCProvider>
           <DevBanner />
           <Header userEmail={email} isAdmin={isAdmin} />
+          <GlobalToaster />
           <div className="component-root">{children}</div>
           <footer className="p-10 bg-green-500 mt-10"></footer>
         </TRPCProvider>

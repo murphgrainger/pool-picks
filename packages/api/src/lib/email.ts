@@ -67,25 +67,29 @@ function buildButton(href: string, label: string): string {
 interface SendPoolInviteEmailParams {
   to: string;
   poolName: string;
-  inviterEmail: string;
+  tournamentName: string;
+  tournamentDates: string;
   appBaseUrl: string;
 }
 
 export async function sendPoolInviteEmail({
   to,
   poolName,
-  inviterEmail,
+  tournamentName,
+  tournamentDates,
   appBaseUrl,
 }: SendPoolInviteEmailParams): Promise<{ success: boolean; error?: string }> {
   const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
   const content = `
-<h2 style="margin:0 0 16px;color:#181818;font-size:20px;">You're invited!</h2>
 <p style="margin:0 0 8px;color:#333333;font-size:16px;line-height:1.5;">
-  <strong>${inviterEmail}</strong> has invited you to join
+  You have been invited to join the following pool:
 </p>
-<p style="margin:0 0 24px;color:#181818;font-size:20px;font-weight:bold;">
+<p style="margin:0 0 4px;color:#181818;font-size:20px;font-weight:bold;">
   ${poolName}
+</p>
+<p style="margin:0 0 24px;color:#777777;font-size:13px;line-height:1.4;">
+  ${tournamentName} &middot; ${tournamentDates}
 </p>
 <p style="margin:0 0 32px;color:#555555;font-size:14px;line-height:1.5;">
   Sign in to Pool Picks to accept or decline this invitation.
