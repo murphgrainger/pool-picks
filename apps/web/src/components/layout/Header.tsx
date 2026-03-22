@@ -19,6 +19,8 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
 
   const handleSignOut = async () => {
     setLoading(true);
+    // Sign out server-side first to properly clear cookies
+    await fetch("/api/auth/sign-out", { method: "POST" });
     await supabase.auth.signOut();
     router.push("/auth/sign-in");
     router.refresh();
