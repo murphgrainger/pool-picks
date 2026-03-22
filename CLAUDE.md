@@ -130,3 +130,5 @@ All new work should follow this branching strategy:
 4. When done, submit a PR to `main`
 
 **At the start of a new session**, before beginning any work, prompt the user: **"Pull down main and create a new feature branch?"** — unless we are already mid-session with work in progress on an existing branch.
+
+**Commit early, commit often.** After completing each discrete feature, bug fix, or logical unit of work, check in with the user to commit. Don't bundle unrelated changes into a single commit.
