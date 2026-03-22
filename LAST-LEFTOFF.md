@@ -21,9 +21,6 @@
 
 ### What still needs to happen
 
-- Test the Resend auth email flow end-to-end (requires `SUPABASE_SERVICE_ROLE_KEY` to be set) (doesn't work)
-- Verify email template rendering across email clients (done)
-- the pool invite success toast is showing twice - once under the pool status and once under the create invite button. i just want it once under the invite button. be thoughtful of how this adjustment affects other toast implementation and make sure those implementations make sense.
-- update the pool invite template to be in "You have been invited to join the following pool:" instead of the email has invited you to join. remove the "You're invited!". add in smaller text underneath the pool name the tournament name and the dates of the tournament
-- when typing in a pool invite email it should only show emails that start with the same letters typed. right now if i type "s" it is showing the list of everyone already invited (and maybe would show others invited to other pools but i don't have a lot of test data so i'm not sure)
-- the magic link email looks great but it didn't work. the auth didn't work.
+- don't allow duplicate pool invite nicknames
+- don't allow pool members to update nicknames to not be unique
+- when creating a pool and it redirects to the pool - load the pool page with the commissioner panel open when redirecting after creation

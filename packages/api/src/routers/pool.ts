@@ -124,8 +124,9 @@ export const poolRouter = router({
     .input(
       z.object({
         name: z.string().min(1),
-        amount_entry: z.number().int().min(0),
+        amount_entry: z.number().min(0),
         tournament_id: z.number().int(),
+        username: z.string().min(1),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -143,6 +144,7 @@ export const poolRouter = router({
           pool: { connect: { id: pool.id } },
           user: { connect: { id: ctx.user.id } },
           role: "COMMISSIONER",
+          username: input.username,
         },
       });
 
