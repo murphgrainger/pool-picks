@@ -88,16 +88,19 @@ export default function PoolCreatePage() {
     t.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   const createPool = trpc.pool.create.useMutation({
     onSuccess: (data) => {
-      toast.success("Pool created!");
+      setIsRedirecting(true);
       router.push(`/pool/${data.id}`);
-      reset();
     },
     onError: (error) => {
       toast.error(`Something went wrong: ${error.message}`);
     },
   });
+
+  const isLoading = createPool.isPending || isRedirecting;
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     createPool.mutate({
@@ -227,11 +230,11 @@ export default function PoolCreatePage() {
           <Toaster containerStyle={{ position: "absolute" }} />
         </div>
         <button
-          disabled={createPool.isPending}
+          disabled={isLoading}
           type="submit"
           className="my-4 capitalize bg-green-500 text-black font-medium py-2 px-4 rounded-md hover:bg-green-600"
         >
-          {createPool.isPending ? (
+          {isLoading ? (
             <span className="flex items-center justify-center">
               <Spinner className="w-6 h-6 mr-1" />
               Creating...
