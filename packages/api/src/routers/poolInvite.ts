@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "@pool-picks/db";
 import {
@@ -5,6 +6,7 @@ import {
   protectedProcedure,
   commissionerProcedure,
 } from "../trpc";
+import { sendPoolInviteEmail } from "../lib/email";
 
 export const poolInviteRouter = router({
   list: protectedProcedure.query(async () => {
@@ -16,7 +18,10 @@ export const poolInviteRouter = router({
       where: {
         email: ctx.user.email,
         status: "Invited",
-        pool: { status: "Open" },
+        pool: {
+          status: { in: ["Open", "Setup"] },
+          tournament: { end_date: { gte: new Date() } },
+        },
       },
       select: {
         id: true,
@@ -41,14 +46,128 @@ export const poolInviteRouter = router({
         nickname: z.string().min(1),
       })
     )
-    .mutation(async ({ input }) => {
-      return prisma.poolInvite.create({
+    .mutation(async ({ input, ctx }) => {
+      const existing = await prisma.poolInvite.findFirst({
+        where: {
+          pool_id: input.pool_id,
+          email: input.email,
+          status: { not: "Rejected" },
+        },
+      });
+
+      if (existing) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "An invite has already been sent to this email",
+        });
+      }
+
+      // Check nickname uniqueness against non-rejected invites and existing pool members
+      const [dupeInvite, dupeMember] = await Promise.all([
+        prisma.poolInvite.findFirst({
+          where: {
+            pool_id: input.pool_id,
+            nickname: { equals: input.nickname, mode: "insensitive" },
+            status: { not: "Rejected" },
+          },
+        }),
+        prisma.poolMember.findFirst({
+          where: {
+            pool_id: input.pool_id,
+            username: { equals: input.nickname, mode: "insensitive" },
+          },
+        }),
+      ]);
+
+      if (dupeInvite || dupeMember) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Nickname already taken in this pool",
+        });
+      }
+
+      const invite = await prisma.poolInvite.create({
         data: {
           email: input.email,
           nickname: input.nickname,
           pool: { connect: { id: input.pool_id } },
         },
       });
+
+      // Send invite email (non-blocking — invite is saved even if email fails)
+      let emailSent = false;
+      const pool = await prisma.pool.findUnique({
+        where: { id: input.pool_id },
+        select: {
+          name: true,
+          tournament: {
+            select: { name: true, start_date: true, end_date: true },
+          },
+        },
+      });
+
+      if (pool) {
+        const startStr = pool.tournament.start_date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        const endStr = pool.tournament.end_date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+
+        const result = await sendPoolInviteEmail({
+          to: input.email,
+          poolName: pool.name,
+          tournamentName: pool.tournament.name,
+          tournamentDates: `${startStr} – ${endStr}`,
+          appBaseUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        });
+        emailSent = result.success;
+        if (!result.success) {
+          console.error(
+            `Failed to send invite email to ${input.email}:`,
+            result.error
+          );
+        }
+      }
+
+      return { ...invite, emailSent };
+    }),
+
+  pastEmails: commissionerProcedure
+    .input(
+      z.object({
+        pool_id: z.number(),
+      })
+    )
+    .query(async ({ ctx }) => {
+      // Find all pools where this user is commissioner
+      const commissionerPools = await prisma.poolMember.findMany({
+        where: {
+          user_id: ctx.user.id,
+          role: "COMMISSIONER",
+        },
+        select: { pool_id: true },
+      });
+
+      const poolIds = commissionerPools.map((p) => p.pool_id);
+
+      // Get distinct emails from all invites across commissioner's pools
+      const invites = await prisma.poolInvite.findMany({
+        where: {
+          pool_id: { in: poolIds },
+        },
+        select: {
+          email: true,
+          nickname: true,
+        },
+        distinct: ["email"],
+        orderBy: { created_at: "desc" },
+      });
+
+      return invites;
     }),
 
   updateStatus: protectedProcedure

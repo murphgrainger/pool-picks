@@ -11,6 +11,7 @@ type FormValues = {
   name: string;
   amount_entry: string;
   tournament_id: string;
+  username: string;
 };
 
 function formatDateRange(start: Date, end: Date): string {
@@ -87,22 +88,26 @@ export default function PoolCreatePage() {
     t.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   const createPool = trpc.pool.create.useMutation({
     onSuccess: (data) => {
-      toast.success("Pool created!");
+      setIsRedirecting(true);
       router.push(`/pool/${data.id}`);
-      reset();
     },
     onError: (error) => {
       toast.error(`Something went wrong: ${error.message}`);
     },
   });
 
+  const isLoading = createPool.isPending || isRedirecting;
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     createPool.mutate({
       name: data.name,
-      amount_entry: parseInt(data.amount_entry, 10),
+      amount_entry: parseFloat(data.amount_entry),
       tournament_id: parseInt(data.tournament_id, 10),
+      username: data.username,
     });
   };
 
@@ -121,7 +126,6 @@ export default function PoolCreatePage() {
 
   return (
     <div className="container mx-auto max-w-md">
-      <Toaster />
       <form
         className="grid grid-cols-1 gap-y-4 shadow-lg p-8 rounded-lg bg-grey-100 text-white"
         onSubmit={handleSubmit(onSubmit)}
@@ -170,7 +174,6 @@ export default function PoolCreatePage() {
                 >
                   <p className="font-medium">{t.name}</p>
                   <p className="text-xs text-gray-400">
-                    {t.course} &middot;{" "}
                     {formatDateRange(t.start_date, t.end_date)}
                   </p>
                 </li>
@@ -186,21 +189,52 @@ export default function PoolCreatePage() {
 
         <label className="block">
           <span className="text-white">Entry Amount</span>
+          <div className="relative mt-1">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
+              $
+            </span>
+            <input
+              {...register("amount_entry", {
+                required: true,
+                onChange: (e) => {
+                  const raw = e.target.value.replace(/[^0-9.]/g, "");
+                  const parts = raw.split(".");
+                  const formatted =
+                    parts.length > 1
+                      ? parts[0] + "." + parts[1].slice(0, 2)
+                      : raw;
+                  e.target.value = formatted;
+                },
+              })}
+              name="amount_entry"
+              type="text"
+              inputMode="decimal"
+              placeholder="0"
+              className="text-black block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 pl-7"
+            />
+          </div>
+        </label>
+
+        <label className="block">
+          <span className="text-white">Your Commissioner Nickname</span>
           <input
-            {...register("amount_entry", { required: true })}
-            name="amount_entry"
-            type="number"
-            inputMode="numeric"
-            className="mt-1 text-black block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            placeholder="i.e. MurphMoney"
+            {...register("username", { required: true })}
+            name="username"
+            type="text"
+            className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         </label>
 
+        <div className="relative">
+          <Toaster containerStyle={{ position: "absolute" }} />
+        </div>
         <button
-          disabled={createPool.isPending}
+          disabled={isLoading}
           type="submit"
           className="my-4 capitalize bg-green-500 text-black font-medium py-2 px-4 rounded-md hover:bg-green-600"
         >
-          {createPool.isPending ? (
+          {isLoading ? (
             <span className="flex items-center justify-center">
               <Spinner className="w-6 h-6 mr-1" />
               Creating...

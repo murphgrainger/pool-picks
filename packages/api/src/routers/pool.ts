@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "@pool-picks/db";
 import {
@@ -5,6 +6,7 @@ import {
   protectedProcedure,
   commissionerProcedure,
 } from "../trpc";
+import { sendPoolOpenEmail } from "../lib/email";
 
 export const poolRouter = router({
   list: protectedProcedure.query(async () => {
@@ -122,8 +124,9 @@ export const poolRouter = router({
     .input(
       z.object({
         name: z.string().min(1),
-        amount_entry: z.number().int().min(0),
+        amount_entry: z.number().min(0),
         tournament_id: z.number().int(),
+        username: z.string().min(1),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -141,6 +144,7 @@ export const poolRouter = router({
           pool: { connect: { id: pool.id } },
           user: { connect: { id: ctx.user.id } },
           role: "COMMISSIONER",
+          username: input.username,
         },
       });
 
@@ -155,6 +159,69 @@ export const poolRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      // When moving to Open, verify the tournament has athletes
+      if (input.status === "Open") {
+        const pool = await prisma.pool.findUnique({
+          where: { id: input.pool_id },
+          select: { tournament_id: true, name: true },
+        });
+
+        if (!pool) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Pool not found",
+          });
+        }
+
+        const athleteCount = await prisma.athletesInTournaments.count({
+          where: { tournament_id: pool.tournament_id },
+        });
+
+        if (athleteCount === 0) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message:
+              "Cannot open this pool — no athletes are associated with the tournament. Scrape the field first.",
+          });
+        }
+
+        // Update status
+        const updated = await prisma.pool.update({
+          where: { id: input.pool_id },
+          data: { status: input.status },
+        });
+
+        // Send email notifications to all pool members
+        const members = await prisma.poolMember.findMany({
+          where: { pool_id: input.pool_id },
+          select: { user: { select: { email: true } } },
+        });
+
+        const appBaseUrl =
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+        // Fire off emails in parallel (non-blocking for the mutation response)
+        Promise.allSettled(
+          members.map((m) =>
+            sendPoolOpenEmail({
+              to: m.user.email,
+              poolName: pool.name,
+              appBaseUrl,
+              poolId: input.pool_id,
+            })
+          )
+        ).then((results) => {
+          const failed = results.filter((r) => r.status === "rejected");
+          if (failed.length > 0) {
+            console.error(
+              `Failed to send ${failed.length} pool-open emails for pool ${input.pool_id}`
+            );
+          }
+        });
+
+        return updated;
+      }
+
       return prisma.pool.update({
         where: { id: input.pool_id },
         data: { status: input.status },
