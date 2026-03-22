@@ -51,13 +51,38 @@ export const poolInviteRouter = router({
         where: {
           pool_id: input.pool_id,
           email: input.email,
+          status: { not: "Rejected" },
         },
       });
 
       if (existing) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "User already invited",
+          message: "An invite has already been sent to this email",
+        });
+      }
+
+      // Check nickname uniqueness against non-rejected invites and existing pool members
+      const [dupeInvite, dupeMember] = await Promise.all([
+        prisma.poolInvite.findFirst({
+          where: {
+            pool_id: input.pool_id,
+            nickname: { equals: input.nickname, mode: "insensitive" },
+            status: { not: "Rejected" },
+          },
+        }),
+        prisma.poolMember.findFirst({
+          where: {
+            pool_id: input.pool_id,
+            username: { equals: input.nickname, mode: "insensitive" },
+          },
+        }),
+      ]);
+
+      if (dupeInvite || dupeMember) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Nickname already taken in this pool",
         });
       }
 
