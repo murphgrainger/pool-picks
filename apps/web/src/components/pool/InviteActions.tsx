@@ -164,9 +164,19 @@ export function InviteActions({
               </h4>
               {pools.map((member) => (
                 <div
-                  className="p-4 mb-4 bg-grey-100 w-full rounded"
+                  className="relative p-4 mb-4 bg-grey-100 w-full rounded"
                   key={member.id}
                 >
+                  {member.role === "COMMISSIONER" && (
+                    <span className="absolute top-2 right-2 group">
+                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] leading-none pt-[1px] font-bold cursor-default">
+                        C
+                      </span>
+                      <span className="absolute right-0 bottom-full mb-1 px-2 py-1 rounded bg-grey-200 text-white text-[10px] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-active:opacity-100 transition-opacity">
+                        Pool Commissioner
+                      </span>
+                    </span>
+                  )}
                   <div className="text-center">
                     <h3 className="mb-2">{member.pool.name}</h3>
                     <div className="flex flex-wrap justify-center">
@@ -212,9 +222,19 @@ export function InviteActions({
               <div className="bg-grey-200 px-6 pb-4 pt-2">
                 {completedPools.map((member, index) => (
                   <div
-                    className={`p-4 bg-grey-100 w-full rounded ${index < completedPools.length - 1 ? "mb-4" : ""}`}
+                    className={`relative p-4 bg-grey-100 w-full rounded ${index < completedPools.length - 1 ? "mb-4" : ""}`}
                     key={member.id}
                   >
+                    {member.role === "COMMISSIONER" && (
+                      <span className="absolute top-2 right-2 group">
+                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] leading-none pt-[1px] font-bold cursor-default">
+                          C
+                        </span>
+                        <span className="absolute right-0 bottom-full mb-1 px-2 py-1 rounded bg-grey-200 text-white text-[10px] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-active:opacity-100 transition-opacity">
+                          Pool Commissioner
+                        </span>
+                      </span>
+                    )}
                     <div className="text-center">
                       <h3 className="mb-2">{member.pool.name}</h3>
                       <div className="flex flex-wrap justify-center">

@@ -37,6 +37,8 @@ export const poolRouter = router({
               status: true,
               cut_line: true,
               external_id: true,
+              start_date: true,
+              end_date: true,
               updated_at: true,
             },
           },
@@ -156,6 +158,7 @@ export const poolRouter = router({
       z.object({
         pool_id: z.number(),
         status: z.string(),
+        notify: z.boolean().optional().default(true),
       })
     )
     .mutation(async ({ input }) => {
@@ -191,33 +194,34 @@ export const poolRouter = router({
           data: { status: input.status },
         });
 
-        // Send email notifications to all pool members
-        const members = await prisma.poolMember.findMany({
-          where: { pool_id: input.pool_id },
-          select: { user: { select: { email: true } } },
-        });
+        // Send email notifications to all pool members (if requested)
+        if (input.notify) {
+          const members = await prisma.poolMember.findMany({
+            where: { pool_id: input.pool_id },
+            select: { user: { select: { email: true } } },
+          });
 
-        const appBaseUrl =
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+          const appBaseUrl =
+            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-        // Fire off emails in parallel (non-blocking for the mutation response)
-        Promise.allSettled(
-          members.map((m) =>
-            sendPoolOpenEmail({
-              to: m.user.email,
-              poolName: pool.name,
-              appBaseUrl,
-              poolId: input.pool_id,
-            })
-          )
-        ).then((results) => {
-          const failed = results.filter((r) => r.status === "rejected");
-          if (failed.length > 0) {
-            console.error(
-              `Failed to send ${failed.length} pool-open emails for pool ${input.pool_id}`
-            );
-          }
-        });
+          Promise.allSettled(
+            members.map((m) =>
+              sendPoolOpenEmail({
+                to: m.user.email,
+                poolName: pool.name,
+                appBaseUrl,
+                poolId: input.pool_id,
+              })
+            )
+          ).then((results) => {
+            const failed = results.filter((r) => r.status === "rejected");
+            if (failed.length > 0) {
+              console.error(
+                `Failed to send ${failed.length} pool-open emails for pool ${input.pool_id}`
+              );
+            }
+          });
+        }
 
         return updated;
       }

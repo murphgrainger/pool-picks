@@ -26,6 +26,8 @@ interface PoolDetailClientProps {
       status: string;
       cut_line: number | null;
       external_id: number | null;
+      start_date: Date;
+      end_date: Date;
       updated_at: Date;
     };
     pool_invites: {
@@ -60,6 +62,10 @@ export function PoolDetailClient({
     : null;
 
   const showLogo = pool.tournament.name === "Masters Tournament";
+
+  const formatDate = (date: Date) =>
+    new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const tournamentDates = `${formatDate(pool.tournament.start_date)} – ${formatDate(pool.tournament.end_date)}`;
 
   const getScores = trpc.pool.getScores.useQuery(
     { pool_id: pool.id },
@@ -102,11 +108,12 @@ export function PoolDetailClient({
               !showLogo ? "text-center" : ""
             }`}
           >
-            <h1 className="text-lg font-bold">{pool.name}</h1>
+            <h1 className="text-2xl font-bold">{pool.name}</h1>
             <p className="text-base">{pool.tournament.name}</p>
             {pool.tournament.course && (
-              <p className="text-base">{pool.tournament.course}</p>
+              <p className="text-xs">{pool.tournament.course}</p>
             )}
+            <p className="text-xs">{tournamentDates}</p>
             <p className="text-xs">
               ${pool.amount_entry} Ante | Total Pot: ${totalPotAmount}
             </p>
