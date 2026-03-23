@@ -1,4 +1,4 @@
-import { SCORING_PICKS } from "./constants";
+import { PICKS_PER_MEMBER, SCORING_PICKS } from "./constants";
 
 interface AthletePickData {
   status: string;
@@ -9,9 +9,11 @@ export interface PoolMemberFormatted {
   id: number;
   nickname?: string;
   username?: string;
+  role?: string;
   member_sum_under_par: number | null;
   member_position?: number;
   isTied?: boolean;
+  isDQ?: boolean;
   picks: AthletePickFormatted[];
 }
 
@@ -74,12 +76,18 @@ export function reformatPoolMembers(
       );
 
       const sum = sumMemberPicks(picks);
+      const inactivePicks = picks.filter(
+        (p) => p.status === "CUT" || p.status === "WD"
+      ).length;
+      const isDQ = inactivePicks > PICKS_PER_MEMBER - SCORING_PICKS;
 
       return {
         id: member.id,
         nickname: member.user.nickname,
         username: member.username,
+        role: member.role,
         member_sum_under_par: sum,
+        isDQ,
         picks,
       };
     }
@@ -131,12 +139,20 @@ export function calculateMemberPosition(
   });
 
   const nullMembers = members
-    .filter((member) => member.member_sum_under_par === null)
+    .filter((member) => member.member_sum_under_par === null && !member.isDQ)
     .map((member) => ({
       ...member,
       member_position: nonNullMembersWithPosition.length + 1,
       isTied: false,
     }));
 
-  return [...nonNullMembersWithPosition, ...nullMembers];
+  const dqMembers = members
+    .filter((member) => member.isDQ)
+    .map((member) => ({
+      ...member,
+      member_position: undefined,
+      isTied: false,
+    }));
+
+  return [...nonNullMembersWithPosition, ...nullMembers, ...dqMembers];
 }

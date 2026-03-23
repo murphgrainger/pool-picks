@@ -11,9 +11,11 @@ interface PoolMemberCardProps {
     id: number;
     nickname?: string;
     username?: string;
+    role?: string;
     member_sum_under_par: number | null;
     member_position?: number;
     isTied?: boolean;
+    isDQ?: boolean;
     picks: AthletePickFormatted[];
   };
   currentMemberId: number | null;
@@ -52,17 +54,21 @@ export function PoolMemberCard({
     setDisplayUsername(username);
   };
 
-  const underParFormatted = formatToPar(member.member_sum_under_par);
-  let positionFormatted: string = member.member_position
-    ? String(member.member_position)
-    : "--";
-  if (member.isTied) {
+  const showDQ = member.isDQ && (poolStatus === "Active" || poolStatus === "Complete");
+  const underParFormatted = showDQ ? "DQ" : formatToPar(member.member_sum_under_par);
+  let positionFormatted: string = showDQ
+    ? "--"
+    : member.member_position
+      ? String(member.member_position)
+      : "--";
+  if (!showDQ && member.isTied) {
     positionFormatted = `T${positionFormatted}`;
   }
 
   const displayName = hasSubmittedUsername
     ? displayUsername
     : member.nickname;
+
 
   if (poolStatus === "Open") {
     return (
