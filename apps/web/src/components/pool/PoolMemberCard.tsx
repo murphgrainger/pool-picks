@@ -73,7 +73,7 @@ export function PoolMemberCard({
   const commissionerPill = isCommissioner ? (
     <span className="relative ml-2 group">
       <span
-        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] font-bold cursor-default"
+        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] leading-none pt-[1px] font-bold cursor-default"
       >
         C
       </span>
