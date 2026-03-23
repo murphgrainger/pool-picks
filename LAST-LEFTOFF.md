@@ -21,6 +21,7 @@
 
 ### What still needs to happen
 
-- don't allow duplicate pool invite nicknames
-- don't allow pool members to update nicknames to not be unique
-- when creating a pool and it redirects to the pool - load the pool page with the commissioner panel open when redirecting after creation
+- update pool update email to be Time to make your picks! and the next line is The field for the {tournament name} has been finalized. Head over to {pool} to make your picks before the commissioner locks the pool prior to the start of the tournament.
+- make commissioner c on pool member invites and allow tooltip to explain what it is
+- add commissioner pill to pools on main page or consider regrouping the main page by my pools vs pools i'm invited to or something like that. need to plan mode for scale here.
+- add the scraping buttons from the admin page to be available for the commissioner in the commissioner pool panel. plan out how this should work better considering the dates of the tournament and how the api would work on the field finalization.

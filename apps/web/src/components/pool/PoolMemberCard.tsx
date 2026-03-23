@@ -11,9 +11,11 @@ interface PoolMemberCardProps {
     id: number;
     nickname?: string;
     username?: string;
+    role?: string;
     member_sum_under_par: number | null;
     member_position?: number;
     isTied?: boolean;
+    isDQ?: boolean;
     picks: AthletePickFormatted[];
   };
   currentMemberId: number | null;
@@ -52,29 +54,47 @@ export function PoolMemberCard({
     setDisplayUsername(username);
   };
 
-  const underParFormatted = formatToPar(member.member_sum_under_par);
-  let positionFormatted: string = member.member_position
-    ? String(member.member_position)
-    : "--";
-  if (member.isTied) {
+  const showDQ = member.isDQ && (poolStatus === "Active" || poolStatus === "Complete");
+  const underParFormatted = showDQ ? "DQ" : formatToPar(member.member_sum_under_par);
+  let positionFormatted: string = showDQ
+    ? "--"
+    : member.member_position
+      ? String(member.member_position)
+      : "--";
+  if (!showDQ && member.isTied) {
     positionFormatted = `T${positionFormatted}`;
   }
 
   const displayName = hasSubmittedUsername
     ? displayUsername
     : member.nickname;
+  const isCommissioner = member.role === "COMMISSIONER";
+
+  const commissionerPill = isCommissioner ? (
+    <span className="relative ml-2 group">
+      <span
+        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] leading-none pt-[1px] font-bold cursor-default"
+      >
+        C
+      </span>
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-1 rounded bg-grey-100 text-white text-[10px] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-active:opacity-100 transition-opacity">
+        Pool Commissioner
+      </span>
+    </span>
+  ) : null;
+
 
   if (poolStatus === "Open") {
     return (
       <div className="w-full mt-6 p-6 rounded bg-grey-200" key={member.id}>
         {!currentUserCard && (
           <div className="flex justify-between">
-            <h3>{displayName}</h3>
+            <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
             <p className="font-semibold">{pickStatus}</p>
           </div>
         )}
         {currentUserCard && member.picks?.length > 0 && (
-          <h3 className="mb-4">{displayName}</h3>
+          <h3 className="mb-4 flex items-center">{displayName}{commissionerPill}</h3>
         )}
         {currentUserCard && !hasSubmittedUsername && (
           <UsernameCreateForm
@@ -109,7 +129,7 @@ export function PoolMemberCard({
   if (!member.picks?.length) {
     return (
       <div className="w-full mt-6 p-6 rounded bg-grey-200 flex justify-between items-center">
-        <h3>{displayName}</h3>
+        <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
         <span className="italic text-xs">No Picks Submitted</span>
       </div>
     );
@@ -125,7 +145,7 @@ export function PoolMemberCard({
           <p className="text-xl mr-4 text-yellow font-extrabold">
             {positionFormatted}
           </p>
-          <h3>{displayName}</h3>
+          <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
           <div className="flex-1 flex flex-col items-end pr-6 justify-center">
             <p className="text-xl rounded-lg bg-grey-100 p-2 pr-3 pl-3 font-bold text-white">
               {underParFormatted}

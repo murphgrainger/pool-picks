@@ -16,7 +16,7 @@ export const tournamentRouter = router({
             name: true,
             status: true,
             created_at: true,
-            pool_members: { select: { id: true } },
+            pool_members: { select: { id: true, user_id: true, role: true } },
             pool_invites: {
               where: { status: "Invited" },
               select: { id: true },
