@@ -113,7 +113,7 @@ export function PoolInviteForm({
 
   return (
     <div className="w-full bg-grey-100 rounded p-4 mt-4">
-      <h3 className="text-lg font-bold mb-4">Create Pool Invite</h3>
+      <h3 className="text-lg font-bold mb-4">Send Pool Invite</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
           <label className="block text-sm font-medium mb-1">Email</label>
@@ -181,10 +181,10 @@ export function PoolInviteForm({
           {createInvite.isPending ? (
             <span className="flex items-center justify-center">
               <Spinner className="w-6 h-6 mr-1" />
-              Creating...
+              Sending...
             </span>
           ) : (
-            "Create Invite"
+            "Send Invite"
           )}
         </button>
       </form>

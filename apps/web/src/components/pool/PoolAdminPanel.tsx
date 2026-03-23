@@ -31,6 +31,7 @@ export function PoolAdminPanel({
   });
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [pendingNotify, setPendingNotify] = useState<boolean | null>(null);
 
   const updatePool = trpc.pool.updateStatus.useMutation({
     onSuccess: () => {
@@ -39,11 +40,13 @@ export function PoolAdminPanel({
       }
       setShowConfirmModal(false);
       setPendingStatus(null);
+      setPendingNotify(null);
     },
     onError: (err) => {
       toast.error(err.message);
       setShowConfirmModal(false);
       setPendingStatus(null);
+      setPendingNotify(null);
     },
   });
 
@@ -60,8 +63,9 @@ export function PoolAdminPanel({
     updatePool.mutate({ pool_id: poolId, status: option.value });
   };
 
-  const confirmOpen = () => {
-    updatePool.mutate({ pool_id: poolId, status: "Open" });
+  const confirmOpen = (notify: boolean) => {
+    setPendingNotify(notify);
+    updatePool.mutate({ pool_id: poolId, status: "Open", notify });
   };
 
   const poolStatuses = ["Setup", "Open", "Locked", "Active", "Complete"];
@@ -99,34 +103,58 @@ export function PoolAdminPanel({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
           <div className="bg-grey-200 rounded p-6 max-w-sm mx-4 text-white">
             <h3 className="text-lg font-bold mb-3">Open this pool?</h3>
-            <p className="text-sm text-grey-50 mb-6">
-              This will notify all pool members via email that the field is ready
-              and they can make their picks.
+            <p className="text-sm text-grey-50 mb-4">
+              Opening the pool allows members to make their picks. You can also
+              notify the following invitees by email:
             </p>
-            <div className="flex justify-end space-x-3">
+            {existingInviteEmails.length > 0 && (
+              <ul className="text-xs text-grey-50 mb-6 space-y-1">
+                {existingInviteEmails.map((email) => (
+                  <li key={email}>{email}</li>
+                ))}
+              </ul>
+            )}
+            {existingInviteEmails.length === 0 && (
+              <p className="text-xs text-grey-50 italic mb-6">No pending invites.</p>
+            )}
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={() => confirmOpen(true)}
+                disabled={updatePool.isPending}
+                className="w-full px-4 py-2 rounded bg-green-500 hover:bg-green-300 text-black font-medium"
+              >
+                {updatePool.isPending && pendingNotify === true ? (
+                  <span className="flex items-center justify-center">
+                    <Spinner className="w-4 h-4 mr-2" />
+                    Opening...
+                  </span>
+                ) : (
+                  "Open & Notify"
+                )}
+              </button>
+              <button
+                onClick={() => confirmOpen(false)}
+                disabled={updatePool.isPending}
+                className="w-full px-4 py-2 rounded bg-grey-100 hover:bg-grey-75 text-white"
+              >
+                {updatePool.isPending && pendingNotify === false ? (
+                  <span className="flex items-center justify-center">
+                    <Spinner className="w-4 h-4 mr-2" />
+                    Opening...
+                  </span>
+                ) : (
+                  "Open Without Notifying"
+                )}
+              </button>
               <button
                 onClick={() => {
                   setShowConfirmModal(false);
                   setPendingStatus(null);
                 }}
-                className="px-4 py-2 rounded bg-grey-100 hover:bg-grey-75 text-white"
+                className="w-full px-4 py-2 rounded text-grey-50 hover:text-white"
                 disabled={updatePool.isPending}
               >
                 Cancel
-              </button>
-              <button
-                onClick={confirmOpen}
-                disabled={updatePool.isPending}
-                className="px-4 py-2 rounded bg-green-500 hover:bg-green-300 text-black font-medium"
-              >
-                {updatePool.isPending ? (
-                  <span className="flex items-center">
-                    <Spinner className="w-4 h-4 mr-2" />
-                    Opening...
-                  </span>
-                ) : (
-                  "Open Pool"
-                )}
               </button>
             </div>
           </div>
