@@ -21,6 +21,5 @@
 
 ### What still needs to happen
 
-- don't allow duplicate pool invite nicknames
-- don't allow pool members to update nicknames to not be unique
-- when creating a pool and it redirects to the pool - load the pool page with the commissioner panel open when redirecting after creation
+- update pool update email to be Time to make your picks! and the next line is The field for the {tournament name} has been finalized. Head over to {pool} to make your picks before the commissioner locks the pool prior to the start of the tournament.
+-

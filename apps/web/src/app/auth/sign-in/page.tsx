@@ -108,7 +108,7 @@ export default function SignInPage() {
             className="mt-4 bg-grey-200 text-white hover:bg-black rounded"
             disabled={loading || !email}
           >
-            {loading ? "Sending you an email..." : "Continue with Email"}
+            {loading ? "Sending you an email..." : "Email Magic Link"}
           </button>
           {error && <p className="mt-2 text-yellow">{error}</p>}
         </form>
