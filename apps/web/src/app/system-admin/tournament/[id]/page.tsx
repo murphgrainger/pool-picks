@@ -136,7 +136,7 @@ export default function TournamentAdminPage() {
                 className={`text-xs px-2 py-1 rounded ${
                   tournamentHealth.data.scoredCount > 0
                     ? "bg-green-500/20 text-green-400"
-                    : "bg-yellow-500/20 text-yellow-400"
+                    : "bg-red-500/20 text-red-400"
                 }`}
               >
                 {tournamentHealth.data.scoredCount > 0
