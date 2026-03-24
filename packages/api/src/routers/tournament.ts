@@ -65,6 +65,21 @@ export const tournamentRouter = router({
     });
   }),
 
+  getHealth: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      const athleteCount = await prisma.athletesInTournaments.count({
+        where: { tournament_id: input.id },
+      });
+      const scoredCount = await prisma.athletesInTournaments.count({
+        where: {
+          tournament_id: input.id,
+          score_round_one: { not: null },
+        },
+      });
+      return { athleteCount, scoredCount };
+    }),
+
   updateStatus: systemAdminProcedure
     .input(
       z.object({

@@ -4,8 +4,11 @@ export const maxDuration = 60;
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@pool-picks/db";
 import { createRouteHandlerClient } from "@/lib/supabase/route";
-import axios from "axios";
-import * as cheerio from "cheerio";
+
+const ESPN_SCOREBOARD_API =
+  "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard";
+const ESPN_CORE_API =
+  "https://sports.core.api.espn.com/v2/sports/golf/leagues/pga/events";
 
 interface ParsedTournament {
   name: string;
@@ -17,122 +20,74 @@ interface ParsedTournament {
   end_date: Date;
 }
 
-function parseScheduleHtml(
-  html: string,
-  seasonYear: number
-): ParsedTournament[] {
-  const $ = cheerio.load(html);
-  const tournaments: ParsedTournament[] = [];
+async function fetchEventDetails(
+  eventId: string
+): Promise<{ course: string; city: string; region: string }> {
+  try {
+    const response = await fetch(`${ESPN_CORE_API}/${eventId}`);
+    if (!response.ok) return { course: "", city: "", region: "" };
 
-  $(".Table__TR.Table__TR--sm").each((_index, row) => {
-    const dateText = $(row).find(".dateAndTickets__col div div").text().trim();
-    const nameEl = $(row).find(".eventAndLocation__tournamentLink");
-    const name = nameEl.text().trim();
-    const linkEl = $(row).find(".eventAndLocation__innerCell a.AnchorLink");
-    const href = linkEl.attr("href") || "";
-    const venueText = $(row)
-      .find(".eventAndLocation__tournamentLocation")
-      .text()
-      .trim();
+    const data = await response.json();
+    const courseData = data.courses?.[0];
+    if (!courseData) return { course: "", city: "", region: "" };
 
-    if (!name || !dateText) return;
-
-    // Extract external_id from href query param (e.g., tournamentId=401811933)
-    const idMatch = href.match(/tournamentId=(\d+)/);
-    if (!idMatch) return;
-    const external_id = parseInt(idMatch[1], 10);
-
-    // Parse venue: "Riviera Country Club - Pacific Palisades, CA"
-    let course = "";
-    let city = "";
-    let region = "";
-    if (venueText) {
-      const venueParts = venueText.split(" - ");
-      course = venueParts[0]?.trim() || "";
-      if (venueParts[1]) {
-        const locationParts = venueParts[1].split(", ");
-        city = locationParts[0]?.trim() || "";
-        region = locationParts[1]?.trim() || "";
-      }
-    }
-
-    // Parse dates: "Feb 19 - 22" or "Feb 26 - Mar 1"
-    const { startDate, endDate } = parseDateRange(dateText, seasonYear);
-    if (!startDate || !endDate) return;
-
-    tournaments.push({
-      name,
-      external_id,
-      course,
-      city,
-      region,
-      start_date: startDate,
-      end_date: endDate,
-    });
-  });
-
-  return tournaments;
+    return {
+      course: courseData.name || "",
+      city: courseData.address?.city || "",
+      region: courseData.address?.state || "",
+    };
+  } catch {
+    return { course: "", city: "", region: "" };
+  }
 }
 
-function parseDateRange(
-  dateText: string,
-  year: number
-): { startDate: Date | null; endDate: Date | null } {
-  // Formats: "Feb 19 - 22" or "Feb 26 - Mar 1" or "Dec 28 - Jan 2"
-  const months: Record<string, number> = {
-    Jan: 0,
-    Feb: 1,
-    Mar: 2,
-    Apr: 3,
-    May: 4,
-    Jun: 5,
-    Jul: 6,
-    Aug: 7,
-    Sep: 8,
-    Oct: 9,
-    Nov: 10,
-    Dec: 11,
-  };
+async function fetchSchedule(year: number): Promise<ParsedTournament[]> {
+  const url = `${ESPN_SCOREBOARD_API}?dates=${year}0101-${year}1231`;
+  const response = await fetch(url);
+  if (!response.ok)
+    throw new Error(`ESPN API returned ${response.status}`);
 
-  const parts = dateText.split(" - ");
-  if (parts.length !== 2) return { startDate: null, endDate: null };
+  const data = await response.json();
+  const events = data.events || [];
+  const tournaments: ParsedTournament[] = [];
 
-  const startPart = parts[0].trim();
-  const endPart = parts[1].trim();
+  // Fetch venue details for all events in parallel (batched)
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < events.length; i += BATCH_SIZE) {
+    const batch = events.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map(async (event: any) => {
+        const status = event.status?.type?.name;
+        if (status === "STATUS_CANCELED") return null;
 
-  // Parse start: always "Mon DD"
-  const startTokens = startPart.split(" ");
-  if (startTokens.length !== 2) return { startDate: null, endDate: null };
-  const startMonth = months[startTokens[0]];
-  const startDay = parseInt(startTokens[1], 10);
-  if (startMonth === undefined || isNaN(startDay))
-    return { startDate: null, endDate: null };
+        const external_id = parseInt(event.id, 10);
+        if (isNaN(external_id)) return null;
 
-  // Parse end: either "DD" or "Mon DD"
-  const endTokens = endPart.split(" ");
-  let endMonth: number;
-  let endDay: number;
-  if (endTokens.length === 1) {
-    // Same month as start
-    endMonth = startMonth;
-    endDay = parseInt(endTokens[0], 10);
-  } else {
-    endMonth = months[endTokens[0]];
-    endDay = parseInt(endTokens[1], 10);
+        const startDate = new Date(event.date);
+        const endDate = new Date(event.endDate);
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()))
+          return null;
+
+        const details = await fetchEventDetails(event.id);
+
+        return {
+          name: event.name || event.shortName,
+          external_id,
+          course: details.course,
+          city: details.city,
+          region: details.region,
+          start_date: startDate,
+          end_date: endDate,
+        };
+      })
+    );
+
+    for (const result of results) {
+      if (result) tournaments.push(result);
+    }
   }
-  if (endMonth === undefined || isNaN(endDay))
-    return { startDate: null, endDate: null };
 
-  const startDate = new Date(year, startMonth, startDay);
-
-  // If end month is earlier than start month (e.g., Dec 28 - Jan 2), end is next year
-  let endYear = year;
-  if (endMonth < startMonth) {
-    endYear = year + 1;
-  }
-  const endDate = new Date(endYear, endMonth, endDay);
-
-  return { startDate, endDate };
+  return tournaments;
 }
 
 async function upsertTournaments(tournaments: ParsedTournament[]) {
@@ -194,13 +149,11 @@ export async function POST(request: NextRequest) {
       // No body or invalid JSON — use default year
     }
 
-    const url = `https://www.espn.com/golf/schedule/_/season/${year}`;
-    const response = await axios.get(url);
-    const tournaments = parseScheduleHtml(response.data, year);
+    const tournaments = await fetchSchedule(year);
 
     if (!tournaments.length) {
       return NextResponse.json(
-        { message: "No tournaments found on the page" },
+        { message: "No tournaments found" },
         { status: 404 }
       );
     }
@@ -211,7 +164,7 @@ export async function POST(request: NextRequest) {
       ...result,
     });
   } catch (error: any) {
-    console.error("ERROR SCRAPING SCHEDULE:", error);
+    console.error("ERROR SYNCING SCHEDULE:", error);
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

@@ -10,7 +10,7 @@ interface PoolPageProps {
 
 export default async function PoolPage({ params }: PoolPageProps) {
   const { id } = await params;
-  const { supabaseUser } = await getAuthUser();
+  const { supabaseUser, isAdmin } = await getAuthUser();
 
   if (!supabaseUser) redirect("/auth/sign-in");
 
@@ -43,6 +43,7 @@ export default async function PoolPage({ params }: PoolPageProps) {
       poolMembers={poolMembers}
       currentUserPoolMemberId={currentUserPoolMember?.id ?? null}
       isCommissioner={isCommissioner}
+      isAdmin={isAdmin}
     />
   );
 }

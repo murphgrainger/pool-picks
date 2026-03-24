@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Select from "react-select";
+import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { trpc } from "@/lib/trpc/client";
 import { formattedDate } from "@pool-picks/utils";
@@ -19,20 +20,17 @@ export default function TournamentAdminPage() {
   const { data: tournament, isLoading: tournamentLoading } =
     trpc.tournament.getById.useQuery({ id });
 
+  const tournamentHealth = trpc.tournament.getHealth.useQuery({ id });
+
   const updateTournament = trpc.tournament.updateStatus.useMutation();
 
   const [selectedOption, setSelectedOption] = useState<SelectValues>({
     value: "",
     label: "",
   });
-  const [isActive, setActiveTournament] = useState(false);
   const [isScraping, setIsScraping] = useState(false);
   const [loadingButtonId, setLoadingButtonId] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string>("");
-  const [scrapeResult, setScrapeResult] = useState<{
-    message: string;
-    isError: boolean;
-  } | null>(null);
 
   useEffect(() => {
     if (tournament) {
@@ -40,7 +38,6 @@ export default function TournamentAdminPage() {
         value: tournament.status,
         label: tournament.status,
       });
-      setActiveTournament(tournament.status === "Active");
       setUpdatedAt(
         tournament.updated_at
           ? formattedDate(new Date(tournament.updated_at))
@@ -58,7 +55,6 @@ export default function TournamentAdminPage() {
 
   const handleStatusChange = async (option: SelectValues | null) => {
     if (!option) return;
-    setActiveTournament(option.value === "Active");
     setSelectedOption(option);
 
     updateTournament.mutate({ id: tournament.id, status: option.value });
@@ -79,7 +75,6 @@ export default function TournamentAdminPage() {
   const updateData = async (scrapeRoute: string) => {
     setIsScraping(true);
     setLoadingButtonId(scrapeRoute);
-    setScrapeResult(null);
 
     const label = scrapeLabels[scrapeRoute] || scrapeRoute;
 
@@ -96,25 +91,22 @@ export default function TournamentAdminPage() {
       });
 
       if (!response.ok) {
+        const data = await response.json().catch(() => null);
         const message =
-          response.status === 504
-            ? `Timed out updating ${label}. It may have partially completed — try again.`
-            : `Failed to update ${label} (${response.status}). Please try again.`;
-        setScrapeResult({ message, isError: true });
+          data?.message ||
+          (response.status === 504
+            ? `Timed out updating ${label}. Try again.`
+            : `Failed to update ${label} (${response.status}).`);
+        toast.error(message);
         return;
       }
 
       const data = await response.json();
-      setScrapeResult({
-        message: data.message || `Successfully updated ${label}!`,
-        isError: false,
-      });
+      toast.success(data.message || `Successfully updated ${label}!`);
       setUpdatedAt(formattedDate(new Date()));
+      tournamentHealth.refetch();
     } catch {
-      setScrapeResult({
-        message: `Network error updating ${label}. Please check your connection and try again.`,
-        isError: true,
-      });
+      toast.error(`Network error updating ${label}.`);
     } finally {
       setIsScraping(false);
       setLoadingButtonId(null);
@@ -123,10 +115,37 @@ export default function TournamentAdminPage() {
 
   return (
     <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
+      <Toaster />
       <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
         <div className="w-full">
           <h3>{tournament.name}</h3>
           <p>Last Updated: {updatedAt}</p>
+          {tournamentHealth.data && (
+            <div className="flex gap-3 mt-2">
+              <span
+                className={`text-xs px-2 py-1 rounded ${
+                  tournamentHealth.data.athleteCount > 0
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-red-500/20 text-red-400"
+                }`}
+              >
+                {tournamentHealth.data.athleteCount > 0
+                  ? `${tournamentHealth.data.athleteCount} athletes in field`
+                  : "No field synced"}
+              </span>
+              <span
+                className={`text-xs px-2 py-1 rounded ${
+                  tournamentHealth.data.scoredCount > 0
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-yellow-500/20 text-yellow-400"
+                }`}
+              >
+                {tournamentHealth.data.scoredCount > 0
+                  ? `${tournamentHealth.data.scoredCount} with scores`
+                  : "No scores yet"}
+              </span>
+            </div>
+          )}
           <div className="mt-2">
             <label htmlFor="status">Update Status:</label>
             <Select
@@ -140,30 +159,26 @@ export default function TournamentAdminPage() {
               isDisabled={isScraping}
               className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm"
             />
-            {isActive && (
+            {(selectedOption.value === "Scheduled" || selectedOption.value === "Active") && (
               <div className="mt-6 flex flex-col">
-                {tournament.status === "Scheduled" && (
-                  <button
-                    className="bg-grey-200 m-2 hover:bg-green-700"
-                    onClick={() => updateData("athletes")}
-                    disabled={isScraping}
-                  >
-                    {isScraping && loadingButtonId === "athletes"
-                      ? "Updating..."
-                      : "Update Field"}
-                  </button>
-                )}
-                {tournament.status === "Scheduled" && (
-                  <button
-                    className="bg-grey-200 m-2 hover:bg-green-700"
-                    onClick={() => updateData("rankings")}
-                    disabled={isScraping}
-                  >
-                    {isScraping && loadingButtonId === "rankings"
-                      ? "Updating..."
-                      : "Update Rankings"}
-                  </button>
-                )}
+                <button
+                  className="bg-grey-200 m-2 hover:bg-green-700"
+                  onClick={() => updateData("athletes")}
+                  disabled={isScraping}
+                >
+                  {isScraping && loadingButtonId === "athletes"
+                    ? "Updating..."
+                    : "Update Field"}
+                </button>
+                <button
+                  className="bg-grey-200 m-2 hover:bg-green-700"
+                  onClick={() => updateData("rankings")}
+                  disabled={isScraping}
+                >
+                  {isScraping && loadingButtonId === "rankings"
+                    ? "Updating..."
+                    : "Update Rankings"}
+                </button>
                 <button
                   className="bg-grey-200 m-2 hover:bg-green-700"
                   onClick={() => updateData("scores")}
@@ -173,13 +188,6 @@ export default function TournamentAdminPage() {
                     ? "Updating..."
                     : "Update Scores"}
                 </button>
-                {scrapeResult && (
-                  <p
-                    className={`text-sm mt-2 text-center ${scrapeResult.isError ? "text-red-400" : "text-green-400"}`}
-                  >
-                    {scrapeResult.message}
-                  </p>
-                )}
               </div>
             )}
           </div>

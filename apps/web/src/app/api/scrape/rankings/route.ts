@@ -1,3 +1,7 @@
+// NOTE: Rankings still uses HTML scraping because ESPN has no JSON API
+// for world golf rankings. This is the only remaining HTML scraper.
+// All other endpoints (scores, athletes, schedule) use the ESPN JSON API.
+
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
@@ -32,17 +36,33 @@ async function fetchAthleteRankings(url: string): Promise<Athlete[]> {
 
 async function updateAthleteRankings(parsedAthletes: Athlete[]) {
   if (!parsedAthletes.length) {
-    throw new Error("No athlete data available!");
+    throw new Error(
+      "No ranking data found. ESPN may have changed their page layout."
+    );
   }
 
+  let updated = 0;
+  let notFound = 0;
+  const missingNames: string[] = [];
+
   await Promise.all(
-    parsedAthletes.map((athlete) =>
-      prisma.athlete.updateMany({
+    parsedAthletes.map(async (athlete) => {
+      const result = await prisma.athlete.updateMany({
         where: { full_name: athlete.full_name },
         data: { ranking: athlete.ranking },
-      })
-    )
+      });
+      if (result.count > 0) {
+        updated++;
+      } else {
+        notFound++;
+        if (missingNames.length < 10) {
+          missingNames.push(athlete.full_name);
+        }
+      }
+    })
   );
+
+  return { updated, notFound, missingNames };
 }
 
 export async function POST() {
@@ -66,8 +86,19 @@ export async function POST() {
   try {
     const url = "https://www.espn.com/golf/rankings";
     const rankings = await fetchAthleteRankings(url);
-    await updateAthleteRankings(rankings);
-    return NextResponse.json({ message: "Success updating athlete rankings!" });
+    const { updated, notFound, missingNames } =
+      await updateAthleteRankings(rankings);
+
+    let message = `Updated rankings for ${updated} athletes.`;
+    if (notFound > 0) {
+      message += ` ${notFound} ranked players not found in our database`;
+      if (missingNames.length > 0) {
+        message += ` (e.g. ${missingNames.slice(0, 5).join(", ")})`;
+      }
+      message += ".";
+    }
+
+    return NextResponse.json({ message });
   } catch (error: any) {
     console.error("ERROR UPDATING ATHLETE RANKINGS:", error);
     return NextResponse.json({ message: error.message }, { status: 500 });

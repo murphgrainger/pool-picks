@@ -40,6 +40,7 @@ interface PoolDetailClientProps {
   poolMembers: PoolMemberFormatted[];
   currentUserPoolMemberId: number | null;
   isCommissioner: boolean;
+  isAdmin: boolean;
 }
 
 export function PoolDetailClient({
@@ -47,6 +48,7 @@ export function PoolDetailClient({
   poolMembers: initialPoolMembers,
   currentUserPoolMemberId,
   isCommissioner,
+  isAdmin,
 }: PoolDetailClientProps) {
   const router = useRouter();
   const [poolStatus, setPoolStatus] = useState(pool.status);
@@ -168,9 +170,11 @@ export function PoolDetailClient({
         {isCommissioner && showAdminPanel && (
           <PoolAdminPanel
             poolId={pool.id}
+            tournamentId={pool.tournament.id}
             currentStatus={poolStatus}
             existingInviteEmails={poolInvites.map((i) => i.email)}
             onInviteCreated={handleNewInvite}
+            isAdmin={isAdmin}
           />
         )}
       </div>
