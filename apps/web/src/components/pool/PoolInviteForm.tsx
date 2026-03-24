@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { trpc } from "@/lib/trpc/client";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -169,9 +169,6 @@ export function PoolInviteForm({
             className="w-full rounded p-2 text-black"
             placeholder="Enter nickname"
           />
-        </div>
-        <div className="relative">
-          <Toaster containerStyle={{ position: "absolute" }} />
         </div>
         <button
           type="submit"

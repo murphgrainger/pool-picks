@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Select from "react-select";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { trpc } from "@/lib/trpc/client";
 import { PoolInviteForm } from "./PoolInviteForm";
 import { Spinner } from "@/components/ui/Spinner";
@@ -132,7 +132,6 @@ export function PoolAdminPanel({
 
   return (
     <div className="shadow rounded bg-grey-200 w-full m-2 text-white">
-      <Toaster />
       <div className="p-5 flex flex-col space-y-2">
         <label>Pool Status</label>
         <Select

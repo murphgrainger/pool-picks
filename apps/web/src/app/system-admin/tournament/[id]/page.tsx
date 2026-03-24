@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Select from "react-select";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { trpc } from "@/lib/trpc/client";
 import { formattedDate } from "@pool-picks/utils";
@@ -115,7 +115,6 @@ export default function TournamentAdminPage() {
 
   return (
     <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
-      <Toaster />
       <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
         <div className="w-full">
           <h3>{tournament.name}</h3>
