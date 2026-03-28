@@ -34,7 +34,9 @@ export function PickCard({ pick, index }: PickCardProps) {
   const showStatus =
     pick.status === "CUT" || pick.status === "WD" ? pick.status : "--";
   const bgColorClass =
-    index > 3 || pick.score_under_par === null ? "bg-black" : "bg-grey-100";
+    index > 3 || pick.score_under_par === null
+      ? "bg-black"
+      : "bg-gradient-to-br from-grey-100 to-grey-200";
 
   return (
     <div className={`${bgColorClass} mb-4 rounded p-4`}>
