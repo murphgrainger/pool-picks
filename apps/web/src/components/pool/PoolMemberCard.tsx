@@ -86,7 +86,7 @@ export function PoolMemberCard({
 
   if (poolStatus === "Open") {
     return (
-      <div className="w-full mt-6 p-6 rounded bg-grey-200" key={member.id}>
+      <div className="w-full mt-6 p-6 rounded bg-gradient-to-br from-grey-200 to-grey-100/50" key={member.id}>
         {!currentUserCard && (
           <div className="flex justify-between">
             <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
@@ -117,7 +117,7 @@ export function PoolMemberCard({
             .map((athlete) => (
               <p
                 key={athlete.id}
-                className="p-2 mb-2 bg-grey-100 rounded"
+                className="p-2 mb-2 bg-gradient-to-br from-grey-100 to-grey-200 rounded"
               >
                 {athlete.full_name}
               </p>
@@ -128,7 +128,7 @@ export function PoolMemberCard({
 
   if (!member.picks?.length) {
     return (
-      <div className="w-full mt-6 p-6 rounded bg-grey-200 flex justify-between items-center">
+      <div className="w-full mt-6 p-6 rounded bg-gradient-to-br from-grey-200 to-grey-100/50 flex justify-between items-center">
         <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
         <span className="italic text-xs">No Picks Submitted</span>
       </div>
@@ -137,7 +137,7 @@ export function PoolMemberCard({
 
   return (
     <div
-      className="w-full mt-6 p-6 pb-2 rounded bg-grey-200"
+      className="w-full mt-6 p-6 pb-2 rounded bg-gradient-to-br from-grey-200 to-grey-100/50"
       key={member.id}
     >
       <div className="flex items-center pb-4 pt-0">

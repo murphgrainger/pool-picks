@@ -45,22 +45,25 @@ async function updateAthleteRankings(parsedAthletes: Athlete[]) {
   let notFound = 0;
   const missingNames: string[] = [];
 
-  await Promise.all(
-    parsedAthletes.map(async (athlete) => {
-      const result = await prisma.athlete.updateMany({
-        where: { full_name: athlete.full_name },
-        data: { ranking: athlete.ranking },
-      });
-      if (result.count > 0) {
-        updated++;
-      } else {
-        notFound++;
-        if (missingNames.length < 10) {
-          missingNames.push(athlete.full_name);
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < parsedAthletes.length; i += BATCH_SIZE) {
+    await Promise.all(
+      parsedAthletes.slice(i, i + BATCH_SIZE).map(async (athlete) => {
+        const result = await prisma.athlete.updateMany({
+          where: { full_name: athlete.full_name },
+          data: { ranking: athlete.ranking },
+        });
+        if (result.count > 0) {
+          updated++;
+        } else {
+          notFound++;
+          if (missingNames.length < 10) {
+            missingNames.push(athlete.full_name);
+          }
         }
-      }
-    })
-  );
+      })
+    );
+  }
 
   return { updated, notFound, missingNames };
 }

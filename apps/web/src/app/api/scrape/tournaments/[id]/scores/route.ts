@@ -137,8 +137,12 @@ async function fetchGolfData(id: string) {
   // ESPN silently returns the most recent event when the requested event
   // doesn't have data yet. Verify we got the right one.
   if (event.id !== String(tournament.external_id)) {
+    const now = new Date();
+    const isPast = tournament.end_date && tournament.end_date < now;
     throw new Error(
-      "This tournament hasn't started yet — no scores to update."
+      isPast
+        ? "ESPN no longer has live scoreboard data for this completed tournament."
+        : "This tournament hasn't started yet — no scores to update."
     );
   }
 
@@ -214,43 +218,46 @@ async function updateGolfData(
   if (!parsedAthleteData.length)
     throw new Error("No data available for this tournament!");
 
-  await Promise.all(
-    parsedAthleteData.map(async (athleteData) => {
-      const existingAthlete = await prisma.athlete.upsert({
-        where: { full_name: athleteData.full_name },
-        create: { full_name: athleteData.full_name },
-        update: {},
-      });
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < parsedAthleteData.length; i += BATCH_SIZE) {
+    await Promise.all(
+      parsedAthleteData.slice(i, i + BATCH_SIZE).map(async (athleteData) => {
+        const existingAthlete = await prisma.athlete.upsert({
+          where: { full_name: athleteData.full_name },
+          create: { full_name: athleteData.full_name },
+          update: {},
+        });
 
-      const scoreData = {
-        score_round_one: athleteData.score_round_one,
-        score_round_two: athleteData.score_round_two,
-        score_round_three: athleteData.score_round_three,
-        score_round_four: athleteData.score_round_four,
-        score_sum: athleteData.score_sum,
-        score_under_par: athleteData.score_under_par,
-        score_today: athleteData.score_today,
-        position: athleteData.position,
-        thru: athleteData.thru,
-        status: athleteData.status,
-      };
+        const scoreData = {
+          score_round_one: athleteData.score_round_one,
+          score_round_two: athleteData.score_round_two,
+          score_round_three: athleteData.score_round_three,
+          score_round_four: athleteData.score_round_four,
+          score_sum: athleteData.score_sum,
+          score_under_par: athleteData.score_under_par,
+          score_today: athleteData.score_today,
+          position: athleteData.position,
+          thru: athleteData.thru,
+          status: athleteData.status,
+        };
 
-      await prisma.athletesInTournaments.upsert({
-        where: {
-          tournament_id_athlete_id: {
+        await prisma.athletesInTournaments.upsert({
+          where: {
+            tournament_id_athlete_id: {
+              tournament_id: tournamentId,
+              athlete_id: existingAthlete.id,
+            },
+          },
+          create: {
             tournament_id: tournamentId,
             athlete_id: existingAthlete.id,
+            ...scoreData,
           },
-        },
-        create: {
-          tournament_id: tournamentId,
-          athlete_id: existingAthlete.id,
-          ...scoreData,
-        },
-        update: scoreData,
-      });
-    })
-  );
+          update: scoreData,
+        });
+      })
+    );
+  }
 
   if (parsedTournamentData?.cut_line) {
     await prisma.tournament.update({
