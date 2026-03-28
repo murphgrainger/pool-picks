@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, type SubmitHandler } from "react-hook-form";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { trpc } from "@/lib/trpc/client";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -57,9 +57,6 @@ export function UsernameCreateForm({
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-black"
           />
         </label>
-        <div className="relative">
-          <Toaster containerStyle={{ position: "absolute" }} />
-        </div>
         <button
           disabled={updateUsername.isPending}
           type="submit"
