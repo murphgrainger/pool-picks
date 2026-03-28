@@ -36,14 +36,16 @@ function statusColor(status: string) {
 
 function poolStatusColor(status: string) {
   switch (status) {
+    case "Setup":
+      return "bg-blue-500/20 text-blue-300";
+    case "Open":
+      return "bg-yellow/20 text-yellow";
+    case "Locked":
+      return "bg-red-500/20 text-red-400";
     case "Active":
       return "bg-green-500/20 text-green-300";
     case "Complete":
       return "bg-grey-100/50 text-grey-50";
-    case "Locked":
-      return "bg-red-500/20 text-red-400";
-    case "Open":
-      return "bg-yellow/20 text-yellow";
     default:
       return "bg-grey-100/50 text-grey-50";
   }
@@ -205,7 +207,7 @@ function PoolList({ pools }: { pools: Pool[] }) {
                 <span>{pool.pool_invites.length} pending</span>
               )}
               <span
-                className={`text-xs px-2 py-0.5 rounded ${poolStatusColor(pool.status)}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded-full ${poolStatusColor(pool.status)}`}
               >
                 {pool.status}
               </span>
@@ -237,14 +239,16 @@ function TournamentCard({
           <p className="text-lg font-bold">
             &#9971; {tournament.name}
           </p>
-          <p className="text-sm text-grey-50">
-            {formatTournamentDates(tournament.start_date, tournament.end_date)}
-          </p>
-          <span
-            className={`inline-block text-xs px-2 py-0.5 rounded mt-1 ${statusColor(tournament.status)}`}
-          >
-            {tournament.status}
-          </span>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-sm text-grey-50">
+              {formatTournamentDates(tournament.start_date, tournament.end_date)}
+            </p>
+            <span
+              className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor(tournament.status)}`}
+            >
+              {tournament.status}
+            </span>
+          </div>
         </div>
         <ChevronRight className="w-5 h-5 text-grey-75 group-hover:text-white shrink-0 ml-2" />
       </Link>
