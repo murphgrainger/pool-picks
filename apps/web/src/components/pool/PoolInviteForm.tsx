@@ -112,7 +112,7 @@ export function PoolInviteForm({
   };
 
   return (
-    <div className="w-full bg-grey-100 rounded p-4 mt-4">
+    <div className="w-full bg-gradient-to-br from-grey-100 to-grey-200 rounded p-4 mt-4">
       <h3 className="text-lg font-bold mb-4">Send Pool Invite</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">

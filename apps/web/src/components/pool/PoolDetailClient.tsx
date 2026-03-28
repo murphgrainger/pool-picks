@@ -234,7 +234,7 @@ export function PoolDetailClient({
 
       {poolInvites.map((invite) => (
         <div
-          className="w-full mt-6 p-6 rounded bg-grey-100 flex justify-between items-center"
+          className="w-full mt-6 p-6 rounded bg-gradient-to-br from-grey-100 to-grey-200 flex justify-between items-center"
           key={invite.id}
         >
           <p>{invite.nickname}</p>

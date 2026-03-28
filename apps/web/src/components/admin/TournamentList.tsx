@@ -197,7 +197,7 @@ function PoolList({ pools }: { pools: Pool[] }) {
         <Link
           key={pool.id}
           href={`/pool/${pool.id}`}
-          className="flex items-center justify-between p-3 mb-1 bg-grey-100 rounded group"
+          className="flex items-center justify-between p-3 mb-1 bg-gradient-to-br from-grey-100 to-grey-200 rounded group"
         >
           <div className="min-w-0">
             <p className="font-bold">{pool.name}</p>
@@ -272,7 +272,7 @@ function TournamentCard({
           {pastOpen && (
             <div className="mt-1 space-y-2">
               {pastVersions.map((past) => (
-                <div key={past.id} className="bg-grey-100 rounded p-3">
+                <div key={past.id} className="bg-gradient-to-br from-grey-100 to-grey-200 rounded p-3">
                   <Link
                     href={`/system-admin/tournament/${past.id}`}
                     className="flex items-center justify-between group"
