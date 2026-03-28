@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { reformatPoolMembers, type PoolMemberFormatted } from "@pool-picks/utils";
+import toast from "react-hot-toast";
+import { reformatPoolMembers, formatTournamentDates, type PoolMemberFormatted } from "@pool-picks/utils";
 import { trpc } from "@/lib/trpc/client";
 import { PoolStatusCard } from "./PoolStatusCard";
 import { PoolAdminPanel } from "./PoolAdminPanel";
@@ -57,6 +58,10 @@ export function PoolDetailClient({
     useState<PoolMemberFormatted[]>(initialPoolMembers);
   const [poolInvites, setPoolInvites] = useState(pool.pool_invites);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(
+    new Date(pool.tournament.updated_at)
+  );
+
 
   const totalPotAmount = updatedPoolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = pool.tournament.external_id
@@ -65,26 +70,58 @@ export function PoolDetailClient({
 
   const showLogo = pool.tournament.name === "Masters Tournament";
 
-  const formatDate = (date: Date) =>
-    new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const tournamentDates = `${formatDate(pool.tournament.start_date)} – ${formatDate(pool.tournament.end_date)}`;
+  const tournamentDates = formatTournamentDates(pool.tournament.start_date, pool.tournament.end_date);
 
   const getScores = trpc.pool.getScores.useQuery(
     { pool_id: pool.id },
     { enabled: false }
   );
 
+  const formatLastRefreshed = useCallback(() => {
+    const now = new Date();
+    const diffMs = now.getTime() - new Date(lastRefreshed).getTime();
+    const diffMin = Math.floor(diffMs / 60_000);
+    if (diffMin < 1) return "just now";
+    if (diffMin === 1) return "1 min ago";
+    if (diffMin < 60) return `${diffMin} min ago`;
+    const diffHrs = Math.floor(diffMin / 60);
+    if (diffHrs === 1) return "1 hr ago";
+    return `${diffHrs} hrs ago`;
+  }, [lastRefreshed]);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    const result = await getScores.refetch();
-    if (result.data) {
-      const updatedMembers = reformatPoolMembers(
-        result.data,
-        pool.tournament.id
+    try {
+      const response = await fetch(
+        `/api/scrape/tournaments/${pool.tournament_id}/scores`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
       );
-      setUpdatedPoolMembers(updatedMembers);
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        toast.error(data?.message || "Failed to refresh scores.");
+        setIsRefreshing(false);
+        return;
+      }
+
+      // Re-fetch pool scores from DB now that ESPN data is written
+      const result = await getScores.refetch();
+      if (result.data) {
+        setUpdatedPoolMembers(
+          reformatPoolMembers(result.data, pool.tournament.id)
+        );
+      }
+      setLastRefreshed(new Date());
+      toast.success("Scores updated!");
+    } catch {
+      toast.error("Network error refreshing scores.");
+    } finally {
+      setIsRefreshing(false);
     }
-    setIsRefreshing(false);
   };
 
   const handleNewInvite = (newInvite: {
@@ -134,20 +171,25 @@ export function PoolDetailClient({
 
         {/* Refresh button */}
         {(poolStatus === "Active" || poolStatus === "Locked") && (
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="mt-4 bg-grey-200 text-white rounded px-4 py-2 hover:bg-grey-100"
-          >
-            {isRefreshing ? (
-              <span className="flex items-center">
-                <Spinner className="w-4 h-4 mr-2" />
-                Refreshing...
-              </span>
-            ) : (
-              "Refresh Scores"
-            )}
-          </button>
+          <div className="flex flex-col items-center mt-4 gap-1">
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="bg-grey-200 text-white rounded px-4 py-2 hover:bg-grey-100"
+            >
+              {isRefreshing ? (
+                <span className="flex items-center">
+                  <Spinner className="w-4 h-4 mr-2" />
+                  Refreshing...
+                </span>
+              ) : (
+                "Refresh Scores"
+              )}
+            </button>
+            <p className="text-xs text-grey-50">
+              Updated {formatLastRefreshed()}
+            </p>
+          </div>
         )}
 
         <PoolStatusCard status={poolStatus} />

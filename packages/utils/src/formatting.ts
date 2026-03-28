@@ -28,6 +28,18 @@ export function formatTimeAgo(date: Date): string {
   return `${Math.floor(rounded / 1440)} days ago`;
 }
 
+export function formatTournamentDate(date: Date): string {
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+export function formatTournamentDates(start: Date, end: Date): string {
+  return `${formatTournamentDate(start)} – ${formatTournamentDate(end)}`;
+}
+
 export function formattedDate(date: Date): string {
   const formatted = new Date(date).toLocaleString("en-US", {
     month: "2-digit",

@@ -43,6 +43,7 @@ export const tournamentRouter = router({
           cut_line: true,
           external_id: true,
           start_date: true,
+          end_date: true,
           updated_at: true,
         },
       });

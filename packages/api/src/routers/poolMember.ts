@@ -62,6 +62,9 @@ export const poolMemberRouter = router({
             name: true,
             status: true,
             amount_entry: true,
+            tournament: {
+              select: { name: true },
+            },
           },
         },
         user: {

@@ -5,7 +5,7 @@ import Select from "react-select";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { trpc } from "@/lib/trpc/client";
-import { formattedDate } from "@pool-picks/utils";
+import { formattedDate, formatTournamentDates } from "@pool-picks/utils";
 import { Spinner } from "@/components/ui/Spinner";
 
 interface SelectValues {
@@ -118,6 +118,9 @@ export default function TournamentAdminPage() {
       <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
         <div className="w-full">
           <h3>{tournament.name}</h3>
+          <p className="text-sm text-grey-50">
+            {formatTournamentDates(tournament.start_date, tournament.end_date)}
+          </p>
           <p>Last Updated: {updatedAt}</p>
           {tournamentHealth.data && (
             <div className="flex gap-3 mt-2">
