@@ -124,6 +124,18 @@ export function PoolDetailClient({
     }
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    setPoolStatus(newStatus);
+    // Refetch member data so the UI reflects the new status
+    // (e.g. other players' picks become visible when Locked)
+    const result = await getScores.refetch();
+    if (result.data) {
+      setUpdatedPoolMembers(
+        reformatPoolMembers(result.data, pool.tournament.id)
+      );
+    }
+  };
+
   const handleNewInvite = (newInvite: {
     id: number;
     email: string;
@@ -216,6 +228,7 @@ export function PoolDetailClient({
             currentStatus={poolStatus}
             existingInviteEmails={poolInvites.map((i) => i.email)}
             onInviteCreated={handleNewInvite}
+            onStatusChange={handleStatusChange}
             isAdmin={isAdmin}
           />
         )}

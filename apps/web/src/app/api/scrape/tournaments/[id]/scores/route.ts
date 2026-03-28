@@ -137,8 +137,12 @@ async function fetchGolfData(id: string) {
   // ESPN silently returns the most recent event when the requested event
   // doesn't have data yet. Verify we got the right one.
   if (event.id !== String(tournament.external_id)) {
+    const now = new Date();
+    const isPast = tournament.end_date && tournament.end_date < now;
     throw new Error(
-      "This tournament hasn't started yet — no scores to update."
+      isPast
+        ? "ESPN no longer has live scoreboard data for this completed tournament."
+        : "This tournament hasn't started yet — no scores to update."
     );
   }
 

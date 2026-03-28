@@ -18,6 +18,7 @@ interface PoolAdminPanelProps {
   currentStatus: string;
   existingInviteEmails: string[];
   onInviteCreated: (invite: { id: number; email: string; nickname: string; status: string }) => void;
+  onStatusChange: (newStatus: string) => void;
   isAdmin: boolean;
 }
 
@@ -27,6 +28,7 @@ export function PoolAdminPanel({
   currentStatus,
   existingInviteEmails,
   onInviteCreated,
+  onStatusChange,
   isAdmin,
 }: PoolAdminPanelProps) {
   const [selectedOption, setSelectedOption] = useState({
@@ -45,10 +47,10 @@ export function PoolAdminPanel({
   );
 
   const updatePool = trpc.pool.updateStatus.useMutation({
-    onSuccess: () => {
-      if (pendingStatus) {
-        setSelectedOption({ value: pendingStatus, label: pendingStatus });
-      }
+    onSuccess: (_data, variables) => {
+      const newStatus = variables.status;
+      setSelectedOption({ value: newStatus, label: newStatus });
+      onStatusChange(newStatus);
       setShowConfirmModal(false);
       setPendingStatus(null);
       setPendingNotify(null);
