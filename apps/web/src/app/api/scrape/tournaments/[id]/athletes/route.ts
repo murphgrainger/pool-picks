@@ -75,29 +75,32 @@ async function updateAthleteField(
     throw new Error("No athlete data available for this tournament!");
   }
 
-  await Promise.all(
-    parsedAthletes.map(async (athlete) => {
-      const existingAthlete = await prisma.athlete.upsert({
-        where: { full_name: athlete.full_name },
-        create: { full_name: athlete.full_name },
-        update: {},
-      });
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < parsedAthletes.length; i += BATCH_SIZE) {
+    await Promise.all(
+      parsedAthletes.slice(i, i + BATCH_SIZE).map(async (athlete) => {
+        const existingAthlete = await prisma.athlete.upsert({
+          where: { full_name: athlete.full_name },
+          create: { full_name: athlete.full_name },
+          update: {},
+        });
 
-      await prisma.athletesInTournaments.upsert({
-        where: {
-          tournament_id_athlete_id: {
+        await prisma.athletesInTournaments.upsert({
+          where: {
+            tournament_id_athlete_id: {
+              tournament_id: tournamentId,
+              athlete_id: existingAthlete.id,
+            },
+          },
+          create: {
             tournament_id: tournamentId,
             athlete_id: existingAthlete.id,
           },
-        },
-        create: {
-          tournament_id: tournamentId,
-          athlete_id: existingAthlete.id,
-        },
-        update: {},
-      });
-    })
-  );
+          update: {},
+        });
+      })
+    );
+  }
 }
 
 export async function POST(

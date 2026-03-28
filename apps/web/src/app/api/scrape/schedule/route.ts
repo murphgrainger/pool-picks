@@ -104,33 +104,38 @@ async function fetchSchedule(year: number): Promise<ParsedTournament[]> {
 }
 
 async function upsertTournaments(tournaments: ParsedTournament[]) {
-  const results = await Promise.all(
-    tournaments.map((t) =>
-      prisma.tournament.upsert({
-        where: { external_id: t.external_id },
-        update: {
-          name: t.name,
-          course: t.course,
-          city: t.city,
-          region: t.region,
-          start_date: t.start_date,
-          end_date: t.end_date,
-        },
-        create: {
-          name: t.name,
-          external_id: t.external_id,
-          course: t.course,
-          city: t.city,
-          region: t.region,
-          start_date: t.start_date,
-          end_date: t.end_date,
-          status: "Scheduled",
-        },
-      })
-    )
-  );
+  let total = 0;
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < tournaments.length; i += BATCH_SIZE) {
+    await Promise.all(
+      tournaments.slice(i, i + BATCH_SIZE).map((t) =>
+        prisma.tournament.upsert({
+          where: { external_id: t.external_id },
+          update: {
+            name: t.name,
+            course: t.course,
+            city: t.city,
+            region: t.region,
+            start_date: t.start_date,
+            end_date: t.end_date,
+          },
+          create: {
+            name: t.name,
+            external_id: t.external_id,
+            course: t.course,
+            city: t.city,
+            region: t.region,
+            start_date: t.start_date,
+            end_date: t.end_date,
+            status: "Scheduled",
+          },
+        })
+      )
+    );
+    total += Math.min(BATCH_SIZE, tournaments.length - i);
+  }
 
-  return { total: results.length };
+  return { total };
 }
 
 export async function POST(request: NextRequest) {
