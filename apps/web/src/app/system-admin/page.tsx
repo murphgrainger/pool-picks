@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServerCaller } from "@/lib/trpc/server";
 import { prisma } from "@pool-picks/db";
 import { SyncScheduleButton } from "@/components/admin/SyncScheduleButton";
+import { formatTournamentDates } from "@pool-picks/utils";
 
 export default async function SystemAdminPage() {
   const supabase = createClient();
@@ -50,6 +51,9 @@ export default async function SystemAdminPage() {
                   <div>
                     <p className="text-lg font-bold">
                       &#9971; {tournament.name}
+                    </p>
+                    <p className="text-sm text-grey-50">
+                      {formatTournamentDates(tournament.start_date, tournament.end_date)}
                     </p>
                     <p>Status: {tournament.status}</p>
                   </div>

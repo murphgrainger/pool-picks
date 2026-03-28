@@ -4,8 +4,13 @@ export const maxDuration = 60;
 import { NextResponse } from "next/server";
 import { prisma } from "@pool-picks/db";
 import { createRouteHandlerClient } from "@/lib/supabase/route";
-import axios from "axios";
-import * as cheerio from "cheerio";
+import {
+  assertValidResponse,
+  validateScoreboardResponse,
+} from "../../../espn-validation";
+
+const ESPN_API_BASE =
+  "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard";
 
 interface Athlete {
   full_name: string;
@@ -18,17 +23,46 @@ async function fetchAthleteField(id: string): Promise<Athlete[]> {
   if (!tournament || !tournament.external_id)
     throw new Error("Invalid tournament ID requested.");
 
-  const url = `https://www.espn.com/golf/leaderboard/_/tournamentId/${tournament.external_id}`;
-  const response = await axios.get(url);
-  const $ = cheerio.load(response.data);
+  const url = `${ESPN_API_BASE}?event=${tournament.external_id}`;
+  const response = await fetch(url);
+  if (!response.ok)
+    throw new Error(`ESPN API returned ${response.status}`);
+
+  const data = await response.json();
+  await assertValidResponse(data, validateScoreboardResponse, "scoreboard (athletes)");
+
+  const event = data.events[0];
+
+  // ESPN silently returns the most recent event when the requested event
+  // doesn't have data yet. Verify we got the right one.
+  if (event.id !== String(tournament.external_id)) {
+    throw new Error(
+      "The field for this tournament hasn't been announced yet. Try again closer to the event."
+    );
+  }
+
+  const competition = event.competitions?.[0];
+  if (!competition) throw new Error("No competition data in ESPN response.");
+
+  const competitors = competition.competitors || [];
+  if (!competitors.length) {
+    const status = competition.status?.type?.name;
+    if (status === "STATUS_SCHEDULED") {
+      throw new Error(
+        "The field for this tournament hasn't been announced yet. Try again closer to the event."
+      );
+    }
+    throw new Error("No athletes found for this tournament.");
+  }
+
   const athletes: Athlete[] = [];
 
-  $("tr.PlayerRow__Overview").each((_index, element) => {
-    const fullName = $(element).find(".leaderboard_player_name").text();
+  for (const c of competitors) {
+    const fullName = c.athlete?.fullName;
     if (fullName) {
       athletes.push({ full_name: fullName });
     }
-  });
+  }
 
   return athletes;
 }

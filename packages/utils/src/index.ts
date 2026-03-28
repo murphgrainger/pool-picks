@@ -9,6 +9,7 @@ export {
   formatToPar,
   ordinalSuffix,
   formatTimeAgo,
+  formatTournamentDates,
   formattedDate,
   timeAgo,
 } from "./formatting";

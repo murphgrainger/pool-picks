@@ -25,6 +25,9 @@ interface PoolMembership {
     name: string;
     status: string;
     amount_entry: number;
+    tournament: {
+      name: string;
+    };
   };
 }
 
@@ -178,7 +181,8 @@ export function InviteActions({
                     </span>
                   )}
                   <div className="text-center">
-                    <h3 className="mb-2">{member.pool.name}</h3>
+                    <h3 className="mb-1">{member.pool.name}</h3>
+                    <p className="text-xs text-grey-50 mb-2">{member.pool.tournament.name}</p>
                     <div className="flex flex-wrap justify-center">
                       <Link
                         href={`/pool/${member.pool.id}`}
@@ -236,7 +240,8 @@ export function InviteActions({
                       </span>
                     )}
                     <div className="text-center">
-                      <h3 className="mb-2">{member.pool.name}</h3>
+                      <h3 className="mb-1">{member.pool.name}</h3>
+                      <p className="text-xs text-grey-50 mb-2">{member.pool.tournament.name}</p>
                       <div className="flex flex-wrap justify-center">
                         <Link
                           href={`/pool/${member.pool.id}`}
