@@ -39,9 +39,6 @@ yarn-error.log*
 
 package-lock.json
 
-# salesforce
-.sfdx/
-
 # internal docs
 API-OPTIONS.md
 ESPN-JSON-API.md
