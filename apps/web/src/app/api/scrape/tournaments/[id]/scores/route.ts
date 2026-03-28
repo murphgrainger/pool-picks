@@ -4,6 +4,10 @@ export const maxDuration = 60;
 import { NextResponse } from "next/server";
 import { prisma } from "@pool-picks/db";
 import { createRouteHandlerClient } from "@/lib/supabase/route";
+import {
+  assertValidResponse,
+  validateScoreboardResponse,
+} from "../../../espn-validation";
 
 const ESPN_API_BASE =
   "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard";
@@ -126,8 +130,9 @@ async function fetchGolfData(id: string) {
     throw new Error(`ESPN API returned ${response.status}`);
 
   const data = await response.json();
-  const event = data.events?.[0];
-  if (!event) throw new Error("No event data returned from ESPN API.");
+  await assertValidResponse(data, validateScoreboardResponse, "scoreboard (scores)");
+
+  const event = data.events[0];
 
   // ESPN silently returns the most recent event when the requested event
   // doesn't have data yet. Verify we got the right one.

@@ -4,6 +4,11 @@ export const maxDuration = 60;
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@pool-picks/db";
 import { createRouteHandlerClient } from "@/lib/supabase/route";
+import {
+  assertValidResponse,
+  validateScheduleResponse,
+  validateEventDetailsResponse,
+} from "../espn-validation";
 
 const ESPN_SCOREBOARD_API =
   "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard";
@@ -28,6 +33,12 @@ async function fetchEventDetails(
     if (!response.ok) return { course: "", city: "", region: "" };
 
     const data = await response.json();
+    const detailsValidation = validateEventDetailsResponse(data);
+    if (!detailsValidation.valid) {
+      console.warn(`Event details validation failed for ${eventId}:`, detailsValidation.errors);
+      return { course: "", city: "", region: "" };
+    }
+
     const courseData = data.courses?.[0];
     if (!courseData) return { course: "", city: "", region: "" };
 
@@ -48,6 +59,8 @@ async function fetchSchedule(year: number): Promise<ParsedTournament[]> {
     throw new Error(`ESPN API returned ${response.status}`);
 
   const data = await response.json();
+  await assertValidResponse(data, validateScheduleResponse, "scoreboard (schedule)");
+
   const events = data.events || [];
   const tournaments: ParsedTournament[] = [];
 
