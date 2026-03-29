@@ -7,6 +7,7 @@ import {
 } from "@pool-picks/utils";
 import { router, protectedProcedure } from "../trpc";
 import { autoAdvanceScheduledTournaments } from "./tournament";
+import { autoCompleteStaleLockedPools } from "./pool";
 
 export const poolMemberRouter = router({
   getPicks: protectedProcedure
@@ -58,6 +59,7 @@ export const poolMemberRouter = router({
 
   listByUser: protectedProcedure.query(async ({ ctx }) => {
     await autoAdvanceScheduledTournaments();
+    await autoCompleteStaleLockedPools();
     const memberships = await prisma.poolMember.findMany({
       where: { user_id: ctx.user.id },
       select: {
@@ -90,7 +92,7 @@ export const poolMemberRouter = router({
     const activePoolIds = memberships
       .filter((m) => {
         const tournamentStatus = resolveTournamentStatus(m.pool.tournament);
-        const phase = getEffectivePoolPhase(m.pool.status, tournamentStatus, m.pool.tournament.end_date);
+        const phase = getEffectivePoolPhase(m.pool.status, tournamentStatus);
         return phase === "live" || phase === "completed";
       })
       .map((m) => m.pool.id);

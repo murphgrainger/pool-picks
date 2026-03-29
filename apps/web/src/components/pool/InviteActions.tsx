@@ -89,7 +89,7 @@ const PHASE_GROUP_ORDER: PoolPhase[] = ["live", "open", "locked-awaiting", "setu
 
 function getMemberPhase(member: PoolMembership): PoolPhase {
   const tournamentStatus = resolveTournamentStatus(member.pool.tournament);
-  return getEffectivePoolPhase(member.pool.status, tournamentStatus, member.pool.tournament.end_date);
+  return getEffectivePoolPhase(member.pool.status, tournamentStatus);
 }
 
 function groupPoolsByPhase(pools: PoolMembership[]) {

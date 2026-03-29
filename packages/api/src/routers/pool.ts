@@ -6,7 +6,67 @@ import {
   protectedProcedure,
   commissionerProcedure,
 } from "../trpc";
-import { sendPoolOpenEmail } from "../lib/email";
+import { sendPoolOpenEmail, sendPoolAutoCompleteEmail } from "../lib/email";
+
+const STALE_POOL_DAYS = 7;
+
+/**
+ * Auto-completes Locked pools whose tournament ended 7+ days ago.
+ * Updates the DB status to "Complete" and emails the commissioner.
+ * Runs as a side-effect on key read paths.
+ */
+export async function autoCompleteStaleLockedPools() {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - STALE_POOL_DAYS);
+
+  const stalePools = await prisma.pool.findMany({
+    where: {
+      status: { in: ["Locked", "Active"] },
+      tournament: {
+        status: "Completed",
+        end_date: { lt: cutoff },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      tournament: { select: { name: true } },
+      pool_members: {
+        where: { role: "COMMISSIONER" },
+        select: { user: { select: { email: true } } },
+      },
+    },
+  });
+
+  if (stalePools.length === 0) return;
+
+  // Update all stale pools to Complete
+  await prisma.pool.updateMany({
+    where: { id: { in: stalePools.map((p) => p.id) } },
+    data: { status: "Complete" },
+  });
+
+  // Email each commissioner (non-blocking)
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  Promise.allSettled(
+    stalePools.flatMap((pool) =>
+      pool.pool_members.map((m) =>
+        sendPoolAutoCompleteEmail({
+          to: m.user.email,
+          poolName: pool.name,
+          tournamentName: pool.tournament.name,
+          appBaseUrl,
+          poolId: pool.id,
+        })
+      )
+    )
+  ).then((results) => {
+    const failed = results.filter((r) => r.status === "rejected");
+    if (failed.length > 0) {
+      console.error(`Failed to send ${failed.length} auto-complete emails`);
+    }
+  });
+}
 
 export const poolRouter = router({
   list: protectedProcedure.query(async () => {
@@ -18,6 +78,7 @@ export const poolRouter = router({
   getById: protectedProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
+      await autoCompleteStaleLockedPools();
       return prisma.pool.findUnique({
         where: { id: input.id },
         select: {

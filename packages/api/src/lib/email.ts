@@ -158,6 +158,53 @@ interface SendPoolOpenEmailParams {
   poolId: number;
 }
 
+// --- Pool Auto-Complete Notification Email ---
+
+interface SendPoolAutoCompleteEmailParams {
+  to: string;
+  poolName: string;
+  tournamentName: string;
+  appBaseUrl: string;
+  poolId: number;
+}
+
+export async function sendPoolAutoCompleteEmail({
+  to,
+  poolName,
+  tournamentName,
+  appBaseUrl,
+  poolId,
+}: SendPoolAutoCompleteEmailParams): Promise<{ success: boolean; error?: string }> {
+  const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+  const poolUrl = `${appBaseUrl}/pool/${poolId}`;
+
+  const content = `
+<h2 style="margin:0 0 16px;color:#181818;font-size:20px;">Pool Automatically Completed</h2>
+<p style="margin:0 0 8px;color:#333333;font-size:16px;line-height:1.5;">
+  The tournament for <strong>${poolName}</strong> (${tournamentName}) ended over a week ago.
+</p>
+<p style="margin:0 0 32px;color:#555555;font-size:14px;line-height:1.5;">
+  Your pool has been automatically marked as complete. You can view the final results below.
+</p>
+${buildButton(poolUrl, "View Results")}`;
+
+  try {
+    const resend = getResendClient();
+    await resend.emails.send({
+      from: `Pool Picks <${fromAddress}>`,
+      to,
+      subject: `${poolName} has been automatically completed`,
+      html: buildEmailWrapper(content),
+    });
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown email error";
+    return { success: false, error: message };
+  }
+}
+
+// --- Pool Open Notification Email ---
+
 export async function sendPoolOpenEmail({
   to,
   poolName,
