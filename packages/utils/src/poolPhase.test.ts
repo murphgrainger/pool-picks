@@ -25,8 +25,8 @@ describe("getEffectivePoolPhase", () => {
     expect(getEffectivePoolPhase("Locked", "Active")).toBe("live");
   });
 
-  it("returns completed for Locked pool with Completed tournament", () => {
-    expect(getEffectivePoolPhase("Locked", "Completed")).toBe("completed");
+  it("returns live for Locked pool with Completed tournament (pool not finalized yet)", () => {
+    expect(getEffectivePoolPhase("Locked", "Completed")).toBe("live");
   });
 
   // Complete pool — always "completed" regardless of tournament status
@@ -40,7 +40,7 @@ describe("getEffectivePoolPhase", () => {
   it("treats legacy Active pool status same as Locked", () => {
     expect(getEffectivePoolPhase("Active", "Scheduled")).toBe("locked-awaiting");
     expect(getEffectivePoolPhase("Active", "Active")).toBe("live");
-    expect(getEffectivePoolPhase("Active", "Completed")).toBe("completed");
+    expect(getEffectivePoolPhase("Active", "Completed")).toBe("live");
   });
 
   // Edge case: unknown pool status

@@ -184,7 +184,7 @@ export default function TournamentAdminPage() {
                   disabled={updateTournament.isPending}
                   className="text-sm bg-grey-100 text-white px-4 py-2 rounded hover:bg-grey-75"
                 >
-                  Keep Active (Rain Delay)
+                  Keep Active
                 </button>
               </div>
             </div>

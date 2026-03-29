@@ -59,7 +59,7 @@ export function PoolDetailClient({
 }: PoolDetailClientProps) {
   const router = useRouter();
   const [poolStatus, setPoolStatus] = useState(pool.status);
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(isCommissioner);
 
   const tournamentStatus = useMemo(
     () => resolveTournamentStatus(pool.tournament),
@@ -196,8 +196,8 @@ export function PoolDetailClient({
           </div>
         </div>
 
-        {/* Refresh button */}
-        {phase === "live" && (
+        {/* Refresh button — only during active tournament */}
+        {phase === "live" && tournamentStatus === "Active" && (
           <div className="flex flex-col items-center mt-4 gap-1">
             <button
               onClick={handleRefresh}
@@ -221,23 +221,6 @@ export function PoolDetailClient({
 
         <PoolStatusCard phase={phase} />
 
-        {/* Commissioner prompt to finalize pool when tournament is done */}
-        {isCommissioner && phase === "completed" && poolStatus !== "Complete" && (
-          <div className="w-full mt-4 p-4 rounded bg-green-500/20 border border-green-500/30">
-            <p className="text-green-300 text-sm font-medium mb-2">
-              Tournament is over! Finalize your pool and share results.
-            </p>
-            <button
-              onClick={() => {
-                setShowAdminPanel(true);
-              }}
-              className="text-sm bg-green-500 text-black font-medium px-4 py-2 rounded hover:bg-green-300"
-            >
-              Complete Pool
-            </button>
-          </div>
-        )}
-
         {isCommissioner && (
           <button
             onClick={() => setShowAdminPanel((prev) => !prev)}
@@ -258,10 +241,10 @@ export function PoolDetailClient({
             poolId={pool.id}
             tournamentId={pool.tournament.id}
             currentStatus={poolStatus}
+            tournamentStatus={tournamentStatus}
             existingInviteEmails={poolInvites.map((i) => i.email)}
             onInviteCreated={handleNewInvite}
             onStatusChange={handleStatusChange}
-            isAdmin={isAdmin}
           />
         )}
       </div>

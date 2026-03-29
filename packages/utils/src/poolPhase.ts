@@ -29,9 +29,8 @@ export function getEffectivePoolPhase(
         case "Scheduled":
           return "locked-awaiting";
         case "Active":
-          return "live";
         case "Completed":
-          return "completed";
+          return "live";
         default:
           return "locked-awaiting";
       }
