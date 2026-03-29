@@ -1,7 +1,15 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { getEffectivePoolPhase } from "./poolPhase";
 
+function utcDate(year: number, month: number, day: number) {
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
 describe("getEffectivePoolPhase", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   // Setup pool — always "setup" regardless of tournament status
   it("returns setup for Setup pools regardless of tournament status", () => {
     expect(getEffectivePoolPhase("Setup", "Scheduled")).toBe("setup");
@@ -25,7 +33,21 @@ describe("getEffectivePoolPhase", () => {
     expect(getEffectivePoolPhase("Locked", "Active")).toBe("live");
   });
 
-  it("returns live for Locked pool with Completed tournament (pool not finalized yet)", () => {
+  it("returns live for Locked pool with recently Completed tournament", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(utcDate(2026, 4, 15)); // 2 days after end
+
+    expect(getEffectivePoolPhase("Locked", "Completed", utcDate(2026, 4, 13))).toBe("live");
+  });
+
+  it("returns completed for Locked pool with tournament completed 7+ days ago", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(utcDate(2026, 4, 21)); // 8 days after end
+
+    expect(getEffectivePoolPhase("Locked", "Completed", utcDate(2026, 4, 13))).toBe("completed");
+  });
+
+  it("returns live for Locked pool with Completed tournament when no end date provided", () => {
     expect(getEffectivePoolPhase("Locked", "Completed")).toBe("live");
   });
 
@@ -40,7 +62,13 @@ describe("getEffectivePoolPhase", () => {
   it("treats legacy Active pool status same as Locked", () => {
     expect(getEffectivePoolPhase("Active", "Scheduled")).toBe("locked-awaiting");
     expect(getEffectivePoolPhase("Active", "Active")).toBe("live");
-    expect(getEffectivePoolPhase("Active", "Completed")).toBe("live");
+  });
+
+  it("treats legacy Active pool with stale completed tournament as completed", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(utcDate(2026, 4, 21));
+
+    expect(getEffectivePoolPhase("Active", "Completed", utcDate(2026, 4, 13))).toBe("completed");
   });
 
   // Edge case: unknown pool status

@@ -90,7 +90,7 @@ export const poolMemberRouter = router({
     const activePoolIds = memberships
       .filter((m) => {
         const tournamentStatus = resolveTournamentStatus(m.pool.tournament);
-        const phase = getEffectivePoolPhase(m.pool.status, tournamentStatus);
+        const phase = getEffectivePoolPhase(m.pool.status, tournamentStatus, m.pool.tournament.end_date);
         return phase === "live" || phase === "completed";
       })
       .map((m) => m.pool.id);

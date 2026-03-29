@@ -66,8 +66,8 @@ export function PoolDetailClient({
     [pool.tournament]
   );
   const phase = useMemo(
-    () => getEffectivePoolPhase(poolStatus, tournamentStatus),
-    [poolStatus, tournamentStatus]
+    () => getEffectivePoolPhase(poolStatus, tournamentStatus, pool.tournament.end_date),
+    [poolStatus, tournamentStatus, pool.tournament.end_date]
   );
   const [updatedPoolMembers, setUpdatedPoolMembers] =
     useState<PoolMemberFormatted[]>(initialPoolMembers);

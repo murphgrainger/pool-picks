@@ -18,7 +18,12 @@ interface PoolAdminPanelProps {
   currentStatus: string;
   tournamentStatus: string;
   existingInviteEmails: string[];
-  onInviteCreated: (invite: { id: number; email: string; nickname: string; status: string }) => void;
+  onInviteCreated: (invite: {
+    id: number;
+    email: string;
+    nickname: string;
+    status: string;
+  }) => void;
   onStatusChange: (newStatus: string) => void;
 }
 
@@ -97,7 +102,7 @@ export function PoolAdminPanel({
         {showCompletionAlert && (
           <div className="p-3 rounded bg-green-500/20 border border-green-500/30 mb-2">
             <p className="text-green-300 text-sm">
-              Tournament is over! Change the pool status to complete and share
+              Tournament is over! Change the pool status to Complete and share
               the results.
             </p>
           </div>
@@ -107,7 +112,9 @@ export function PoolAdminPanel({
         <Select
           instanceId="status"
           name="status"
-          onChange={(option) => handleStatusChange(option as SelectValues | null)}
+          onChange={(option) =>
+            handleStatusChange(option as SelectValues | null)
+          }
           options={selectOptions}
           value={selectedOption}
           isDisabled={updatePool.isPending}
@@ -117,7 +124,9 @@ export function PoolAdminPanel({
         {/* Tournament data pills */}
         {tournamentHealth.data && (
           <div className="mt-4 pt-4 border-t border-grey-100">
-            <label className="text-sm font-medium text-grey-50">Tournament Data</label>
+            <label className="text-sm font-medium text-grey-50">
+              Tournament Data
+            </label>
             <div className="flex gap-3 mt-2">
               <span
                 className={`text-xs px-2 py-1 rounded ${
@@ -173,7 +182,9 @@ export function PoolAdminPanel({
               </ul>
             )}
             {existingInviteEmails.length === 0 && (
-              <p className="text-xs text-grey-50 italic mb-6">No pending invites.</p>
+              <p className="text-xs text-grey-50 italic mb-6">
+                No pending invites.
+              </p>
             )}
             <div className="flex flex-col space-y-2">
               <button
