@@ -11,7 +11,7 @@ interface PoolMemberWithPool {
 export function sortPoolMembersByPoolStatus<T extends PoolMemberWithPool>(
   poolMembers: T[]
 ): T[] {
-  const statusOrder = ["Active", "Open", "Locked", "Complete", "Setup"];
+  const statusOrder = ["Locked", "Open", "Complete", "Setup"];
 
   return [...poolMembers].sort((a, b) => {
     const indexA = statusOrder.indexOf(a.pool.status);

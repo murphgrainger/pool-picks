@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { reformatPoolMembers, formatTournamentDates, type PoolMemberFormatted } from "@pool-picks/utils";
+import {
+  reformatPoolMembers,
+  formatTournamentDates,
+  resolveTournamentStatus,
+  getEffectivePoolPhase,
+  type PoolMemberFormatted,
+} from "@pool-picks/utils";
 import { trpc } from "@/lib/trpc/client";
 import { PoolStatusCard } from "./PoolStatusCard";
 import { PoolAdminPanel } from "./PoolAdminPanel";
@@ -53,7 +59,16 @@ export function PoolDetailClient({
 }: PoolDetailClientProps) {
   const router = useRouter();
   const [poolStatus, setPoolStatus] = useState(pool.status);
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(isCommissioner);
+
+  const tournamentStatus = useMemo(
+    () => resolveTournamentStatus(pool.tournament),
+    [pool.tournament]
+  );
+  const phase = useMemo(
+    () => getEffectivePoolPhase(poolStatus, tournamentStatus),
+    [poolStatus, tournamentStatus]
+  );
   const [updatedPoolMembers, setUpdatedPoolMembers] =
     useState<PoolMemberFormatted[]>(initialPoolMembers);
   const [poolInvites, setPoolInvites] = useState(pool.pool_invites);
@@ -181,8 +196,8 @@ export function PoolDetailClient({
           </div>
         </div>
 
-        {/* Refresh button */}
-        {(poolStatus === "Active" || poolStatus === "Locked") && (
+        {/* Refresh button — only during active tournament */}
+        {phase === "live" && tournamentStatus === "Active" && (
           <div className="flex flex-col items-center mt-4 gap-1">
             <button
               onClick={handleRefresh}
@@ -204,7 +219,7 @@ export function PoolDetailClient({
           </div>
         )}
 
-        <PoolStatusCard status={poolStatus} />
+        <PoolStatusCard phase={phase} />
 
         {isCommissioner && (
           <button
@@ -226,10 +241,10 @@ export function PoolDetailClient({
             poolId={pool.id}
             tournamentId={pool.tournament.id}
             currentStatus={poolStatus}
+            tournamentStatus={tournamentStatus}
             existingInviteEmails={poolInvites.map((i) => i.email)}
             onInviteCreated={handleNewInvite}
             onStatusChange={handleStatusChange}
-            isAdmin={isAdmin}
           />
         )}
       </div>
@@ -239,7 +254,7 @@ export function PoolDetailClient({
           key={member.id}
           member={member}
           currentMemberId={currentUserPoolMemberId}
-          poolStatus={poolStatus}
+          phase={phase}
           tournamentId={pool.tournament.id}
           tournamentExternalUrl={tournamentExternalUrl}
         />

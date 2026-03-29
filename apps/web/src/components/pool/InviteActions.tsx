@@ -4,12 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc/client";
-import { Spinner } from "@/components/ui/Spinner";
 import {
   formatTournamentDates,
   formatToPar,
   ordinalSuffix,
+  resolveTournamentStatus,
+  getEffectivePoolPhase,
+  type PoolPhase,
 } from "@pool-picks/utils";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface Invite {
   id: number;
@@ -37,6 +40,7 @@ interface PoolMembership {
       name: string;
       start_date: Date;
       end_date: Date;
+      status: string;
     };
   };
 }
@@ -47,31 +51,53 @@ interface InviteActionsProps {
   userEmail: string;
 }
 
-function poolStatusColor(status: string) {
-  switch (status) {
-    case "Setup":
+function phaseColor(phase: PoolPhase) {
+  switch (phase) {
+    case "setup":
       return "bg-blue-500/20 text-blue-300";
-    case "Open":
+    case "open":
       return "bg-yellow/20 text-yellow";
-    case "Locked":
+    case "locked-awaiting":
       return "bg-red-500/20 text-red-400";
-    case "Active":
+    case "live":
       return "bg-green-500/20 text-green-300";
-    case "Complete":
+    case "completed":
       return "bg-grey-100/50 text-grey-50";
     default:
       return "bg-grey-100/50 text-grey-50";
   }
 }
 
-const STATUS_GROUP_ORDER = ["Active", "Locked", "Open", "Setup"] as const;
+function phaseLabel(phase: PoolPhase) {
+  switch (phase) {
+    case "setup":
+      return "Setup";
+    case "open":
+      return "Open";
+    case "locked-awaiting":
+      return "Locked";
+    case "live":
+      return "Live";
+    case "completed":
+      return "Complete";
+    default:
+      return phase;
+  }
+}
 
-function groupPoolsByStatus(pools: PoolMembership[]) {
+const PHASE_GROUP_ORDER: PoolPhase[] = ["live", "open", "locked-awaiting", "setup"];
+
+function getMemberPhase(member: PoolMembership): PoolPhase {
+  const tournamentStatus = resolveTournamentStatus(member.pool.tournament);
+  return getEffectivePoolPhase(member.pool.status, tournamentStatus);
+}
+
+function groupPoolsByPhase(pools: PoolMembership[]) {
   const groups: Record<string, PoolMembership[]> = {};
   for (const member of pools) {
-    const status = member.pool.status;
-    if (!groups[status]) groups[status] = [];
-    groups[status].push(member);
+    const phase = getMemberPhase(member);
+    if (!groups[phase]) groups[phase] = [];
+    groups[phase].push(member);
   }
   return groups;
 }
@@ -95,7 +121,8 @@ function ChevronRight({ className }: { className?: string }) {
 }
 
 function PoolCard({ member }: { member: PoolMembership }) {
-  const isActive = member.pool.status === "Active";
+  const phase = getMemberPhase(member);
+  const showScore = phase === "live" || phase === "completed";
 
   return (
     <Link
@@ -122,7 +149,7 @@ function PoolCard({ member }: { member: PoolMembership }) {
             member.pool.tournament.end_date
           )}
         </p>
-        {isActive && member.rank !== null && (
+        {showScore && member.rank !== null && (
           <div className="flex items-center gap-4 mt-2 text-sm">
             <div>
               <span className="text-grey-50 text-xs">Rank </span>
@@ -135,7 +162,7 @@ function PoolCard({ member }: { member: PoolMembership }) {
             <div>
               <span className="text-grey-50 text-xs">Score </span>
               <span className="font-bold text-green-300">
-                {formatToPar(member.score ?? null) ?? "—"}
+                {formatToPar(member.score ?? null) ?? "\u2014"}
               </span>
             </div>
           </div>
@@ -184,10 +211,10 @@ export function InviteActions({
     });
   };
 
-  const grouped = groupPoolsByStatus(poolMembers);
-  const completedPools = grouped["Complete"] || [];
-  const hasActivePools = STATUS_GROUP_ORDER.some(
-    (s) => grouped[s] && grouped[s].length > 0
+  const grouped = groupPoolsByPhase(poolMembers);
+  const completedPools = grouped["completed"] || [];
+  const hasActivePools = PHASE_GROUP_ORDER.some(
+    (p) => grouped[p] && grouped[p].length > 0
   );
 
   return (
@@ -244,17 +271,17 @@ export function InviteActions({
         </p>
       )}
 
-      {/* Pool groups by status */}
-      {STATUS_GROUP_ORDER.map((status) => {
-        const pools = grouped[status];
+      {/* Pool groups by phase */}
+      {PHASE_GROUP_ORDER.map((phase) => {
+        const pools = grouped[phase];
         if (!pools || pools.length === 0) return null;
         return (
-          <div key={status} className="w-full mb-4">
+          <div key={phase} className="w-full mb-4">
             <div className="mb-2">
               <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full ${poolStatusColor(status)}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded-full ${phaseColor(phase)}`}
               >
-                {status}
+                {phaseLabel(phase)}
               </span>
             </div>
             {pools.map((member) => (
@@ -273,7 +300,7 @@ export function InviteActions({
           >
             <div className="flex items-center gap-2">
               <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full ${poolStatusColor("Complete")}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded-full ${phaseColor("completed")}`}
               >
                 Complete
               </span>

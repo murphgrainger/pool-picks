@@ -16,20 +16,25 @@ interface PoolAdminPanelProps {
   poolId: number;
   tournamentId: number;
   currentStatus: string;
+  tournamentStatus: string;
   existingInviteEmails: string[];
-  onInviteCreated: (invite: { id: number; email: string; nickname: string; status: string }) => void;
+  onInviteCreated: (invite: {
+    id: number;
+    email: string;
+    nickname: string;
+    status: string;
+  }) => void;
   onStatusChange: (newStatus: string) => void;
-  isAdmin: boolean;
 }
 
 export function PoolAdminPanel({
   poolId,
   tournamentId,
   currentStatus,
+  tournamentStatus,
   existingInviteEmails,
   onInviteCreated,
   onStatusChange,
-  isAdmin,
 }: PoolAdminPanelProps) {
   const [selectedOption, setSelectedOption] = useState({
     value: currentStatus,
@@ -38,13 +43,10 @@ export function PoolAdminPanel({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const [pendingNotify, setPendingNotify] = useState<boolean | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncingAction, setSyncingAction] = useState<string | null>(null);
 
-  const tournamentHealth = trpc.tournament.getHealth.useQuery(
-    { id: tournamentId },
-    { enabled: isAdmin }
-  );
+  const tournamentHealth = trpc.tournament.getHealth.useQuery({
+    id: tournamentId,
+  });
 
   const updatePool = trpc.pool.updateStatus.useMutation({
     onSuccess: (_data, variables) => {
@@ -73,7 +75,10 @@ export function PoolAdminPanel({
     }
 
     setSelectedOption(option);
-    updatePool.mutate({ pool_id: poolId, status: option.value });
+    updatePool.mutate({
+      pool_id: poolId,
+      status: option.value as "Setup" | "Open" | "Locked" | "Complete",
+    });
   };
 
   const confirmOpen = (notify: boolean) => {
@@ -81,145 +86,74 @@ export function PoolAdminPanel({
     updatePool.mutate({ pool_id: poolId, status: "Open", notify });
   };
 
-  const syncTournamentData = async (action: "athletes" | "rankings" | "scores") => {
-    setIsSyncing(true);
-    setSyncingAction(action);
-
-    const labels: Record<string, string> = {
-      athletes: "athlete field",
-      rankings: "rankings",
-      scores: "scores",
-    };
-    const label = labels[action];
-
-    try {
-      const url =
-        action === "rankings"
-          ? `/api/scrape/${action}`
-          : `/api/scrape/tournaments/${tournamentId}/${action}`;
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        const message =
-          data?.message ||
-          (response.status === 504
-            ? `Timed out updating ${label}. Try again.`
-            : `Failed to update ${label} (${response.status}).`);
-        toast.error(message);
-        return;
-      }
-
-      const data = await response.json();
-      toast.success(data.message || `Successfully updated ${label}!`);
-      tournamentHealth.refetch();
-    } catch {
-      toast.error(`Network error updating ${label}.`);
-    } finally {
-      setIsSyncing(false);
-      setSyncingAction(null);
-    }
-  };
-
-  const poolStatuses = ["Setup", "Open", "Locked", "Active", "Complete"];
+  const poolStatuses = ["Setup", "Open", "Locked", "Complete"];
   const selectOptions: SelectValues[] = poolStatuses.map((el) => ({
     value: el,
     label: el,
   }));
 
+  const showCompletionAlert =
+    tournamentStatus === "Completed" && currentStatus !== "Complete";
+
   return (
     <div className="shadow rounded bg-grey-200 w-full m-2 text-white">
       <div className="p-5 flex flex-col space-y-2">
+        {/* Completion alert */}
+        {showCompletionAlert && (
+          <div className="p-3 rounded bg-green-500/20 border border-green-500/30 mb-2">
+            <p className="text-green-300 text-sm">
+              Tournament is over! Change the pool status to Complete and share
+              the results.
+            </p>
+          </div>
+        )}
+
         <label>Pool Status</label>
         <Select
           instanceId="status"
           name="status"
-          onChange={(option) => handleStatusChange(option as SelectValues | null)}
+          onChange={(option) =>
+            handleStatusChange(option as SelectValues | null)
+          }
           options={selectOptions}
           value={selectedOption}
           isDisabled={updatePool.isPending}
           className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 color-black"
         />
-        {isAdmin && (
+
+        {/* Tournament data pills */}
+        {tournamentHealth.data && (
           <div className="mt-4 pt-4 border-t border-grey-100">
-            <label className="text-sm font-medium text-grey-50">Tournament Data</label>
-            {tournamentHealth.data && (
-              <div className="flex gap-3 mt-2 mb-3">
-                <span
-                  className={`text-xs px-2 py-1 rounded ${
-                    tournamentHealth.data.athleteCount > 0
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-red-500/20 text-red-400"
-                  }`}
-                >
-                  {tournamentHealth.data.athleteCount > 0
-                    ? `${tournamentHealth.data.athleteCount} athletes`
-                    : "No field"}
-                </span>
-                <span
-                  className={`text-xs px-2 py-1 rounded ${
-                    tournamentHealth.data.scoredCount > 0
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-red-500/20 text-red-400"
-                  }`}
-                >
-                  {tournamentHealth.data.scoredCount > 0
-                    ? `${tournamentHealth.data.scoredCount} with scores`
-                    : "No scores"}
-                </span>
-              </div>
-            )}
-            <div className="flex flex-col gap-2">
-              <button
-                className="text-sm bg-grey-100 px-3 py-2 rounded hover:bg-grey-75 disabled:opacity-50"
-                onClick={() => syncTournamentData("athletes")}
-                disabled={isSyncing}
+            <label className="text-sm font-medium text-grey-50">
+              Tournament Data
+            </label>
+            <div className="flex gap-3 mt-2">
+              <span
+                className={`text-xs px-2 py-1 rounded ${
+                  tournamentHealth.data.athleteCount > 0
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-red-500/20 text-red-400"
+                }`}
               >
-                {isSyncing && syncingAction === "athletes" ? (
-                  <span className="flex items-center justify-center">
-                    <Spinner className="w-3 h-3 mr-2" />
-                    Syncing...
-                  </span>
-                ) : (
-                  "Sync Field"
-                )}
-              </button>
-              <button
-                className="text-sm bg-grey-100 px-3 py-2 rounded hover:bg-grey-75 disabled:opacity-50"
-                onClick={() => syncTournamentData("rankings")}
-                disabled={isSyncing}
+                {tournamentHealth.data.athleteCount > 0
+                  ? `${tournamentHealth.data.athleteCount} athletes`
+                  : "No field"}
+              </span>
+              <span
+                className={`text-xs px-2 py-1 rounded ${
+                  tournamentHealth.data.scoredCount > 0
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-red-500/20 text-red-400"
+                }`}
               >
-                {isSyncing && syncingAction === "rankings" ? (
-                  <span className="flex items-center justify-center">
-                    <Spinner className="w-3 h-3 mr-2" />
-                    Syncing...
-                  </span>
-                ) : (
-                  "Sync Rankings"
-                )}
-              </button>
-              <button
-                className="text-sm bg-grey-100 px-3 py-2 rounded hover:bg-grey-75 disabled:opacity-50"
-                onClick={() => syncTournamentData("scores")}
-                disabled={isSyncing}
-              >
-                {isSyncing && syncingAction === "scores" ? (
-                  <span className="flex items-center justify-center">
-                    <Spinner className="w-3 h-3 mr-2" />
-                    Syncing...
-                  </span>
-                ) : (
-                  "Sync Scores"
-                )}
-              </button>
+                {tournamentHealth.data.scoredCount > 0
+                  ? `${tournamentHealth.data.scoredCount} with scores`
+                  : "No scores"}
+              </span>
             </div>
           </div>
         )}
+
         {selectedOption.value === "Setup" && (
           <div className="mt-8">
             <PoolInviteForm
@@ -248,7 +182,9 @@ export function PoolAdminPanel({
               </ul>
             )}
             {existingInviteEmails.length === 0 && (
-              <p className="text-xs text-grey-50 italic mb-6">No pending invites.</p>
+              <p className="text-xs text-grey-50 italic mb-6">
+                No pending invites.
+              </p>
             )}
             <div className="flex flex-col space-y-2">
               <button
