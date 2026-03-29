@@ -24,6 +24,7 @@ export function getEffectivePoolPhase(
     case "Open":
       return "open";
     case "Locked":
+    case "Active": // legacy — treat same as Locked until migration runs
       switch (tournamentStatus) {
         case "Scheduled":
           return "locked-awaiting";

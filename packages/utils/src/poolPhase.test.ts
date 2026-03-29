@@ -36,6 +36,13 @@ describe("getEffectivePoolPhase", () => {
     expect(getEffectivePoolPhase("Complete", "Completed")).toBe("completed");
   });
 
+  // Legacy "Active" pool status — treated same as Locked until migration runs
+  it("treats legacy Active pool status same as Locked", () => {
+    expect(getEffectivePoolPhase("Active", "Scheduled")).toBe("locked-awaiting");
+    expect(getEffectivePoolPhase("Active", "Active")).toBe("live");
+    expect(getEffectivePoolPhase("Active", "Completed")).toBe("completed");
+  });
+
   // Edge case: unknown pool status
   it("defaults to setup for unknown pool status", () => {
     expect(getEffectivePoolPhase("Unknown", "Active")).toBe("setup");
