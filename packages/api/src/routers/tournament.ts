@@ -2,12 +2,33 @@ import { z } from "zod";
 import { prisma } from "@pool-picks/db";
 import { router, protectedProcedure, systemAdminProcedure } from "../trpc";
 
+/**
+ * Auto-advances any "Scheduled" tournaments to "Active" if their start_date
+ * has passed. This keeps the DB status in sync with reality so the column
+ * is always the source of truth. Runs as a fire-and-forget side-effect
+ * on key read paths.
+ */
+export async function autoAdvanceScheduledTournaments() {
+  const today = new Date();
+  const todayDate = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+  );
+  await prisma.tournament.updateMany({
+    where: {
+      status: "Scheduled",
+      start_date: { lte: todayDate },
+    },
+    data: { status: "Active" },
+  });
+}
+
 export const tournamentRouter = router({
   list: protectedProcedure.query(async () => {
     return prisma.tournament.findMany();
   }),
 
   listWithPools: protectedProcedure.query(async () => {
+    await autoAdvanceScheduledTournaments();
     return prisma.tournament.findMany({
       include: {
         pools: {
@@ -31,6 +52,7 @@ export const tournamentRouter = router({
   getById: protectedProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
+      await autoAdvanceScheduledTournaments();
       return prisma.tournament.findUnique({
         where: { id: input.id },
         select: {
@@ -85,7 +107,7 @@ export const tournamentRouter = router({
     .input(
       z.object({
         id: z.number(),
-        status: z.string(),
+        status: z.enum(["Scheduled", "Active", "Completed"]),
       })
     )
     .mutation(async ({ input }) => {
