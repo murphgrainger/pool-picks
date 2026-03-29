@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { prisma } from "@pool-picks/db";
-import { sumMemberPicks } from "@pool-picks/utils";
+import {
+  sumMemberPicks,
+  resolveTournamentStatus,
+  getEffectivePoolPhase,
+} from "@pool-picks/utils";
 import { router, protectedProcedure } from "../trpc";
+import { autoAdvanceScheduledTournaments } from "./tournament";
 
 export const poolMemberRouter = router({
   getPicks: protectedProcedure
@@ -52,6 +57,7 @@ export const poolMemberRouter = router({
     }),
 
   listByUser: protectedProcedure.query(async ({ ctx }) => {
+    await autoAdvanceScheduledTournaments();
     const memberships = await prisma.poolMember.findMany({
       where: { user_id: ctx.user.id },
       select: {
@@ -65,7 +71,12 @@ export const poolMemberRouter = router({
             amount_entry: true,
             tournament_id: true,
             tournament: {
-              select: { name: true, start_date: true, end_date: true },
+              select: {
+                name: true,
+                start_date: true,
+                end_date: true,
+                status: true,
+              },
             },
           },
         },
@@ -75,9 +86,13 @@ export const poolMemberRouter = router({
       },
     });
 
-    // For active pools, compute rank and score server-side
+    // For live/completed pools, compute rank and score server-side
     const activePoolIds = memberships
-      .filter((m) => m.pool.status === "Active")
+      .filter((m) => {
+        const tournamentStatus = resolveTournamentStatus(m.pool.tournament);
+        const phase = getEffectivePoolPhase(m.pool.status, tournamentStatus);
+        return phase === "live" || phase === "completed";
+      })
       .map((m) => m.pool.id);
 
     const rankMap: Record<

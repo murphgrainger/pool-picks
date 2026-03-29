@@ -73,7 +73,10 @@ export function PoolAdminPanel({
     }
 
     setSelectedOption(option);
-    updatePool.mutate({ pool_id: poolId, status: option.value });
+    updatePool.mutate({
+      pool_id: poolId,
+      status: option.value as "Setup" | "Open" | "Locked" | "Complete",
+    });
   };
 
   const confirmOpen = (notify: boolean) => {
@@ -126,7 +129,7 @@ export function PoolAdminPanel({
     }
   };
 
-  const poolStatuses = ["Setup", "Open", "Locked", "Active", "Complete"];
+  const poolStatuses = ["Setup", "Open", "Locked", "Complete"];
   const selectOptions: SelectValues[] = poolStatuses.map((el) => ({
     value: el,
     label: el,

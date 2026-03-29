@@ -5,7 +5,12 @@ import Select from "react-select";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { trpc } from "@/lib/trpc/client";
-import { formattedDate, formatTournamentDates } from "@pool-picks/utils";
+import {
+  formattedDate,
+  formatTournamentDates,
+  resolveTournamentStatus,
+  getTournamentStatus,
+} from "@pool-picks/utils";
 import { Spinner } from "@/components/ui/Spinner";
 
 interface SelectValues {
@@ -34,9 +39,10 @@ export default function TournamentAdminPage() {
 
   useEffect(() => {
     if (tournament) {
+      const resolved = resolveTournamentStatus(tournament);
       setSelectedOption({
-        value: tournament.status,
-        label: tournament.status,
+        value: resolved,
+        label: resolved,
       });
       setUpdatedAt(
         tournament.updated_at
@@ -53,11 +59,21 @@ export default function TournamentAdminPage() {
       </div>
     );
 
+  const resolvedStatus = resolveTournamentStatus(tournament);
+  const dateBasedStatus = getTournamentStatus(
+    tournament.start_date,
+    tournament.end_date
+  );
+  const needsCompletionConfirm =
+    dateBasedStatus === "Completed" && resolvedStatus === "Active";
+
   const handleStatusChange = async (option: SelectValues | null) => {
     if (!option) return;
     setSelectedOption(option);
-
-    updateTournament.mutate({ id: tournament.id, status: option.value });
+    updateTournament.mutate({
+      id: tournament.id,
+      status: option.value as "Scheduled" | "Active" | "Completed",
+    });
   };
 
   const tournamentStatuses = ["Scheduled", "Active", "Completed"];
@@ -148,8 +164,34 @@ export default function TournamentAdminPage() {
               </span>
             </div>
           )}
+
+          {/* Completion confirmation prompt */}
+          {needsCompletionConfirm && (
+            <div className="mt-4 p-4 rounded bg-green-500/20 border border-green-500/30">
+              <p className="text-green-300 text-sm font-medium mb-2">
+                Tournament end date has passed. Mark as completed?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleStatusChange({ value: "Completed", label: "Completed" })}
+                  disabled={updateTournament.isPending}
+                  className="text-sm bg-green-500 text-black font-medium px-4 py-2 rounded hover:bg-green-300"
+                >
+                  Mark Completed
+                </button>
+                <button
+                  onClick={() => handleStatusChange({ value: "Active", label: "Active" })}
+                  disabled={updateTournament.isPending}
+                  className="text-sm bg-grey-100 text-white px-4 py-2 rounded hover:bg-grey-75"
+                >
+                  Keep Active (Rain Delay)
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="mt-2">
-            <label htmlFor="status">Update Status:</label>
+            <label htmlFor="status">Tournament Status:</label>
             <Select
               instanceId="status"
               name="status"
@@ -161,7 +203,7 @@ export default function TournamentAdminPage() {
               isDisabled={isScraping}
               className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm"
             />
-            {(selectedOption.value === "Scheduled" || selectedOption.value === "Active") && (
+            {(resolvedStatus === "Scheduled" || resolvedStatus === "Active") && (
               <div className="mt-6 flex flex-col">
                 <button
                   className="bg-grey-200 m-2 hover:bg-green-700"

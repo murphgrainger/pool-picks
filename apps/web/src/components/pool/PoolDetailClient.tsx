@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { reformatPoolMembers, formatTournamentDates, type PoolMemberFormatted } from "@pool-picks/utils";
+import {
+  reformatPoolMembers,
+  formatTournamentDates,
+  resolveTournamentStatus,
+  getEffectivePoolPhase,
+  type PoolMemberFormatted,
+} from "@pool-picks/utils";
 import { trpc } from "@/lib/trpc/client";
 import { PoolStatusCard } from "./PoolStatusCard";
 import { PoolAdminPanel } from "./PoolAdminPanel";
@@ -54,6 +60,15 @@ export function PoolDetailClient({
   const router = useRouter();
   const [poolStatus, setPoolStatus] = useState(pool.status);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+
+  const tournamentStatus = useMemo(
+    () => resolveTournamentStatus(pool.tournament),
+    [pool.tournament]
+  );
+  const phase = useMemo(
+    () => getEffectivePoolPhase(poolStatus, tournamentStatus),
+    [poolStatus, tournamentStatus]
+  );
   const [updatedPoolMembers, setUpdatedPoolMembers] =
     useState<PoolMemberFormatted[]>(initialPoolMembers);
   const [poolInvites, setPoolInvites] = useState(pool.pool_invites);
@@ -182,7 +197,7 @@ export function PoolDetailClient({
         </div>
 
         {/* Refresh button */}
-        {(poolStatus === "Active" || poolStatus === "Locked") && (
+        {phase === "live" && (
           <div className="flex flex-col items-center mt-4 gap-1">
             <button
               onClick={handleRefresh}
@@ -204,7 +219,24 @@ export function PoolDetailClient({
           </div>
         )}
 
-        <PoolStatusCard status={poolStatus} />
+        <PoolStatusCard phase={phase} />
+
+        {/* Commissioner prompt to finalize pool when tournament is done */}
+        {isCommissioner && phase === "completed" && poolStatus !== "Complete" && (
+          <div className="w-full mt-4 p-4 rounded bg-green-500/20 border border-green-500/30">
+            <p className="text-green-300 text-sm font-medium mb-2">
+              Tournament is over! Finalize your pool and share results.
+            </p>
+            <button
+              onClick={() => {
+                setShowAdminPanel(true);
+              }}
+              className="text-sm bg-green-500 text-black font-medium px-4 py-2 rounded hover:bg-green-300"
+            >
+              Complete Pool
+            </button>
+          </div>
+        )}
 
         {isCommissioner && (
           <button
@@ -239,7 +271,7 @@ export function PoolDetailClient({
           key={member.id}
           member={member}
           currentMemberId={currentUserPoolMemberId}
-          poolStatus={poolStatus}
+          phase={phase}
           tournamentId={pool.tournament.id}
           tournamentExternalUrl={tournamentExternalUrl}
         />

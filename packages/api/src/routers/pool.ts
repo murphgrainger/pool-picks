@@ -157,7 +157,7 @@ export const poolRouter = router({
     .input(
       z.object({
         pool_id: z.number(),
-        status: z.string(),
+        status: z.enum(["Setup", "Open", "Locked", "Complete"]),
         notify: z.boolean().optional().default(true),
       })
     )

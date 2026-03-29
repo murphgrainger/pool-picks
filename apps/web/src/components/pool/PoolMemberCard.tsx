@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatToPar, type AthletePickFormatted } from "@pool-picks/utils";
+import { formatToPar, type AthletePickFormatted, type PoolPhase } from "@pool-picks/utils";
 import { PickCard } from "@/components/picks/PickCard";
 import { PicksCreateForm } from "@/components/picks/PicksCreateForm";
 import { UsernameCreateForm } from "@/components/picks/UsernameCreateForm";
@@ -19,7 +19,7 @@ interface PoolMemberCardProps {
     picks: AthletePickFormatted[];
   };
   currentMemberId: number | null;
-  poolStatus: string;
+  phase: PoolPhase;
   tournamentId: number;
   tournamentExternalUrl: string | null;
 }
@@ -27,7 +27,7 @@ interface PoolMemberCardProps {
 export function PoolMemberCard({
   member,
   currentMemberId,
-  poolStatus,
+  phase,
   tournamentId,
   tournamentExternalUrl,
 }: PoolMemberCardProps) {
@@ -54,7 +54,7 @@ export function PoolMemberCard({
     setDisplayUsername(username);
   };
 
-  const showDQ = member.isDQ && (poolStatus === "Active" || poolStatus === "Complete");
+  const showDQ = member.isDQ && (phase === "live" || phase === "completed");
   const underParFormatted = showDQ ? "DQ" : formatToPar(member.member_sum_under_par);
   let positionFormatted: string = showDQ
     ? "--"
@@ -84,7 +84,7 @@ export function PoolMemberCard({
   ) : null;
 
 
-  if (poolStatus === "Open") {
+  if (phase === "open") {
     return (
       <div className="w-full mt-6 p-6 rounded bg-gradient-to-br from-grey-200 to-grey-100/50" key={member.id}>
         {!currentUserCard && (
