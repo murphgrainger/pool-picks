@@ -224,16 +224,22 @@ export function PoolDetailClient({
         {isCommissioner && (
           <button
             onClick={() => setShowAdminPanel((prev) => !prev)}
-            className="p-1 pr-2 pl-2 mt-2 bg-gray-500 rounded"
+            className="p-1 pr-2 pl-2 mt-2 bg-gray-500 rounded flex items-center"
           >
             Commissioner Panel
-            <span
-              className={`accordion-arrow text-grey-50 ml-2 mt-1 text-xs ${
-                showAdminPanel ? "open" : ""
-              }`}
+            <svg
+              className={`w-4 h-4 ml-2 transition-transform text-grey-50 ${showAdminPanel ? "" : "rotate-180"}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              &#9660;
-            </span>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
           </button>
         )}
         {isCommissioner && showAdminPanel && (

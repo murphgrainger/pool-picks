@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
@@ -11,61 +10,93 @@ interface HeaderProps {
   isAdmin: boolean;
 }
 
+function NavButton({
+  label,
+  loading,
+  onClick,
+  className,
+}: {
+  label: string;
+  loading: boolean;
+  onClick: () => void;
+  className: string;
+}) {
+  return (
+    <button onClick={onClick} disabled={loading} className={className}>
+      <span className="grid">
+        <span className={`col-start-1 row-start-1 flex items-center justify-center ${loading ? "invisible" : ""}`}>
+          {label}
+        </span>
+        {loading && (
+          <span className="col-start-1 row-start-1 flex items-center justify-center">
+            <Spinner className="w-5 h-5" />
+          </span>
+        )}
+      </span>
+    </button>
+  );
+}
+
 export function Header({ userEmail, isAdmin }: HeaderProps) {
   const [isLoading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const supabase = createClient();
 
   const handleSignOut = async () => {
     setLoading(true);
-    // Sign out server-side first to properly clear cookies
     await fetch("/api/auth/sign-out", { method: "POST" });
     await supabase.auth.signOut();
     router.push("/auth/sign-in");
     router.refresh();
   };
 
+  const handleNavigate = (href: string) => {
+    setNavigatingTo(href);
+    setMenuOpen(false);
+    startTransition(() => {
+      router.push(href);
+    });
+  };
+
+  const isNavLoading = (href: string) => isPending && navigatingTo === href;
+
   return (
     <header className="body-font bg-green-500">
       <div className="container mx-auto flex flex-wrap p-5 justify-between items-center">
-        <Link
-          href="/"
+        <button
+          onClick={() => handleNavigate("/")}
           className="flex title-font font-medium items-center"
         >
           <span className="pr-2 text-2xl">&#9971;</span>
           <h3>PoolPicks</h3>
-        </Link>
+        </button>
 
         {/* Desktop nav */}
         {userEmail && (
           <nav className="hidden md:flex items-center space-x-2">
-            <Link
-              href="/pool/create"
+            <NavButton
+              label="Create a Pool"
+              loading={isNavLoading("/pool/create")}
+              onClick={() => handleNavigate("/pool/create")}
               className="rounded bg-green-300 hover:bg-yellow hover:text-black px-4 py-2"
-            >
-              Create a Pool
-            </Link>
+            />
             {isAdmin && (
-              <Link
-                href="/system-admin"
+              <NavButton
+                label="Admin"
+                loading={isNavLoading("/system-admin")}
+                onClick={() => handleNavigate("/system-admin")}
                 className="rounded bg-green-300 hover:bg-yellow hover:text-black px-4 py-2"
-              >
-                Admin
-              </Link>
+              />
             )}
-            <button
-              className="rounded bg-green-300 hover:bg-yellow px-4 py-2"
+            <NavButton
+              label="Logout"
+              loading={isLoading}
               onClick={handleSignOut}
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <Spinner className="w-6 h-6 mr-1" />
-                </span>
-              ) : (
-                <span>Logout</span>
-              )}
-            </button>
+              className="rounded bg-green-300 hover:bg-yellow px-4 py-2"
+            />
           </nav>
         )}
 
@@ -92,34 +123,26 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
       {/* Mobile menu */}
       {userEmail && menuOpen && (
         <nav className="md:hidden border-t border-green-300 px-5 pb-4 flex flex-col space-y-2">
-          <Link
-            href="/pool/create"
+          <NavButton
+            label="Create a Pool"
+            loading={isNavLoading("/pool/create")}
+            onClick={() => handleNavigate("/pool/create")}
             className="rounded bg-green-300 hover:bg-yellow hover:text-black px-4 py-2 text-center"
-            onClick={() => setMenuOpen(false)}
-          >
-            Create a Pool
-          </Link>
+          />
           {isAdmin && (
-            <Link
-              href="/system-admin"
+            <NavButton
+              label="Admin"
+              loading={isNavLoading("/system-admin")}
+              onClick={() => handleNavigate("/system-admin")}
               className="rounded bg-green-300 hover:bg-yellow hover:text-black px-4 py-2 text-center"
-              onClick={() => setMenuOpen(false)}
-            >
-              Admin
-            </Link>
+            />
           )}
-          <button
-            className="rounded bg-green-300 hover:bg-yellow px-4 py-2"
+          <NavButton
+            label="Logout"
+            loading={isLoading}
             onClick={handleSignOut}
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center">
-                <Spinner className="w-6 h-6 mr-1" />
-              </span>
-            ) : (
-              <span>Logout</span>
-            )}
-          </button>
+            className="rounded bg-green-300 hover:bg-yellow px-4 py-2"
+          />
         </nav>
       )}
     </header>

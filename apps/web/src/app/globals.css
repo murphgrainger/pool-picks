@@ -69,18 +69,6 @@ button:disabled {
   margin-right: 20px;
 }
 
-.accordion-arrow {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-right: 0.5em;
-  transition: transform 0.3s ease-in-out;
-  cursor: pointer;
-}
-
-.accordion-arrow.open {
-  transform: rotate(180deg);
-}
 
 sup {
   margin-left: -4px;

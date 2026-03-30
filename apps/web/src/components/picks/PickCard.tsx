@@ -50,16 +50,24 @@ export function PickCard({ pick, index }: PickCardProps) {
           <span className="text-xs">Score</span>
           <p className="text-xl">{underParFormatted}</p>
         </div>
-        <div
-          className="accordion-header"
+        <button
           onClick={() => setIsOpen(!isOpen)}
+          className="p-1"
         >
-          <span
-            className={`accordion-arrow text-grey-200 ${isOpen ? "open" : ""}`}
+          <svg
+            className={`w-4 h-4 transition-transform text-grey-50 ${isOpen ? "" : "rotate-180"}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            &#9660;
-          </span>
-        </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
       </div>
       {isOpen && (
         <div className="mt-4 flex justify-around bg-grey-200 p-4 rounded">

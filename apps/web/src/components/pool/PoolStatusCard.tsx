@@ -21,8 +21,8 @@ export function PoolStatusCard({ phase }: PoolStatusCardProps) {
   }
 
   return (
-    <div className="w-full mt-4 p-4 rounded bg-grey-200">
-      <p className="text-white text-xs">&#11088; {statusDescription}</p>
+    <div className="w-full mt-4 p-3 rounded bg-green-500/20 border border-green-500/30">
+      <p className="text-green-300 text-sm">{statusDescription}</p>
     </div>
   );
 }

@@ -71,9 +71,9 @@ export function PoolMemberCard({
   const isCommissioner = member.role === "COMMISSIONER";
 
   const commissionerPill = isCommissioner ? (
-    <span className="relative ml-2 group">
+    <span className="relative ml-2 group inline-flex items-center">
       <span
-        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] leading-none pt-[1px] font-bold cursor-default"
+        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] leading-none font-bold cursor-default"
       >
         C
       </span>
@@ -152,16 +152,24 @@ export function PoolMemberCard({
             </p>
           </div>
         </div>
-        <div
-          className="accordion-header"
+        <button
           onClick={() => setShowPicks(!showPicks)}
+          className="p-1"
         >
-          <span
-            className={`accordion-arrow text-yellow ${showPicks ? "open" : ""}`}
+          <svg
+            className={`w-4 h-4 transition-transform text-yellow ${showPicks ? "" : "rotate-180"}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            &#9660;
-          </span>
-        </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
       </div>
       {showPicks &&
         member.picks

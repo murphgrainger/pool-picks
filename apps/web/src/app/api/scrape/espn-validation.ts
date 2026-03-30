@@ -170,9 +170,9 @@ export async function sendSchemaAlert(
   try {
     const resend = new Resend(apiKey);
     await resend.emails.send({
-      from: `Pool Picks Alerts <${fromAddress}>`,
+      from: `PoolPicks Alerts <${fromAddress}>`,
       to: alertEmail,
-      subject: "Pool Picks: ESPN API schema change detected",
+      subject: "PoolPicks: ESPN API schema change detected",
       html: `
         <h2>ESPN API Schema Change Detected</h2>
         <p><strong>Endpoint:</strong> ${endpoint}</p>

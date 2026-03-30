@@ -133,8 +133,8 @@ function PoolCard({ member }: { member: PoolMembership }) {
         <div className="flex items-center gap-2">
           <p className="font-bold">{member.pool.name}</p>
           {member.role === "COMMISSIONER" && (
-            <span className="relative group/tip">
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] leading-none pt-[1px] font-bold cursor-default">
+            <span className="relative group/tip inline-flex items-center">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] leading-none font-bold cursor-default">
                 C
               </span>
               <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-1 rounded bg-grey-200 text-white text-[10px] whitespace-nowrap opacity-0 pointer-events-none group-hover/tip:opacity-100 transition-opacity">
@@ -265,10 +265,20 @@ export function InviteActions({
 
       {/* Empty state */}
       {!hasActivePools && !poolInvites.length && !completedPools.length && (
-        <p className="text-center text-grey-50">
-          You currently aren&apos;t in any active pools. Create one or ask a
-          commissioner to invite you!
-        </p>
+        <div className="p-4 rounded bg-green-500/20 border border-green-500/30">
+          <p className="text-green-300 text-sm text-center">
+            You currently aren&apos;t in any active pools. Create one or ask a
+            commissioner to invite you!
+          </p>
+          <div className="flex justify-center mt-3">
+            <Link
+              href="/pool/create"
+              className="rounded bg-green-500 text-black font-bold px-4 py-2 text-sm hover:bg-yellow"
+            >
+              Create a Pool
+            </Link>
+          </div>
+        </div>
       )}
 
       {/* Pool groups by phase */}
