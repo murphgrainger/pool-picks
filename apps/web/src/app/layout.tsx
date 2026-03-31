@@ -28,12 +28,14 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className="bg-black flex flex-col">
+      <body className="bg-cream flex flex-col text-black">
         <TRPCProvider>
           <DevBanner />
           <Header userEmail={email} isAdmin={isAdmin} />
           <div className="component-root">{children}</div>
-          <footer className="p-10 bg-green-500 mt-10"></footer>
+          <footer className="p-6 bg-green-700 mt-10">
+            <p className="text-center text-green-100 text-xs tracking-wide">PoolPicks</p>
+          </footer>
         </TRPCProvider>
       </body>
     </html>

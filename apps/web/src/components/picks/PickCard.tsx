@@ -35,19 +35,19 @@ export function PickCard({ pick, index }: PickCardProps) {
     pick.status === "CUT" || pick.status === "WD" ? pick.status : "--";
   const bgColorClass =
     index > 3 || pick.score_under_par === null
-      ? "bg-black"
-      : "bg-gradient-to-br from-grey-100 to-grey-200";
+      ? "bg-grey-200 border border-grey-100 opacity-60"
+      : "bg-white border border-grey-100";
 
   return (
-    <div className={`${bgColorClass} mb-4 rounded p-4`}>
+    <div className={`${bgColorClass} mb-3 rounded p-4`}>
       <div className="flex items-center">
         <p className="flex-1 font-semibold text-base">{pick.full_name}</p>
         <div className="flex-1 flex flex-col items-center justify-center">
-          <span className="text-xs">Pos</span>
+          <span className="text-xs text-grey-75">Pos</span>
           <p className="text-xl">{pick.position || showStatus}</p>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center">
-          <span className="text-xs">Score</span>
+          <span className="text-xs text-grey-75">Score</span>
           <p className="text-xl">{underParFormatted}</p>
         </div>
         <button
@@ -55,7 +55,7 @@ export function PickCard({ pick, index }: PickCardProps) {
           className="p-1"
         >
           <svg
-            className={`w-4 h-4 transition-transform text-grey-50 ${isOpen ? "" : "rotate-180"}`}
+            className={`w-4 h-4 transition-transform text-grey-75 ${isOpen ? "" : "rotate-180"}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -70,39 +70,39 @@ export function PickCard({ pick, index }: PickCardProps) {
         </button>
       </div>
       {isOpen && (
-        <div className="mt-4 flex justify-around bg-grey-200 p-4 rounded">
+        <div className="mt-4 flex justify-around bg-grey-200 border border-grey-100 p-4 rounded">
           {scoreTodayFormatted && (
             <div className="flex-1 flex flex-col items-center justify-center">
-              <span className="text-xs">Today</span>
+              <span className="text-xs text-grey-75">Today</span>
               <p>{scoreTodayFormatted}</p>
             </div>
           )}
           {thruFormatted && (
             <div className="flex-1 flex flex-col items-center justify-center">
-              <span className="text-xs">Thru</span>
+              <span className="text-xs text-grey-75">Thru</span>
               <p>{thruFormatted || "-"}</p>
             </div>
           )}
           {thruIsTeeTime && (
             <div className="flex-1 flex flex-col items-center justify-center">
-              <span className="text-xs">Tee Time</span>
+              <span className="text-xs text-grey-75">Tee Time</span>
               <p>{pick.thru || "-"}</p>
             </div>
           )}
           <div className="flex-1 flex flex-col items-center justify-center">
-            <span className="text-xs">R1</span>
+            <span className="text-xs text-grey-75">R1</span>
             <p>{pick.score_round_one || "-"}</p>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center">
-            <span className="text-xs">R2</span>
+            <span className="text-xs text-grey-75">R2</span>
             <p>{pick.score_round_two || "-"}</p>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center">
-            <span className="text-xs">R3</span>
+            <span className="text-xs text-grey-75">R3</span>
             <p>{pick.score_round_three || "-"}</p>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center">
-            <span className="text-xs">R4</span>
+            <span className="text-xs text-grey-75">R4</span>
             <p>{pick.score_round_four || "-"}</p>
           </div>
         </div>

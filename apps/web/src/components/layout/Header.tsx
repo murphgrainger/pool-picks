@@ -64,14 +64,14 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
   const isNavLoading = (href: string) => isPending && navigatingTo === href;
 
   return (
-    <header className="body-font bg-green-500">
+    <header className="body-font bg-green-700 text-white">
       <div className="container mx-auto flex flex-wrap p-5 justify-between items-center">
         <button
           onClick={() => handleNavigate("/")}
-          className="flex title-font font-medium items-center"
+          className="flex title-font font-medium items-center text-white"
         >
           <span className="pr-2 text-2xl">&#9971;</span>
-          <h3>PoolPicks</h3>
+          <h3 className="text-white">PoolPicks</h3>
         </button>
 
         {/* Desktop nav */}
@@ -81,21 +81,21 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
               label="Create a Pool"
               loading={isNavLoading("/pool/create")}
               onClick={() => handleNavigate("/pool/create")}
-              className="rounded bg-green-300 hover:bg-yellow hover:text-black px-4 py-2"
+              className="rounded bg-green-900 hover:bg-gold hover:text-black text-white px-4 py-2"
             />
             {isAdmin && (
               <NavButton
                 label="Admin"
                 loading={isNavLoading("/system-admin")}
                 onClick={() => handleNavigate("/system-admin")}
-                className="rounded bg-green-300 hover:bg-yellow hover:text-black px-4 py-2"
+                className="rounded bg-green-900 hover:bg-gold hover:text-black text-white px-4 py-2"
               />
             )}
             <NavButton
               label="Logout"
               loading={isLoading}
               onClick={handleSignOut}
-              className="rounded bg-green-300 hover:bg-yellow px-4 py-2"
+              className="rounded bg-green-900 hover:bg-gold hover:text-black text-white px-4 py-2"
             />
           </nav>
         )}
@@ -108,13 +108,13 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
             aria-label="Toggle menu"
           >
             <span
-              className={`block w-5 h-0.5 bg-black transition-transform ${menuOpen ? "rotate-45 translate-y-1.5" : ""}`}
+              className={`block w-5 h-0.5 bg-white transition-transform ${menuOpen ? "rotate-45 translate-y-1.5" : ""}`}
             />
             <span
-              className={`block w-5 h-0.5 bg-black transition-opacity ${menuOpen ? "opacity-0" : ""}`}
+              className={`block w-5 h-0.5 bg-white transition-opacity ${menuOpen ? "opacity-0" : ""}`}
             />
             <span
-              className={`block w-5 h-0.5 bg-black transition-transform ${menuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}
+              className={`block w-5 h-0.5 bg-white transition-transform ${menuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}
             />
           </button>
         )}
@@ -122,26 +122,26 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
 
       {/* Mobile menu */}
       {userEmail && menuOpen && (
-        <nav className="md:hidden border-t border-green-300 px-5 pb-4 flex flex-col space-y-2">
+        <nav className="md:hidden border-t border-green-900 px-5 pb-4 flex flex-col space-y-2">
           <NavButton
             label="Create a Pool"
             loading={isNavLoading("/pool/create")}
             onClick={() => handleNavigate("/pool/create")}
-            className="rounded bg-green-300 hover:bg-yellow hover:text-black px-4 py-2 text-center"
+            className="rounded bg-green-900 hover:bg-gold hover:text-black text-white px-4 py-2 text-center"
           />
           {isAdmin && (
             <NavButton
               label="Admin"
               loading={isNavLoading("/system-admin")}
               onClick={() => handleNavigate("/system-admin")}
-              className="rounded bg-green-300 hover:bg-yellow hover:text-black px-4 py-2 text-center"
+              className="rounded bg-green-900 hover:bg-gold hover:text-black text-white px-4 py-2 text-center"
             />
           )}
           <NavButton
             label="Logout"
             loading={isLoading}
             onClick={handleSignOut}
-            className="rounded bg-green-300 hover:bg-yellow px-4 py-2"
+            className="rounded bg-green-900 hover:bg-gold hover:text-black text-white px-4 py-2"
           />
         </nav>
       )}

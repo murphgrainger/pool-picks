@@ -7,6 +7,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #FAF9F6;
+  color: #1a1a1a;
 }
 
 .component-root {
@@ -48,7 +50,7 @@ button:disabled {
 }
 
 .button-tertiary {
-  color: black;
+  color: white;
   padding: .5em 1em;
   margin: 0 1em;
   border-radius: 20px;
@@ -61,7 +63,7 @@ button:disabled {
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #888;
+  border: 1px solid #d1d5db;
 }
 
 .button-oauth .oauth-logo {
@@ -69,14 +71,13 @@ button:disabled {
   margin-right: 20px;
 }
 
-
 sup {
   margin-left: -4px;
 }
 
 hr {
   border: 0;
-  border-top: 1px solid #888;
+  border-top: 1px solid #d1d5db;
   display: block;
   margin: 2rem auto 1rem;
   overflow: visible;
@@ -84,8 +85,8 @@ hr {
 }
 
 hr::before {
-  background: rgb(229 231 235 / var(--tw-bg-opacity));
-  color: #888;
+  background: #FAF9F6;
+  color: #9ca3af;
   content: "or";
   padding: 0 0.4rem;
   position: relative;

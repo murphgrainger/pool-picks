@@ -23,8 +23,8 @@ export default async function SystemAdminPage() {
   const tournaments = await caller.tournament.listWithPools();
 
   return (
-    <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
-      <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
+    <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col">
+      <div className="flex flex-col w-full bg-white border border-grey-100 rounded-lg shadow-sm p-4 items-center">
         <TournamentList tournaments={tournaments} />
       </div>
     </div>
