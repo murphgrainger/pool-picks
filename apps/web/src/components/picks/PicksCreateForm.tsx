@@ -92,7 +92,7 @@ export function PicksCreateForm({
     <div className="w-full mt-6">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-grey-100"
+        className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-grey-200 border border-grey-100"
       >
         <h3>Step 2: Submit Your Picks</h3>
         <ul className="list-none text-lg">
@@ -108,7 +108,7 @@ export function PicksCreateForm({
             <li>
               <a
                 href={tournamentExternalUrl}
-                className="font-bold text-yellow underline"
+                className="font-bold text-green-700 underline"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -119,7 +119,7 @@ export function PicksCreateForm({
           <li>
             <a
               href="https://www.espn.com/golf/rankings"
-              className="font-bold text-yellow underline"
+              className="font-bold text-green-700 underline"
               target="_blank"
               rel="noreferrer"
             >
@@ -128,9 +128,9 @@ export function PicksCreateForm({
           </li>
         </ul>
         {Array.from({ length: 6 }, (_, index) => (
-          <div key={index} className="text-black">
+          <div key={index}>
             <label className="block">
-              <span className="text-white">Pick {index + 1}</span>
+              <span>Pick {index + 1}</span>
               <input
                 type="hidden"
                 {...register(`picks.${index}.id`, { required: true, valueAsNumber: true })}
@@ -138,7 +138,7 @@ export function PicksCreateForm({
               <Select
                 instanceId={`long-value-select-${index}`}
                 name={`pick-${index}`}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 color-black"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 onChange={(option) =>
                   handlePickChange(option as SelectValues | null, index)
                 }
@@ -146,14 +146,14 @@ export function PicksCreateForm({
               />
             </label>
             {errors?.picks?.[index] && (
-              <p className="text-yellow">Pick {index + 1} is required</p>
+              <p className="text-red-500">Pick {index + 1} is required</p>
             )}
           </div>
         ))}
         <button
           disabled={createPicks.isPending}
           type="submit"
-          className="my-4 capitalize bg-grey-200 text-white font-medium py-2 px-4 rounded-md hover:bg-yellow hover:text-black"
+          className="my-4 capitalize bg-green-700 text-white font-medium py-2 px-4 rounded-md hover:bg-gold hover:text-black"
         >
           {createPicks.isPending ? (
             <span className="flex items-center justify-center">

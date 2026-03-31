@@ -96,12 +96,12 @@ export function PoolAdminPanel({
     tournamentStatus === "Completed" && currentStatus !== "Complete";
 
   return (
-    <div className="shadow rounded bg-grey-200 w-full m-2 text-white">
+    <div className="shadow-sm rounded-lg bg-grey-200 border border-grey-100 w-full m-2">
       <div className="p-5 flex flex-col space-y-2">
         {/* Completion alert */}
         {showCompletionAlert && (
-          <div className="p-3 rounded bg-green-500/20 border border-green-500/30 mb-2">
-            <p className="text-green-300 text-sm">
+          <div className="p-3 rounded bg-green-50 border border-green-100 mb-2">
+            <p className="text-green-700 text-sm">
               Tournament is over! Change the pool status to Complete and share
               the results.
             </p>
@@ -118,21 +118,21 @@ export function PoolAdminPanel({
           options={selectOptions}
           value={selectedOption}
           isDisabled={updatePool.isPending}
-          className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 color-black"
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
         />
 
         {/* Tournament data pills */}
         {tournamentHealth.data && (
-          <div className="mt-4 pt-4 border-t border-grey-100">
-            <label className="text-sm font-medium text-grey-50">
+          <div className="mt-4 pt-4 border-t border-grey-300">
+            <label className="text-sm font-medium text-grey-75">
               Tournament Data
             </label>
             <div className="flex gap-3 mt-2">
               <span
                 className={`text-xs px-2 py-1 rounded ${
                   tournamentHealth.data.athleteCount > 0
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-red-500/20 text-red-400"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
                 }`}
               >
                 {tournamentHealth.data.athleteCount > 0
@@ -142,8 +142,8 @@ export function PoolAdminPanel({
               <span
                 className={`text-xs px-2 py-1 rounded ${
                   tournamentHealth.data.scoredCount > 0
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-red-500/20 text-red-400"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
                 }`}
               >
                 {tournamentHealth.data.scoredCount > 0
@@ -167,22 +167,22 @@ export function PoolAdminPanel({
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="bg-grey-200 rounded p-6 max-w-sm mx-4 text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl">
             <h3 className="text-lg font-bold mb-3">Open this pool?</h3>
-            <p className="text-sm text-grey-50 mb-4">
+            <p className="text-sm text-grey-75 mb-4">
               Opening the pool allows members to make their picks. You can also
               notify the following invitees by email:
             </p>
             {existingInviteEmails.length > 0 && (
-              <ul className="text-xs text-grey-50 mb-6 space-y-1">
+              <ul className="text-xs text-grey-75 mb-6 space-y-1">
                 {existingInviteEmails.map((email) => (
                   <li key={email}>{email}</li>
                 ))}
               </ul>
             )}
             {existingInviteEmails.length === 0 && (
-              <p className="text-xs text-grey-50 italic mb-6">
+              <p className="text-xs text-grey-75 italic mb-6">
                 No pending invites.
               </p>
             )}
@@ -190,7 +190,7 @@ export function PoolAdminPanel({
               <button
                 onClick={() => confirmOpen(true)}
                 disabled={updatePool.isPending}
-                className="w-full px-4 py-2 rounded bg-green-500 hover:bg-green-300 text-black font-medium"
+                className="w-full px-4 py-2 rounded bg-green-700 hover:bg-green-900 text-white font-medium"
               >
                 {updatePool.isPending && pendingNotify === true ? (
                   <span className="flex items-center justify-center">
@@ -204,7 +204,7 @@ export function PoolAdminPanel({
               <button
                 onClick={() => confirmOpen(false)}
                 disabled={updatePool.isPending}
-                className="w-full px-4 py-2 rounded bg-grey-100 hover:bg-grey-75 text-white"
+                className="w-full px-4 py-2 rounded bg-grey-100 hover:bg-grey-300"
               >
                 {updatePool.isPending && pendingNotify === false ? (
                   <span className="flex items-center justify-center">
@@ -220,7 +220,7 @@ export function PoolAdminPanel({
                   setShowConfirmModal(false);
                   setPendingStatus(null);
                 }}
-                className="w-full px-4 py-2 rounded text-grey-50 hover:text-white"
+                className="w-full px-4 py-2 rounded text-grey-75 hover:text-black"
                 disabled={updatePool.isPending}
               >
                 Cancel

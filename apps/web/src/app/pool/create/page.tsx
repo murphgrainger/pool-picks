@@ -50,7 +50,6 @@ export default function PoolCreatePage() {
   const { data: tournaments, isLoading: tournamentsLoading } =
     trpc.tournament.listSelectable.useQuery();
 
-  // Pre-select tournament from query param
   useEffect(() => {
     if (tournamentIdParam && tournaments) {
       const match = tournaments.find(
@@ -70,7 +69,6 @@ export default function PoolCreatePage() {
     }
   }, [tournamentIdParam, tournaments, setValue]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -127,25 +125,24 @@ export default function PoolCreatePage() {
   return (
     <div className="container mx-auto max-w-md">
       <form
-        className="grid grid-cols-1 gap-y-4 shadow-lg p-8 rounded-lg bg-grey-100 text-white"
+        className="grid grid-cols-1 gap-y-4 shadow-sm p-8 rounded-lg bg-white border border-grey-100"
         onSubmit={handleSubmit(onSubmit)}
       >
         <h1 className="text-3xl font-medium">Create a Pool</h1>
 
         <label className="block">
-          <span className="text-white">Name</span>
+          <span>Name</span>
           <input
             placeholder="i.e. Grainger Masters 2025"
             {...register("name", { required: true })}
             name="name"
             type="text"
-            className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         </label>
 
-        {/* Tournament Typeahead */}
         <div className="block" ref={dropdownRef}>
-          <span className="text-white">Tournament</span>
+          <span>Tournament</span>
           <input type="hidden" {...register("tournament_id", { required: true })} />
           <input
             type="text"
@@ -160,20 +157,20 @@ export default function PoolCreatePage() {
               }
             }}
             onFocus={() => setIsOpen(true)}
-            className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
           {isOpen && filteredTournaments && filteredTournaments.length > 0 && (
-            <ul className="mt-1 max-h-60 overflow-y-auto rounded-md bg-grey-200 border border-grey-75 shadow-lg">
+            <ul className="mt-1 max-h-60 overflow-y-auto rounded-md bg-white border border-grey-300 shadow-lg">
               {filteredTournaments.map((t) => (
                 <li
                   key={t.id}
                   onClick={() => handleSelectTournament(t)}
-                  className={`px-3 py-2 cursor-pointer hover:bg-grey-75 ${
-                    selectedTournament?.id === t.id ? "bg-grey-75" : ""
+                  className={`px-3 py-2 cursor-pointer hover:bg-grey-200 ${
+                    selectedTournament?.id === t.id ? "bg-grey-200" : ""
                   }`}
                 >
                   <p className="font-medium">{t.name}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-grey-75">
                     {formatDateRange(t.start_date, t.end_date)}
                   </p>
                 </li>
@@ -181,14 +178,14 @@ export default function PoolCreatePage() {
             </ul>
           )}
           {isOpen && filteredTournaments && filteredTournaments.length === 0 && searchText && (
-            <div className="mt-1 px-3 py-2 rounded-md bg-grey-200 border border-grey-75 text-gray-400 text-sm">
+            <div className="mt-1 px-3 py-2 rounded-md bg-white border border-grey-300 text-grey-75 text-sm">
               No tournaments found
             </div>
           )}
         </div>
 
         <label className="block">
-          <span className="text-white">Entry Amount</span>
+          <span>Entry Amount</span>
           <div className="relative mt-1">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
               $
@@ -210,26 +207,26 @@ export default function PoolCreatePage() {
               type="text"
               inputMode="decimal"
               placeholder="0"
-              className="text-black block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 pl-7"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 pl-7"
             />
           </div>
         </label>
 
         <label className="block">
-          <span className="text-white">Your Commissioner Nickname</span>
+          <span>Your Commissioner Nickname</span>
           <input
             placeholder="i.e. MurphMoney"
             {...register("username", { required: true })}
             name="username"
             type="text"
-            className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         </label>
 
         <button
           disabled={isLoading}
           type="submit"
-          className="my-4 capitalize bg-green-500 text-black font-medium py-2 px-4 rounded-md hover:bg-green-600"
+          className="my-4 capitalize bg-green-700 text-white font-medium py-2 px-4 rounded-md hover:bg-gold hover:text-black"
         >
           {isLoading ? (
             <span className="flex items-center justify-center">

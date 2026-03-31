@@ -123,7 +123,6 @@ export function PoolDetailClient({
         return;
       }
 
-      // Re-fetch pool scores from DB now that ESPN data is written
       const result = await getScores.refetch();
       if (result.data) {
         setUpdatedPoolMembers(
@@ -141,8 +140,6 @@ export function PoolDetailClient({
 
   const handleStatusChange = async (newStatus: string) => {
     setPoolStatus(newStatus);
-    // Refetch member data so the UI reflects the new status
-    // (e.g. other players' picks become visible when Locked)
     const result = await getScores.refetch();
     if (result.data) {
       setUpdatedPoolMembers(
@@ -161,8 +158,8 @@ export function PoolDetailClient({
   };
 
   return (
-    <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
-      <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
+    <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col">
+      <div className="flex flex-col w-full bg-white border border-grey-100 rounded-lg shadow-sm p-4 items-center">
         <div className="flex">
           {showLogo && (
             <div className="pl-4 pr-4">
@@ -175,18 +172,18 @@ export function PoolDetailClient({
             }`}
           >
             <h1 className="text-2xl font-bold">{pool.name}</h1>
-            <p className="text-base">{pool.tournament.name}</p>
+            <p className="text-base text-grey-75">{pool.tournament.name}</p>
             {pool.tournament.course && (
-              <p className="text-xs">{pool.tournament.course}</p>
+              <p className="text-xs text-grey-75">{pool.tournament.course}</p>
             )}
-            <p className="text-xs">{tournamentDates}</p>
-            <p className="text-xs">
+            <p className="text-xs text-grey-75">{tournamentDates}</p>
+            <p className="text-xs text-grey-75">
               ${pool.amount_entry} Ante | Total Pot: ${totalPotAmount}
             </p>
             {tournamentExternalUrl && (
               <a
                 href={tournamentExternalUrl}
-                className="font-bold text-yellow underline mt-2"
+                className="font-bold text-green-700 underline mt-2"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -202,7 +199,7 @@ export function PoolDetailClient({
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="bg-grey-200 text-white rounded px-4 py-2 hover:bg-grey-100"
+              className="bg-green-700 text-white rounded px-4 py-2 hover:bg-green-900"
             >
               {isRefreshing ? (
                 <span className="flex items-center">
@@ -213,7 +210,7 @@ export function PoolDetailClient({
                 "Refresh Scores"
               )}
             </button>
-            <p className="text-xs text-grey-50">
+            <p className="text-xs text-grey-75">
               Updated {formatLastRefreshed()}
             </p>
           </div>
@@ -224,16 +221,22 @@ export function PoolDetailClient({
         {isCommissioner && (
           <button
             onClick={() => setShowAdminPanel((prev) => !prev)}
-            className="p-1 pr-2 pl-2 mt-2 bg-gray-500 rounded"
+            className="p-1 pr-2 pl-2 mt-2 bg-grey-100 rounded flex items-center hover:bg-grey-300"
           >
             Commissioner Panel
-            <span
-              className={`accordion-arrow text-grey-50 ml-2 mt-1 text-xs ${
-                showAdminPanel ? "open" : ""
-              }`}
+            <svg
+              className={`w-4 h-4 ml-2 transition-transform text-grey-75 ${showAdminPanel ? "" : "rotate-180"}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              &#9660;
-            </span>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
           </button>
         )}
         {isCommissioner && showAdminPanel && (
@@ -262,11 +265,11 @@ export function PoolDetailClient({
 
       {poolInvites.map((invite) => (
         <div
-          className="w-full mt-6 p-6 rounded bg-gradient-to-br from-grey-100 to-grey-200 flex justify-between items-center"
+          className="w-full mt-4 p-6 rounded bg-white border border-grey-100 shadow-sm flex justify-between items-center"
           key={invite.id}
         >
           <p>{invite.nickname}</p>
-          <span className="italic text-xs">Invited</span>
+          <span className="italic text-xs text-grey-75">Invited</span>
         </div>
       ))}
     </div>
