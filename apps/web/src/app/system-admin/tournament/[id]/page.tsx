@@ -54,7 +54,7 @@ export default function TournamentAdminPage() {
 
   if (tournamentLoading || !tournament)
     return (
-      <div className="container mx-auto max-w-xl flex items-center justify-center text-white p-8">
+      <div className="container mx-auto max-w-xl flex items-center justify-center p-8">
         <Spinner />
       </div>
     );
@@ -130,11 +130,11 @@ export default function TournamentAdminPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col bg-black text-white">
-      <div className="flex flex-col w-full bg-grey-75 rounded p-4 items-center">
+    <div className="container mx-auto max-w-xl flex flex-wrap items-center flex-col">
+      <div className="flex flex-col w-full bg-white border border-grey-100 rounded-lg shadow-sm p-4 items-center">
         <div className="w-full">
           <h3>{tournament.name}</h3>
-          <p className="text-sm text-grey-50">
+          <p className="text-sm text-grey-75">
             {formatTournamentDates(tournament.start_date, tournament.end_date)}
           </p>
           <p>Last Updated: {updatedAt}</p>
@@ -143,8 +143,8 @@ export default function TournamentAdminPage() {
               <span
                 className={`text-xs px-2 py-1 rounded ${
                   tournamentHealth.data.athleteCount > 0
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-red-500/20 text-red-400"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
                 }`}
               >
                 {tournamentHealth.data.athleteCount > 0
@@ -154,8 +154,8 @@ export default function TournamentAdminPage() {
               <span
                 className={`text-xs px-2 py-1 rounded ${
                   tournamentHealth.data.scoredCount > 0
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-red-500/20 text-red-400"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
                 }`}
               >
                 {tournamentHealth.data.scoredCount > 0
@@ -165,24 +165,23 @@ export default function TournamentAdminPage() {
             </div>
           )}
 
-          {/* Completion confirmation prompt */}
           {needsCompletionConfirm && (
-            <div className="mt-4 p-4 rounded bg-green-500/20 border border-green-500/30">
-              <p className="text-green-300 text-sm font-medium mb-2">
+            <div className="mt-4 p-4 rounded bg-green-50 border border-green-100">
+              <p className="text-green-700 text-sm font-medium mb-2">
                 Tournament end date has passed. Mark as completed?
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleStatusChange({ value: "Completed", label: "Completed" })}
                   disabled={updateTournament.isPending}
-                  className="text-sm bg-green-500 text-black font-medium px-4 py-2 rounded hover:bg-green-300"
+                  className="text-sm bg-green-700 text-white font-medium px-4 py-2 rounded hover:bg-green-900"
                 >
                   Mark Completed
                 </button>
                 <button
                   onClick={() => handleStatusChange({ value: "Active", label: "Active" })}
                   disabled={updateTournament.isPending}
-                  className="text-sm bg-grey-100 text-white px-4 py-2 rounded hover:bg-grey-75"
+                  className="text-sm bg-grey-100 px-4 py-2 rounded hover:bg-grey-300"
                 >
                   Keep Active
                 </button>
@@ -201,12 +200,12 @@ export default function TournamentAdminPage() {
               options={selectOptions}
               value={selectedOption}
               isDisabled={isScraping}
-              className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
             />
             {(resolvedStatus === "Scheduled" || resolvedStatus === "Active") && (
               <div className="mt-6 flex flex-col">
                 <button
-                  className="bg-grey-200 m-2 hover:bg-green-700"
+                  className="bg-grey-200 border border-grey-100 m-2 hover:bg-green-100 rounded"
                   onClick={() => updateData("athletes")}
                   disabled={isScraping}
                 >
@@ -215,7 +214,7 @@ export default function TournamentAdminPage() {
                     : "Update Field"}
                 </button>
                 <button
-                  className="bg-grey-200 m-2 hover:bg-green-700"
+                  className="bg-grey-200 border border-grey-100 m-2 hover:bg-green-100 rounded"
                   onClick={() => updateData("rankings")}
                   disabled={isScraping}
                 >
@@ -224,7 +223,7 @@ export default function TournamentAdminPage() {
                     : "Update Rankings"}
                 </button>
                 <button
-                  className="bg-grey-200 m-2 hover:bg-green-700"
+                  className="bg-grey-200 border border-grey-100 m-2 hover:bg-green-100 rounded"
                   onClick={() => updateData("scores")}
                   disabled={isScraping}
                 >

@@ -112,7 +112,7 @@ export function PoolInviteForm({
   };
 
   return (
-    <div className="w-full bg-gradient-to-br from-grey-100 to-grey-200 rounded p-4 mt-4">
+    <div className="w-full bg-white border border-grey-100 rounded-lg p-4 mt-4 shadow-sm">
       <h3 className="text-lg font-bold mb-4">Send Pool Invite</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
@@ -130,12 +130,12 @@ export function PoolInviteForm({
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
             onKeyDown={handleKeyDown}
             required
-            className="w-full rounded p-2 text-black"
+            className="w-full rounded p-2 border border-grey-300"
             placeholder="Enter email address"
             autoComplete="off"
           />
           {showSuggestions && filteredSuggestions.length > 0 && (
-            <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
+            <ul className="absolute z-10 w-full bg-white border border-grey-300 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
               {filteredSuggestions.map((s, i) => (
                 <li
                   key={s.email}
@@ -144,14 +144,14 @@ export function PoolInviteForm({
                     s.alreadyInvited
                       ? "text-gray-400 cursor-not-allowed"
                       : i === highlightedIndex
-                        ? "bg-green-100 text-black cursor-pointer"
-                        : "text-black hover:bg-gray-100 cursor-pointer"
+                        ? "bg-green-100 cursor-pointer"
+                        : "hover:bg-gray-100 cursor-pointer"
                   }`}
                 >
                   <span className={s.alreadyInvited ? "font-normal" : "font-medium"}>
                     {s.email}
                   </span>
-                  <span className={s.alreadyInvited ? "text-gray-400 ml-2" : "text-gray-500 ml-2"}>
+                  <span className="text-gray-500 ml-2">
                     ({s.alreadyInvited ? "already invited" : s.nickname})
                   </span>
                 </li>
@@ -166,14 +166,14 @@ export function PoolInviteForm({
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             required
-            className="w-full rounded p-2 text-black"
+            className="w-full rounded p-2 border border-grey-300"
             placeholder="Enter nickname"
           />
         </div>
         <button
           type="submit"
           disabled={createInvite.isPending}
-          className="w-full bg-green-500 text-black font-medium py-2 px-4 rounded hover:bg-green-600 disabled:opacity-50"
+          className="w-full bg-green-700 text-white font-medium py-2 px-4 rounded hover:bg-green-900 disabled:opacity-50"
         >
           {createInvite.isPending ? (
             <span className="flex items-center justify-center">

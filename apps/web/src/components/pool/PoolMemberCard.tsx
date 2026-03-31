@@ -71,13 +71,13 @@ export function PoolMemberCard({
   const isCommissioner = member.role === "COMMISSIONER";
 
   const commissionerPill = isCommissioner ? (
-    <span className="relative ml-2 group">
+    <span className="relative ml-2 group inline-flex items-center">
       <span
-        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#edec3233] text-yellow text-[10px] leading-none pt-[1px] font-bold cursor-default"
+        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gold/20 text-yellow text-[10px] leading-none font-bold cursor-default"
       >
         C
       </span>
-      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-1 rounded bg-grey-100 text-white text-[10px] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-active:opacity-100 transition-opacity">
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-1 rounded bg-green-700 text-white text-[10px] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-active:opacity-100 transition-opacity">
         Pool Commissioner
       </span>
     </span>
@@ -86,11 +86,11 @@ export function PoolMemberCard({
 
   if (phase === "open") {
     return (
-      <div className="w-full mt-6 p-6 rounded bg-gradient-to-br from-grey-200 to-grey-100/50" key={member.id}>
+      <div className="w-full mt-4 p-6 rounded-lg bg-white border border-grey-100 shadow-sm" key={member.id}>
         {!currentUserCard && (
           <div className="flex justify-between">
             <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
-            <p className="font-semibold">{pickStatus}</p>
+            <p className="font-semibold text-grey-75">{pickStatus}</p>
           </div>
         )}
         {currentUserCard && member.picks?.length > 0 && (
@@ -117,7 +117,7 @@ export function PoolMemberCard({
             .map((athlete) => (
               <p
                 key={athlete.id}
-                className="p-2 mb-2 bg-gradient-to-br from-grey-100 to-grey-200 rounded"
+                className="p-2 mb-2 bg-grey-200 border border-grey-100 rounded"
               >
                 {athlete.full_name}
               </p>
@@ -128,40 +128,48 @@ export function PoolMemberCard({
 
   if (!member.picks?.length) {
     return (
-      <div className="w-full mt-6 p-6 rounded bg-gradient-to-br from-grey-200 to-grey-100/50 flex justify-between items-center">
+      <div className="w-full mt-4 p-6 rounded-lg bg-white border border-grey-100 shadow-sm flex justify-between items-center">
         <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
-        <span className="italic text-xs">No Picks Submitted</span>
+        <span className="italic text-xs text-grey-75">No Picks Submitted</span>
       </div>
     );
   }
 
   return (
     <div
-      className="w-full mt-6 p-6 pb-2 rounded bg-gradient-to-br from-grey-200 to-grey-100/50"
+      className="w-full mt-4 p-6 pb-2 rounded-lg bg-white border border-grey-100 shadow-sm"
       key={member.id}
     >
       <div className="flex items-center pb-4 pt-0">
         <div className="flex-1 flex items-center">
-          <p className="text-xl mr-4 text-yellow font-extrabold">
+          <p className="text-xl mr-4 text-gold font-extrabold">
             {positionFormatted}
           </p>
           <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
           <div className="flex-1 flex flex-col items-end pr-6 justify-center">
-            <p className="text-xl rounded-lg bg-grey-100 p-2 pr-3 pl-3 font-bold text-white">
+            <p className="text-xl rounded-lg bg-green-700 p-2 pr-3 pl-3 font-bold text-white">
               {underParFormatted}
             </p>
           </div>
         </div>
-        <div
-          className="accordion-header"
+        <button
           onClick={() => setShowPicks(!showPicks)}
+          className="p-1"
         >
-          <span
-            className={`accordion-arrow text-yellow ${showPicks ? "open" : ""}`}
+          <svg
+            className={`w-4 h-4 transition-transform text-grey-75 ${showPicks ? "" : "rotate-180"}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            &#9660;
-          </span>
-        </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
       </div>
       {showPicks &&
         member.picks

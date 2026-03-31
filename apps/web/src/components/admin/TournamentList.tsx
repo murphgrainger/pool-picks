@@ -26,9 +26,9 @@ interface Tournament {
 function statusColor(status: string) {
   switch (status) {
     case "Active":
-      return "bg-green-500/20 text-green-300";
+      return "bg-green-100 text-green-700";
     case "Completed":
-      return "bg-grey-100/50 text-grey-50";
+      return "bg-grey-100 text-grey-75";
     default:
       return "bg-yellow/20 text-yellow";
   }
@@ -37,22 +37,18 @@ function statusColor(status: string) {
 function poolStatusColor(status: string) {
   switch (status) {
     case "Setup":
-      return "bg-blue-500/20 text-blue-300";
+      return "bg-blue-100 text-blue-700";
     case "Open":
       return "bg-yellow/20 text-yellow";
     case "Locked":
-      return "bg-red-500/20 text-red-400";
+      return "bg-red-100 text-red-700";
     case "Complete":
-      return "bg-grey-100/50 text-grey-50";
+      return "bg-grey-100 text-grey-75";
     default:
-      return "bg-grey-100/50 text-grey-50";
+      return "bg-grey-100 text-grey-75";
   }
 }
 
-/**
- * Normalize a tournament name for matching year-over-year.
- * Strips sponsor text like "pres. by Mastercard", "presented by Workday", etc.
- */
 function normalizeName(name: string) {
   return name
     .replace(/\s+(pres\.|presented)\s+by\s+.+$/i, "")
@@ -60,13 +56,6 @@ function normalizeName(name: string) {
     .toLowerCase();
 }
 
-/**
- * Splits tournaments into:
- * - upcoming: current-year tournaments that are NOT completed, each with any
- *   past-year versions of the same tournament attached
- * - past: completed current-year tournaments + past-year tournaments that
- *   have no upcoming current-year counterpart
- */
 function categorizeTournaments(tournaments: Tournament[]) {
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -94,12 +83,9 @@ function categorizeTournaments(tournaments: Tournament[]) {
     }
   }
 
-  // Build a set of normalized names for upcoming tournaments
   const upcomingNames = new Set(currentYear_upcoming.map((t) => normalizeName(t.name)));
 
-  // Past-year tournaments that match an upcoming tournament by name
   const pastByName: Record<string, Tournament[]> = {};
-  // Past-year tournaments with no upcoming counterpart
   const orphanedPast: Tournament[] = [];
 
   for (const t of pastYear_all) {
@@ -112,7 +98,6 @@ function categorizeTournaments(tournaments: Tournament[]) {
     }
   }
 
-  // Sort each group
   const sortByStartAsc = (a: Tournament, b: Tournament) =>
     new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
 
@@ -123,7 +108,6 @@ function categorizeTournaments(tournaments: Tournament[]) {
     pastByName[key].sort(sortByStartAsc);
   }
 
-  // Overall past = completed this year + orphaned past-year tournaments
   const overallPast = [...currentYear_completed, ...orphanedPast];
 
   return { upcoming: currentYear_upcoming, pastByName, overallPast };
@@ -195,11 +179,11 @@ function PoolList({ pools }: { pools: Pool[] }) {
         <Link
           key={pool.id}
           href={`/pool/${pool.id}`}
-          className="flex items-center justify-between p-3 mb-1 bg-gradient-to-br from-grey-100 to-grey-200 rounded group"
+          className="flex items-center justify-between p-3 mb-1 bg-grey-200 border border-grey-100 rounded group"
         >
           <div className="min-w-0">
             <p className="font-bold">{pool.name}</p>
-            <div className="flex items-center gap-3 text-sm text-grey-50 mt-1">
+            <div className="flex items-center gap-3 text-sm text-grey-75 mt-1">
               <span>{pool.pool_members.length} members</span>
               {pool.pool_invites.length > 0 && (
                 <span>{pool.pool_invites.length} pending</span>
@@ -211,7 +195,7 @@ function PoolList({ pools }: { pools: Pool[] }) {
               </span>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-grey-75 group-hover:text-white shrink-0 ml-2" />
+          <ChevronRight className="w-4 h-4 text-grey-300 group-hover:text-green-700 shrink-0 ml-2" />
         </Link>
       ))}
     </div>
@@ -230,7 +214,7 @@ function TournamentCard({
   const resolved = resolveTournamentStatus(tournament);
 
   return (
-    <li className="bg-grey-200 rounded p-3 mb-2">
+    <li className="bg-white border border-grey-100 rounded-lg shadow-sm p-3 mb-2">
       <Link
         href={`/system-admin/tournament/${tournament.id}`}
         className="flex items-center justify-between group"
@@ -240,7 +224,7 @@ function TournamentCard({
             &#9971; {tournament.name}
           </p>
           <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-sm text-grey-50">
+            <p className="text-sm text-grey-75">
               {formatTournamentDates(tournament.start_date, tournament.end_date)}
             </p>
             <span
@@ -250,7 +234,7 @@ function TournamentCard({
             </span>
           </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-grey-75 group-hover:text-white shrink-0 ml-2" />
+        <ChevronRight className="w-5 h-5 text-grey-300 group-hover:text-green-700 shrink-0 ml-2" />
       </Link>
 
       <PoolList pools={tournament.pools} />
@@ -265,25 +249,25 @@ function TournamentCard({
               Past Years ({pastVersions.length})
             </span>
             <ChevronDown
-              className="w-3 h-3 text-grey-75 group-hover:text-white"
+              className="w-3 h-3 text-grey-75 group-hover:text-black"
               open={pastOpen}
             />
           </button>
           {pastOpen && (
             <div className="mt-1 space-y-2">
               {pastVersions.map((past) => (
-                <div key={past.id} className="bg-gradient-to-br from-grey-100 to-grey-200 rounded p-3">
+                <div key={past.id} className="bg-grey-200 border border-grey-100 rounded p-3">
                   <Link
                     href={`/system-admin/tournament/${past.id}`}
                     className="flex items-center justify-between group"
                   >
                     <div className="min-w-0">
                       <p className="font-bold text-sm">{new Date(past.start_date).getFullYear()}</p>
-                      <p className="text-xs text-grey-50">
+                      <p className="text-xs text-grey-75">
                         {formatTournamentDates(past.start_date, past.end_date)}
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-grey-75 group-hover:text-white shrink-0 ml-2" />
+                    <ChevronRight className="w-4 h-4 text-grey-300 group-hover:text-green-700 shrink-0 ml-2" />
                   </Link>
                   <PoolList pools={past.pools} />
                 </div>
@@ -308,7 +292,7 @@ export function TournamentList({ tournaments }: { tournaments: Tournament[] }) {
         <h1 className="text-lg font-bold">System Admin</h1>
         <button
           onClick={() => setSettingsOpen(!settingsOpen)}
-          className={`p-2 rounded hover:bg-grey-200 hover:text-grey-75 transition-colors ${settingsOpen ? "text-white bg-grey-200" : "text-grey-200"}`}
+          className={`p-2 rounded hover:bg-grey-200 transition-colors ${settingsOpen ? "text-green-700 bg-grey-200" : "text-grey-75"}`}
           title="Settings"
         >
           <GearIcon />
@@ -316,7 +300,7 @@ export function TournamentList({ tournaments }: { tournaments: Tournament[] }) {
       </div>
 
       {settingsOpen && (
-        <div className="w-full mb-4 p-3 bg-grey-200 rounded">
+        <div className="w-full mb-4 p-3 bg-grey-200 border border-grey-100 rounded">
           <SyncScheduleButton />
         </div>
       )}
@@ -337,13 +321,13 @@ export function TournamentList({ tournaments }: { tournaments: Tournament[] }) {
           <div className="mt-4">
             <button
               onClick={() => setPastOpen(!pastOpen)}
-              className="group w-full flex items-center justify-between py-3 px-4 text-left bg-grey-200 rounded"
+              className="group w-full flex items-center justify-between py-3 px-4 text-left bg-grey-200 border border-grey-100 rounded"
             >
               <h4 className="text-xs uppercase tracking-wider text-grey-75">
                 Past ({overallPast.length})
               </h4>
               <ChevronDown
-                className="w-4 h-4 text-grey-75 group-hover:text-white"
+                className="w-4 h-4 text-grey-75 group-hover:text-black"
                 open={pastOpen}
               />
             </button>

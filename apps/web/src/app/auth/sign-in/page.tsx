@@ -54,9 +54,9 @@ export default function SignInPage() {
   if (emailSent) {
     return (
       <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
-        <div className="bg-grey-50 w-full max-w-md p-10 rounded flex flex-col items-center text-center">
+        <div className="bg-white border border-grey-100 shadow-sm w-full max-w-md p-10 rounded-lg flex flex-col items-center text-center">
           <h1>Check Your Email</h1>
-          <p className="mt-6">
+          <p className="mt-6 text-grey-75">
             We sent you a verification link so you can sign into PoolPicks.
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function SignInPage() {
 
   return (
     <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col">
-      <div className="bg-grey-50 w-full max-w-md p-10 rounded flex flex-col items-center">
+      <div className="bg-white border border-grey-100 shadow-sm w-full max-w-md p-10 rounded-lg flex flex-col items-center">
         <h1 className="mb-8">Sign In</h1>
         <button
           onClick={handleGoogleSignIn}
@@ -99,18 +99,18 @@ export default function SignInPage() {
             id="email"
             name="email"
             placeholder="Email"
-            className="w-full rounded h-14"
+            className="w-full rounded h-14 border border-grey-300"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <button
             type="submit"
-            className="mt-4 bg-grey-200 text-white hover:bg-black rounded"
+            className="mt-4 bg-green-700 text-white hover:bg-green-900 rounded"
             disabled={loading || !email}
           >
             {loading ? "Sending you an email..." : "Email Magic Link"}
           </button>
-          {error && <p className="mt-2 text-yellow">{error}</p>}
+          {error && <p className="mt-2 text-red-500">{error}</p>}
         </form>
       </div>
     </div>

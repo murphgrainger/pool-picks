@@ -24,7 +24,7 @@ function buildEmailWrapper(content: string): string {
           <!-- Header -->
           <tr>
             <td style="background-color:#EDEC32;padding:20px;text-align:center;">
-              <h1 style="margin:0;color:#181818;font-size:24px;font-weight:bold;letter-spacing:0.5px;">Pool Picks</h1>
+              <h1 style="margin:0;color:#181818;font-size:24px;font-weight:bold;letter-spacing:0.5px;">PoolPicks</h1>
             </td>
           </tr>
           <!-- Body -->
@@ -37,7 +37,7 @@ function buildEmailWrapper(content: string): string {
           <tr>
             <td style="background-color:#ffffff;padding:16px 24px;border-top:1px solid #e5e5e5;">
               <p style="margin:0;color:#999999;font-size:12px;text-align:center;">
-                Pool Picks &mdash; Golf pool wagering with friends
+                PoolPicks &mdash; Golf pool wagering with friends
               </p>
             </td>
           </tr>
@@ -92,16 +92,16 @@ export async function sendPoolInviteEmail({
   ${tournamentName} &middot; ${tournamentDates}
 </p>
 <p style="margin:0 0 32px;color:#555555;font-size:14px;line-height:1.5;">
-  Sign in to Pool Picks to accept or decline this invitation.
+  Sign in to PoolPicks to accept or decline this invitation.
 </p>
 ${buildButton(appBaseUrl, "View Invitation")}`;
 
   try {
     const resend = getResendClient();
     await resend.emails.send({
-      from: `Pool Picks <${fromAddress}>`,
+      from: `PoolPicks <${fromAddress}>`,
       to,
-      subject: `You've been invited to join ${poolName} on Pool Picks`,
+      subject: `You've been invited to join ${poolName} on PoolPicks`,
       html: buildEmailWrapper(content),
     });
     return { success: true };
@@ -125,7 +125,7 @@ export async function sendAuthEmail({
   const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
   const content = `
-<h2 style="margin:0 0 16px;color:#181818;font-size:20px;">Sign in to Pool Picks</h2>
+<h2 style="margin:0 0 16px;color:#181818;font-size:20px;">Sign in to PoolPicks</h2>
 <p style="margin:0 0 32px;color:#555555;font-size:14px;line-height:1.5;">
   Click the button below to sign in. This link will expire in 1 hour.
 </p>
@@ -137,9 +137,9 @@ ${buildButton(magicLink, "Sign In")}
   try {
     const resend = getResendClient();
     await resend.emails.send({
-      from: `Pool Picks <${fromAddress}>`,
+      from: `PoolPicks <${fromAddress}>`,
       to,
-      subject: "Sign in to Pool Picks",
+      subject: "Sign in to PoolPicks",
       html: buildEmailWrapper(content),
     });
     return { success: true };
@@ -191,7 +191,7 @@ ${buildButton(poolUrl, "View Results")}`;
   try {
     const resend = getResendClient();
     await resend.emails.send({
-      from: `Pool Picks <${fromAddress}>`,
+      from: `PoolPicks <${fromAddress}>`,
       to,
       subject: `${poolName} has been automatically completed`,
       html: buildEmailWrapper(content),
@@ -227,7 +227,7 @@ ${buildButton(poolUrl, "Make Your Picks")}`;
   try {
     const resend = getResendClient();
     await resend.emails.send({
-      from: `Pool Picks <${fromAddress}>`,
+      from: `PoolPicks <${fromAddress}>`,
       to,
       subject: `${poolName} is open — time to make your picks!`,
       html: buildEmailWrapper(content),
