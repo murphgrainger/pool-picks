@@ -10,9 +10,9 @@
 - Added `poolInvite.pastEmails` tRPC query that returns distinct emails across all pools a commissioner manages
 - Updated `PoolInviteForm` with autocomplete dropdown that suggests past invite emails/nicknames as the commissioner types
 - Updated `.env.example` files with `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `NEXT_PUBLIC_APP_URL`
-- Replaced Supabase OTP email with branded Resend email via `/api/auth/send-magic-link` route using `admin.generateLink`
+- Auth uses Email OTP (6-digit code) via Supabase Auth with custom SMTP (Resend) and Send Email Hook for branded templates
 - Restyled all email templates: white background, yellow (#EDEC32) header, clean design matching app brand
-- Added three email types: invite, auth magic link, pool open notification
+- Added email types: invite, OTP sign-in code, pool open notification, pool auto-complete
 - Pool invitations for Setup-status pools now show on home page (not just Open)
 - Added confirmation modal when commissioner moves pool to Open status ("This will notify all pool members...")
 - Added server-side failsafe: cannot move pool to Open if tournament has no athletes
