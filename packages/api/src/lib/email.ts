@@ -111,26 +111,30 @@ ${buildButton(appBaseUrl, "View Invitation")}`;
   }
 }
 
-// --- Auth OTP / Magic Link Email ---
+// --- Auth OTP Email ---
 
-interface SendAuthEmailParams {
+interface SendOtpEmailParams {
   to: string;
-  magicLink: string;
+  otp: string;
 }
 
-export async function sendAuthEmail({
+export async function sendOtpEmail({
   to,
-  magicLink,
-}: SendAuthEmailParams): Promise<{ success: boolean; error?: string }> {
+  otp,
+}: SendOtpEmailParams): Promise<{ success: boolean; error?: string }> {
   const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
   const content = `
 <h2 style="margin:0 0 16px;color:#181818;font-size:20px;">Sign in to PoolPicks</h2>
-<p style="margin:0 0 32px;color:#555555;font-size:14px;line-height:1.5;">
-  Click the button below to sign in. This link will expire in 1 hour.
+<p style="margin:0 0 24px;color:#555555;font-size:14px;line-height:1.5;">
+  Enter this code to sign in. It expires in 10 minutes.
 </p>
-${buildButton(magicLink, "Sign In")}
-<p style="margin:24px 0 0;color:#999999;font-size:12px;line-height:1.5;">
+<div style="text-align:center;margin:0 0 24px;">
+  <span style="display:inline-block;font-size:32px;font-weight:bold;letter-spacing:8px;color:#181818;background-color:#f5f5f5;padding:16px 24px;border-radius:8px;border:1px solid #e5e5e5;font-family:monospace;">
+    ${otp}
+  </span>
+</div>
+<p style="margin:0;color:#999999;font-size:12px;line-height:1.5;">
   If you didn't request this email, you can safely ignore it.
 </p>`;
 
@@ -139,7 +143,7 @@ ${buildButton(magicLink, "Sign In")}
     await resend.emails.send({
       from: `PoolPicks <${fromAddress}>`,
       to,
-      subject: "Sign in to PoolPicks",
+      subject: "Your PoolPicks sign-in code",
       html: buildEmailWrapper(content),
     });
     return { success: true };

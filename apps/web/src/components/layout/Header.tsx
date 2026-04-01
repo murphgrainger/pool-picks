@@ -49,6 +49,7 @@ export function Header({ userEmail, isAdmin }: HeaderProps) {
     setLoading(true);
     await fetch("/api/auth/sign-out", { method: "POST" });
     await supabase.auth.signOut();
+    setLoading(false);
     router.push("/auth/sign-in");
     router.refresh();
   };
