@@ -217,7 +217,7 @@ export default function PoolCreatePage() {
         <label className="block">
           <span>Your Commissioner Nickname</span>
           <input
-            placeholder="i.e. MurphMoney"
+            placeholder="e.g. MurphMoney"
             {...register("username", { required: true })}
             name="username"
             type="text"

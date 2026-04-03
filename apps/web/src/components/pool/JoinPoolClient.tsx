@@ -26,6 +26,7 @@ interface JoinPoolClientProps {
   isAuthenticated: boolean;
   isAlreadyMember: boolean;
   hasPendingInvite: boolean;
+  commissionerNickname: string | null;
 }
 
 export function JoinPoolClient({
@@ -34,6 +35,7 @@ export function JoinPoolClient({
   isAuthenticated,
   isAlreadyMember,
   hasPendingInvite,
+  commissionerNickname,
 }: JoinPoolClientProps) {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -67,6 +69,9 @@ export function JoinPoolClient({
           <p className="text-grey-50 text-sm mb-4">{pool.tournament.course}</p>
         )}
 
+        {commissionerNickname && (
+          <span className="text-sm text-grey-75 mb-1">Commissioner: {commissionerNickname}</span>
+        )}
         <div className="flex gap-4 text-sm text-grey-75 mb-6">
           <span>{pool._count.pool_members} member{pool._count.pool_members !== 1 ? "s" : ""}</span>
           {pool.amount_entry > 0 && <span>${pool.amount_entry} entry</span>}
@@ -117,7 +122,7 @@ export function JoinPoolClient({
           <form onSubmit={handleJoin} className="w-full flex flex-col">
             <input
               type="text"
-              placeholder="Choose a username"
+              placeholder="Your nickname"
               className="w-full rounded h-14 border border-grey-300 mb-4"
               value={username}
               onChange={(e) => setUsername(e.target.value)}

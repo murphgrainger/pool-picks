@@ -28,11 +28,18 @@ export default async function JoinPage({ params }: JoinPageProps) {
           end_date: true,
         },
       },
+      pool_members: {
+        where: { role: "COMMISSIONER" },
+        select: { username: true },
+        take: 1,
+      },
       _count: { select: { pool_members: true } },
     },
   });
 
   if (!pool) notFound();
+
+  const commissionerNickname = pool.pool_members[0]?.username ?? null;
 
   const { supabaseUser } = await getAuthUser();
 
@@ -62,6 +69,7 @@ export default async function JoinPage({ params }: JoinPageProps) {
       isAuthenticated={!!supabaseUser}
       isAlreadyMember={isAlreadyMember}
       hasPendingInvite={hasPendingInvite}
+      commissionerNickname={commissionerNickname}
     />
   );
 }
