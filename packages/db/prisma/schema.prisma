@@ -23,6 +23,11 @@ enum PoolRole {
   MEMBER
 }
 
+enum JoinMode {
+  OPEN
+  INVITE_ONLY
+}
+
 model Tournament {
   id          Int                    @id @default(autoincrement())
   created_at  DateTime               @default(now())
@@ -79,7 +84,8 @@ model Pool {
   updated_at    DateTime     @updatedAt
   name          String
   status        String       @default("Setup")
-  invite_code   String?
+  invite_code   String?  @unique
+  join_mode     JoinMode @default(INVITE_ONLY)
   amount_entry  Int
   amount_sum    Int?         @default(0)
   tournament_id Int

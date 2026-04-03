@@ -113,7 +113,7 @@ export function PoolInviteForm({
 
   return (
     <div className="w-full bg-white border border-grey-100 rounded-lg p-4 mt-4 shadow-sm">
-      <h3 className="text-lg font-bold mb-4">Send Pool Invite</h3>
+      <h3 className="text-lg font-bold mb-4">Send Pool Invite via Email</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
           <label className="block text-sm font-medium mb-1">Email</label>

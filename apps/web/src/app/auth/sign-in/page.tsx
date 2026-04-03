@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type AuthStep = "email" | "otp";
 
@@ -17,6 +17,8 @@ export default function SignInPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams?.get("next") || "/";
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function SignInPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
     if (error) {
@@ -118,7 +120,7 @@ export default function SignInPage() {
       await fetch("/api/auth/ensure-user", { method: "POST" });
     }
 
-    router.push("/");
+    router.push(next);
     router.refresh();
   };
 

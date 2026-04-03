@@ -3,10 +3,12 @@ import { z } from "zod";
 import { prisma } from "@pool-picks/db";
 import {
   router,
+  publicProcedure,
   protectedProcedure,
   commissionerProcedure,
 } from "../trpc";
 import { sendPoolOpenEmail, sendPoolAutoCompleteEmail } from "../lib/email";
+import { generateUniqueInviteCode } from "../lib/inviteCode";
 
 const STALE_POOL_DAYS = 7;
 
@@ -85,6 +87,8 @@ export const poolRouter = router({
           id: true,
           name: true,
           status: true,
+          invite_code: true,
+          join_mode: true,
           amount_entry: true,
           amount_sum: true,
           tournament_id: true,
@@ -190,13 +194,18 @@ export const poolRouter = router({
         amount_entry: z.number().min(0),
         tournament_id: z.number().int(),
         username: z.string().min(1),
+        join_mode: z.enum(["OPEN", "INVITE_ONLY"]).default("INVITE_ONLY"),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const invite_code = await generateUniqueInviteCode();
+
       const pool = await prisma.pool.create({
         data: {
           name: input.name,
           amount_entry: input.amount_entry,
+          join_mode: input.join_mode,
+          invite_code,
           tournament: { connect: { id: input.tournament_id } },
         },
       });
@@ -290,6 +299,132 @@ export const poolRouter = router({
       return prisma.pool.update({
         where: { id: input.pool_id },
         data: { status: input.status },
+      });
+    }),
+
+  getByInviteCode: publicProcedure
+    .input(z.object({ code: z.string().min(1) }))
+    .query(async ({ input }) => {
+      const pool = await prisma.pool.findUnique({
+        where: { invite_code: input.code.toUpperCase() },
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          join_mode: true,
+          amount_entry: true,
+          tournament: {
+            select: {
+              name: true,
+              course: true,
+              start_date: true,
+              end_date: true,
+            },
+          },
+          _count: { select: { pool_members: true } },
+        },
+      });
+
+      if (!pool) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invalid invite code",
+        });
+      }
+
+      return pool;
+    }),
+
+  joinByCode: protectedProcedure
+    .input(
+      z.object({
+        code: z.string().min(1),
+        username: z.string().min(1),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const pool = await prisma.pool.findUnique({
+        where: { invite_code: input.code.toUpperCase() },
+        select: { id: true, status: true, join_mode: true },
+      });
+
+      if (!pool) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invalid invite code",
+        });
+      }
+
+      if (pool.join_mode !== "OPEN") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This pool is invite-only. Ask the commissioner to invite you.",
+        });
+      }
+
+      if (pool.status !== "Setup" && pool.status !== "Open") {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "This pool is no longer accepting new members.",
+        });
+      }
+
+      // Check if already a member
+      const existingMember = await prisma.poolMember.findFirst({
+        where: { pool_id: pool.id, user_id: ctx.user.id },
+      });
+      if (existingMember) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "You're already a member of this pool.",
+        });
+      }
+
+      // Check if username is taken in this pool
+      const usernameTaken = await prisma.poolMember.findFirst({
+        where: { pool_id: pool.id, username: input.username },
+      });
+      if (usernameTaken) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "That username is already taken in this pool.",
+        });
+      }
+
+      // Create the member
+      const member = await prisma.poolMember.create({
+        data: {
+          pool: { connect: { id: pool.id } },
+          user: { connect: { id: ctx.user.id } },
+          role: "MEMBER",
+          username: input.username,
+        },
+      });
+
+      // Auto-accept any pending invite for this user's email
+      await prisma.poolInvite.updateMany({
+        where: {
+          pool_id: pool.id,
+          email: ctx.user.email,
+          status: "Invited",
+        },
+        data: { status: "Accepted" },
+      });
+
+      return { poolId: pool.id, memberId: member.id };
+    }),
+
+  updateJoinMode: commissionerProcedure
+    .input(
+      z.object({
+        pool_id: z.number(),
+        join_mode: z.enum(["OPEN", "INVITE_ONLY"]),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return prisma.pool.update({
+        where: { id: input.pool_id },
+        data: { join_mode: input.join_mode },
       });
     }),
 });
