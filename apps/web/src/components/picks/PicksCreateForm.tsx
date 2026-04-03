@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Select from "react-select";
 import { useRouter } from "next/navigation";
@@ -20,16 +20,23 @@ type FormValues = {
   picks: { id: number }[];
 };
 
+export interface ExistingPick {
+  id: number;
+  full_name: string;
+}
+
 interface PicksCreateFormProps {
   memberId: number;
   tournamentId: number;
   tournamentExternalUrl: string | null;
+  existingPicks?: ExistingPick[];
 }
 
 export function PicksCreateForm({
   memberId,
   tournamentId,
   tournamentExternalUrl,
+  existingPicks,
 }: PicksCreateFormProps) {
   const router = useRouter();
   const {
@@ -38,19 +45,41 @@ export function PicksCreateForm({
     handleSubmit,
     formState: { errors },
     clearErrors,
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({
+    defaultValues: existingPicks?.length
+      ? { picks: existingPicks.map((p) => ({ id: p.id })) }
+      : undefined,
+  });
+
+  const isEditing = !!existingPicks?.length;
 
   const { data: athletes, isLoading, error } = trpc.athlete.listByTournament.useQuery({
     tournament_id: tournamentId,
   });
 
-  const [picks, setPicks] = useState<Array<{ id: number; full_name: string; isAGroup: boolean } | null>>([
-    null, null, null, null, null, null,
-  ]);
+  const [picks, setPicks] = useState<Array<{ id: number; full_name: string; isAGroup: boolean } | null>>(
+    [null, null, null, null, null, null]
+  );
+
+  const didInitialize = useRef(false);
+  useEffect(() => {
+    if (existingPicks?.length && athletes && !didInitialize.current) {
+      didInitialize.current = true;
+      const initialized = existingPicks.map((p) => {
+        const athlete = athletes.find((a) => a.id === p.id);
+        return {
+          id: p.id,
+          full_name: p.full_name,
+          isAGroup: !!(athlete?.ranking && athlete.ranking <= 20),
+        };
+      });
+      setPicks(initialized);
+    }
+  }, [existingPicks, athletes]);
 
   const createPicks = trpc.poolMember.submitPicks.useMutation({
     onSuccess: () => {
-      toast.success("Picks submitted!");
+      toast.success(isEditing ? "Picks updated!" : "Picks submitted!");
       router.refresh();
     },
     onError: (error) => {
@@ -117,7 +146,7 @@ export function PicksCreateForm({
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-y-6 p-4 rounded-lg bg-grey-200 border border-grey-100"
       >
-        <h3>Submit Your Picks</h3>
+        <h3>{isEditing ? "Edit Your Picks" : "Submit Your Picks"}</h3>
         <ul className="list-none text-lg">
           <span className="font-bold">Pick 6, Use 4</span>
           <li>- Pick 3 players max from the A Group</li>
@@ -188,10 +217,10 @@ export function PicksCreateForm({
           {createPicks.isPending ? (
             <span className="flex items-center justify-center">
               <Spinner className="w-6 h-6 mr-1" />
-              Submitting Picks...
+              {isEditing ? "Updating Picks..." : "Submitting Picks..."}
             </span>
           ) : (
-            <span>Submit Picks</span>
+            <span>{isEditing ? "Update Picks" : "Submit Picks"}</span>
           )}
         </button>
       </form>

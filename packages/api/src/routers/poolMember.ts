@@ -105,6 +105,11 @@ export const poolMemberRouter = router({
         });
       }
 
+      // Delete any existing picks (supports editing)
+      await prisma.poolMembersAthletes.deleteMany({
+        where: { poolMember_id: input.poolMemberId },
+      });
+
       const picks = await Promise.all(
         input.athleteIds.map((athleteId) =>
           prisma.poolMembersAthletes.create({

@@ -37,6 +37,7 @@ export function PoolMemberCard({
     : "Awaiting Picks";
 
   const [showPicks, setShowPicks] = useState(false);
+  const [isEditingPicks, setIsEditingPicks] = useState(false);
   const [hasSubmittedUsername, setHasSubmittedUsername] = useState(
     !!member.username
   );
@@ -93,8 +94,47 @@ export function PoolMemberCard({
             <p className="font-semibold text-grey-75">{pickStatus}</p>
           </div>
         )}
-        {currentUserCard && member.picks?.length > 0 && (
-          <h3 className="mb-4 flex items-center">{displayName}{commissionerPill}</h3>
+        {currentUserCard && member.picks?.length > 0 && !isEditingPicks && (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
+              <button
+                onClick={() => setIsEditingPicks(true)}
+                className="text-sm font-medium text-green-700 hover:text-green-900 transition-colors"
+              >
+                Edit Picks
+              </button>
+            </div>
+            {member.picks
+              .sort((a, b) => a.full_name.localeCompare(b.full_name))
+              .map((athlete) => (
+                <p
+                  key={athlete.id}
+                  className="p-2 mb-2 bg-grey-200 border border-grey-100 rounded"
+                >
+                  {athlete.full_name}
+                </p>
+              ))}
+          </>
+        )}
+        {currentUserCard && member.picks?.length > 0 && isEditingPicks && (
+          <>
+            <div className="flex justify-between items-center">
+              <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
+              <button
+                onClick={() => setIsEditingPicks(false)}
+                className="text-sm font-medium text-grey-75 hover:text-black transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+            <PicksCreateForm
+              memberId={currentMemberId!}
+              tournamentId={tournamentId}
+              tournamentExternalUrl={tournamentExternalUrl}
+              existingPicks={member.picks.map((p) => ({ id: p.id, full_name: p.full_name }))}
+            />
+          </>
         )}
         {currentUserCard && !hasSubmittedUsername && (
           <UsernameCreateForm
@@ -111,17 +151,6 @@ export function PoolMemberCard({
               tournamentExternalUrl={tournamentExternalUrl}
             />
           )}
-        {currentUserCard &&
-          member.picks
-            ?.sort((a, b) => a.full_name.localeCompare(b.full_name))
-            .map((athlete) => (
-              <p
-                key={athlete.id}
-                className="p-2 mb-2 bg-grey-200 border border-grey-100 rounded"
-              >
-                {athlete.full_name}
-              </p>
-            ))}
       </div>
     );
   }
