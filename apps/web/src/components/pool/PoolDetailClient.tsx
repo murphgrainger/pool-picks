@@ -256,16 +256,28 @@ export function PoolDetailClient({
         )}
       </div>
 
-      {updatedPoolMembers.map((member) => (
-        <PoolMemberCard
-          key={member.id}
-          member={member}
-          currentMemberId={currentUserPoolMemberId}
-          phase={phase}
-          tournamentId={pool.tournament.id}
-          tournamentExternalUrl={tournamentExternalUrl}
-        />
-      ))}
+      {[...updatedPoolMembers]
+        .sort((a, b) => {
+          if (phase === "open") {
+            const aIsCurrentUser = a.id === currentUserPoolMemberId ? 0 : 1;
+            const bIsCurrentUser = b.id === currentUserPoolMemberId ? 0 : 1;
+            if (aIsCurrentUser !== bIsCurrentUser) return aIsCurrentUser - bIsCurrentUser;
+            const aHasPicks = a.picks?.length ? 0 : 1;
+            const bHasPicks = b.picks?.length ? 0 : 1;
+            return aHasPicks - bHasPicks;
+          }
+          return 0;
+        })
+        .map((member) => (
+          <PoolMemberCard
+            key={member.id}
+            member={member}
+            currentMemberId={currentUserPoolMemberId}
+            phase={phase}
+            tournamentId={pool.tournament.id}
+            tournamentExternalUrl={tournamentExternalUrl}
+          />
+        ))}
 
       {poolInvites.map((invite) => (
         <div

@@ -3,6 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "../../packages/db/prisma/**"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "dev": {
