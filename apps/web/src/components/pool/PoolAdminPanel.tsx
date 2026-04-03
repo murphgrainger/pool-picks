@@ -17,6 +17,8 @@ interface PoolAdminPanelProps {
   tournamentId: number;
   currentStatus: string;
   tournamentStatus: string;
+  inviteCode: string | null;
+  joinMode: string;
   existingInviteEmails: string[];
   onInviteCreated: (invite: {
     id: number;
@@ -32,6 +34,8 @@ export function PoolAdminPanel({
   tournamentId,
   currentStatus,
   tournamentStatus,
+  inviteCode,
+  joinMode: initialJoinMode,
   existingInviteEmails,
   onInviteCreated,
   onStatusChange,
@@ -43,10 +47,29 @@ export function PoolAdminPanel({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const [pendingNotify, setPendingNotify] = useState<boolean | null>(null);
+  const [joinMode, setJoinMode] = useState(initialJoinMode);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [showEmailInvites, setShowEmailInvites] = useState(initialJoinMode !== "OPEN");
 
   const tournamentHealth = trpc.tournament.getHealth.useQuery({
     id: tournamentId,
   });
+
+  const updateJoinMode = trpc.pool.updateJoinMode.useMutation({
+    onSuccess: (_data, variables) => {
+      setJoinMode(variables.join_mode);
+      toast.success(`Join mode updated to ${variables.join_mode === "OPEN" ? "open" : "invite-only"}`);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handleCopyLink = () => {
+    if (!inviteCode) return;
+    const link = `${window.location.origin}/join/${inviteCode}`;
+    navigator.clipboard.writeText(link);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
 
   const updatePool = trpc.pool.updateStatus.useMutation({
     onSuccess: (_data, variables) => {
@@ -121,6 +144,88 @@ export function PoolAdminPanel({
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
         />
 
+        {/* Invite Link Section */}
+        {inviteCode && (currentStatus === "Setup" || currentStatus === "Open") && (
+          <div className="mt-4 pt-4 border-t border-grey-300">
+            <label className="text-sm font-medium text-grey-75">
+              Invite Link
+            </label>
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="text"
+                readOnly
+                value={`${typeof window !== "undefined" ? window.location.origin : ""}/join/${inviteCode}`}
+                className="flex-1 text-sm bg-grey-100 border border-grey-300 rounded px-3 py-2 text-grey-75"
+              />
+              <button
+                onClick={handleCopyLink}
+                className="px-3 py-2 text-sm rounded bg-green-700 text-white hover:bg-green-900 whitespace-nowrap"
+              >
+                {linkCopied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <div className="flex items-center gap-3 mt-3">
+              <label className="text-sm text-grey-75">Join mode:</label>
+              <button
+                onClick={() =>
+                  updateJoinMode.mutate({
+                    pool_id: poolId,
+                    join_mode: joinMode === "OPEN" ? "INVITE_ONLY" : "OPEN",
+                  })
+                }
+                disabled={updateJoinMode.isPending}
+                className={`text-xs px-3 py-1 rounded font-medium ${
+                  joinMode === "OPEN"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-grey-100 text-grey-75"
+                }`}
+              >
+                {joinMode === "OPEN" ? "Open" : "Invite Only"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Email Invite Form */}
+        {selectedOption.value === "Setup" && (
+          joinMode === "OPEN" ? (
+            <>
+              <button
+                onClick={() => setShowEmailInvites((prev) => !prev)}
+                className="flex items-center text-sm text-grey-75 hover:text-black mt-3 self-start p-0"
+              >
+                <svg
+                  className={`w-4 h-4 mr-1 transition-transform ${showEmailInvites ? "" : "-rotate-90"}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+                Send Pool Invite via Email
+              </button>
+              {showEmailInvites && (
+                <PoolInviteForm
+                  poolId={poolId}
+                  existingInviteEmails={existingInviteEmails}
+                  onInviteCreated={onInviteCreated}
+                />
+              )}
+            </>
+          ) : (
+            <PoolInviteForm
+              poolId={poolId}
+              existingInviteEmails={existingInviteEmails}
+              onInviteCreated={onInviteCreated}
+            />
+          )
+        )}
+
         {/* Tournament data pills */}
         {tournamentHealth.data && (
           <div className="mt-4 pt-4 border-t border-grey-300">
@@ -151,16 +256,6 @@ export function PoolAdminPanel({
                   : "No scores"}
               </span>
             </div>
-          </div>
-        )}
-
-        {selectedOption.value === "Setup" && (
-          <div className="mt-8">
-            <PoolInviteForm
-              poolId={poolId}
-              existingInviteEmails={existingInviteEmails}
-              onInviteCreated={onInviteCreated}
-            />
           </div>
         )}
       </div>

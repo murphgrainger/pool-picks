@@ -21,6 +21,8 @@ interface PoolDetailClientProps {
     id: number;
     name: string;
     status: string;
+    invite_code: string | null;
+    join_mode: string;
     amount_entry: number;
     amount_sum: number | null;
     tournament_id: number;
@@ -216,7 +218,7 @@ export function PoolDetailClient({
           </div>
         )}
 
-        <PoolStatusCard phase={phase} />
+        <PoolStatusCard phase={phase} isCommissioner={isCommissioner} />
 
         {isCommissioner && (
           <button
@@ -245,6 +247,8 @@ export function PoolDetailClient({
             tournamentId={pool.tournament.id}
             currentStatus={poolStatus}
             tournamentStatus={tournamentStatus}
+            inviteCode={pool.invite_code}
+            joinMode={pool.join_mode}
             existingInviteEmails={poolInvites.map((i) => i.email)}
             onInviteCreated={handleNewInvite}
             onStatusChange={handleStatusChange}

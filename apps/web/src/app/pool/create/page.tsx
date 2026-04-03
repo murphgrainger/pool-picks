@@ -12,6 +12,7 @@ type FormValues = {
   amount_entry: string;
   tournament_id: string;
   username: string;
+  join_mode: "OPEN" | "INVITE_ONLY";
 };
 
 function formatDateRange(start: Date, end: Date): string {
@@ -106,6 +107,7 @@ export default function PoolCreatePage() {
       amount_entry: parseFloat(data.amount_entry),
       tournament_id: parseInt(data.tournament_id, 10),
       username: data.username,
+      join_mode: data.join_mode,
     });
   };
 
@@ -215,13 +217,38 @@ export default function PoolCreatePage() {
         <label className="block">
           <span>Your Commissioner Nickname</span>
           <input
-            placeholder="i.e. MurphMoney"
+            placeholder="e.g. MurphMoney"
             {...register("username", { required: true })}
             name="username"
             type="text"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         </label>
+
+        <fieldset className="block">
+          <legend className="font-medium">How can people join this pool?</legend>
+          <div className="mt-2 space-y-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="OPEN"
+                defaultChecked
+                {...register("join_mode")}
+                className="text-green-700 focus:ring-green-700"
+              />
+              <span>Anyone with an invite link</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="INVITE_ONLY"
+                {...register("join_mode")}
+                className="text-green-700 focus:ring-green-700"
+              />
+              <span>Only people I invite by email</span>
+            </label>
+          </div>
+        </fieldset>
 
         <button
           disabled={isLoading}

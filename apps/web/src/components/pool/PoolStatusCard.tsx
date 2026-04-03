@@ -2,6 +2,7 @@ import type { PoolPhase } from "@pool-picks/utils";
 
 interface PoolStatusCardProps {
   phase: PoolPhase;
+  isCommissioner?: boolean;
 }
 
 function phaseStyle(phase: PoolPhase) {
@@ -17,8 +18,9 @@ function phaseStyle(phase: PoolPhase) {
   }
 }
 
-export function PoolStatusCard({ phase }: PoolStatusCardProps) {
+export function PoolStatusCard({ phase, isCommissioner }: PoolStatusCardProps) {
   if (phase === "live" || phase === "locked-awaiting") return null;
+  if (isCommissioner) return null;
 
   let statusDescription = "";
 

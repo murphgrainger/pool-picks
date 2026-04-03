@@ -29,13 +29,15 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Redirect unauthenticated users to sign-in (except for auth routes and API routes)
+  // Redirect unauthenticated users to sign-in (except for auth, API, and join routes)
   const isAuthRoute = request.nextUrl.pathname.startsWith("/auth");
   const isApiRoute = request.nextUrl.pathname.startsWith("/api");
+  const isJoinRoute = request.nextUrl.pathname.startsWith("/join");
 
-  if (!user && !isAuthRoute && !isApiRoute) {
+  if (!user && !isAuthRoute && !isApiRoute && !isJoinRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/sign-in";
+    url.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(url);
   }
 

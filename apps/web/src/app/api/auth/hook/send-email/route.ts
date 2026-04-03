@@ -15,7 +15,7 @@ interface SendEmailHookPayload {
   };
 }
 
-const SUPPORTED_ACTION_TYPES = ["email", "signup"];
+const SUPPORTED_ACTION_TYPES = ["email", "signup", "magiclink"];
 
 export async function POST(request: Request) {
   const hookSecret = process.env.SEND_EMAIL_HOOK_SECRET;
