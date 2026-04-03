@@ -134,6 +134,7 @@ export const poolRouter = router({
                     select: {
                       id: true,
                       full_name: true,
+                      ranking: true,
                       tournaments: {
                         select: {
                           status: true,
