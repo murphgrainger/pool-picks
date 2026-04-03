@@ -20,6 +20,7 @@ export interface PoolMemberFormatted {
 export interface AthletePickFormatted {
   id: number;
   full_name: string;
+  ranking: number | null;
   status: string;
   position: number | null;
   score_today: number | null;
@@ -60,6 +61,7 @@ export function reformatPoolMembers(
           return {
             id: athletePick.athlete.id,
             full_name: athletePick.athlete.full_name,
+            ranking: athletePick.athlete.ranking ?? null,
             status: tournament?.status ?? "",
             position: tournament?.position ?? null,
             score_today: tournament?.score_today ?? null,

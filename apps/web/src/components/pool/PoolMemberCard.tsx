@@ -105,14 +105,22 @@ export function PoolMemberCard({
                 Edit Picks
               </button>
             </div>
-            {member.picks
-              .sort((a, b) => a.full_name.localeCompare(b.full_name))
+            {[...member.picks]
+              .sort((a, b) => {
+                const aIsA = a.ranking && a.ranking <= 20 ? 0 : 1;
+                const bIsA = b.ranking && b.ranking <= 20 ? 0 : 1;
+                if (aIsA !== bIsA) return aIsA - bIsA;
+                return a.full_name.localeCompare(b.full_name);
+              })
               .map((athlete) => (
                 <p
                   key={athlete.id}
                   className="p-2 mb-2 bg-grey-200 border border-grey-100 rounded"
                 >
                   {athlete.full_name}
+                  {athlete.ranking && athlete.ranking <= 20 && (
+                    <span className="ml-2 text-xs text-grey-75">(A Group)</span>
+                  )}
                 </p>
               ))}
           </>

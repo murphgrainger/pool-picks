@@ -258,9 +258,13 @@ export function PoolDetailClient({
 
       {[...updatedPoolMembers]
         .sort((a, b) => {
-          if (phase === "open" && currentUserPoolMemberId) {
-            if (a.id === currentUserPoolMemberId) return -1;
-            if (b.id === currentUserPoolMemberId) return 1;
+          if (phase === "open") {
+            const aIsCurrentUser = a.id === currentUserPoolMemberId ? 0 : 1;
+            const bIsCurrentUser = b.id === currentUserPoolMemberId ? 0 : 1;
+            if (aIsCurrentUser !== bIsCurrentUser) return aIsCurrentUser - bIsCurrentUser;
+            const aHasPicks = a.picks?.length ? 0 : 1;
+            const bHasPicks = b.picks?.length ? 0 : 1;
+            return aHasPicks - bHasPicks;
           }
           return 0;
         })
