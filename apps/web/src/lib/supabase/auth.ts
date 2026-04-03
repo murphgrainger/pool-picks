@@ -17,14 +17,25 @@ export const getAuthUser = cache(async () => {
     return { supabaseUser: null, email: null, isAdmin: false };
   }
 
-  const dbUser = await prisma.user.findUnique({
+  let dbUser = await prisma.user.findUnique({
     where: { id: supabaseUser.id },
     select: { is_admin: true },
   });
 
+  // Self-healing: if the Supabase user exists but has no Prisma row
+  // (e.g. ensure-user call failed after OTP verify), create it now.
+  if (!dbUser) {
+    await prisma.user.upsert({
+      where: { email: supabaseUser.email },
+      update: { id: supabaseUser.id },
+      create: { id: supabaseUser.id, email: supabaseUser.email },
+    });
+    dbUser = { is_admin: false };
+  }
+
   return {
     supabaseUser,
     email: supabaseUser.email,
-    isAdmin: dbUser?.is_admin ?? false,
+    isAdmin: dbUser.is_admin,
   };
 });

@@ -27,7 +27,7 @@ export function UsernameCreateForm({
 
   const updateUsername = trpc.poolMember.updateUsername.useMutation({
     onSuccess: (_, variables) => {
-      toast.success("Username updated!");
+      toast.success("Nickname set!");
       onSubmitSuccess(variables.username);
       reset();
     },
@@ -46,11 +46,11 @@ export function UsernameCreateForm({
         onSubmit={handleSubmit(handleFormSubmit)}
         className="grid grid-cols-1 gap-y-3 p-4 rounded-lg bg-grey-200 border border-grey-100 mb-2"
       >
-        <h4 className="font-bold">Step 1: Set Your Pool Username</h4>
-        <span>So pool fellow members knows who you are!</span>
+        <h4 className="font-bold">Step 1: Set Your Pool Nickname</h4>
+        <span>So fellow pool members know who you are!</span>
         <label className="block">
           <input
-            placeholder="Username"
+            placeholder="Nickname"
             {...register("username", { required: true })}
             name="username"
             type="text"
@@ -68,7 +68,7 @@ export function UsernameCreateForm({
               Setting...
             </span>
           ) : (
-            <span>Set Username</span>
+            <span>Set Nickname</span>
           )}
         </button>
       </form>
