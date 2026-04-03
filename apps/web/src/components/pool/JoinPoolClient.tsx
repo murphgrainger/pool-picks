@@ -25,6 +25,7 @@ interface JoinPoolClientProps {
   code: string;
   isAuthenticated: boolean;
   isAlreadyMember: boolean;
+  hasPendingInvite: boolean;
 }
 
 export function JoinPoolClient({
@@ -32,6 +33,7 @@ export function JoinPoolClient({
   code,
   isAuthenticated,
   isAlreadyMember,
+  hasPendingInvite,
 }: JoinPoolClientProps) {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -51,9 +53,10 @@ export function JoinPoolClient({
     joinMutation.mutate({ code, username });
   };
 
+  const poolAccepting = pool.status === "Setup" || pool.status === "Open";
   const canJoin =
-    pool.join_mode === "OPEN" &&
-    (pool.status === "Setup" || pool.status === "Open");
+    poolAccepting &&
+    (pool.join_mode === "OPEN" || hasPendingInvite);
 
   return (
     <div className="container mx-auto max-w-5xl flex flex-wrap items-center flex-col p-4">
@@ -72,17 +75,13 @@ export function JoinPoolClient({
         {/* Not authenticated */}
         {!isAuthenticated && (
           <>
-            {canJoin ? (
+            {poolAccepting ? (
               <a
                 href={`/auth/sign-in?next=/join/${code}`}
                 className="w-full bg-green-700 text-white hover:bg-green-900 rounded py-3 px-4 text-center block"
               >
                 Sign In to Join
               </a>
-            ) : pool.join_mode !== "OPEN" ? (
-              <p className="text-grey-75">
-                This pool is invite-only. Ask the commissioner to invite you.
-              </p>
             ) : (
               <p className="text-grey-75">
                 This pool is no longer accepting new members.
@@ -107,9 +106,9 @@ export function JoinPoolClient({
         {/* Can't join */}
         {isAuthenticated && !isAlreadyMember && !canJoin && (
           <p className="text-grey-75">
-            {pool.join_mode !== "OPEN"
-              ? "This pool is invite-only. Ask the commissioner to invite you."
-              : "This pool is no longer accepting new members."}
+            {!poolAccepting
+              ? "This pool is no longer accepting new members."
+              : "This pool is invite-only. Ask the commissioner to invite you."}
           </p>
         )}
 

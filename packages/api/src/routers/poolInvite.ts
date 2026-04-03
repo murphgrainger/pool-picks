@@ -16,7 +16,7 @@ export const poolInviteRouter = router({
   listPending: protectedProcedure.query(async ({ ctx }) => {
     return prisma.poolInvite.findMany({
       where: {
-        email: ctx.user.email,
+        email: { equals: ctx.user.email, mode: "insensitive" },
         status: "Invited",
         pool: {
           status: { in: ["Open", "Setup"] },
@@ -100,13 +100,14 @@ export const poolInviteRouter = router({
         where: { id: input.pool_id },
         select: {
           name: true,
+          invite_code: true,
           tournament: {
             select: { name: true, start_date: true, end_date: true },
           },
         },
       });
 
-      if (pool) {
+      if (pool && pool.invite_code) {
         const startStr = pool.tournament.start_date.toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
@@ -123,6 +124,8 @@ export const poolInviteRouter = router({
           tournamentName: pool.tournament.name,
           tournamentDates: `${startStr} – ${endStr}`,
           appBaseUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+          poolId: input.pool_id,
+          inviteCode: pool.invite_code,
         });
         emailSent = result.success;
         if (!result.success) {

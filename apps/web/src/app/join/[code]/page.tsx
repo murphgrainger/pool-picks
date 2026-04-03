@@ -37,11 +37,22 @@ export default async function JoinPage({ params }: JoinPageProps) {
   const { supabaseUser } = await getAuthUser();
 
   let isAlreadyMember = false;
+  let hasPendingInvite = false;
   if (supabaseUser) {
-    const membership = await prisma.poolMember.findFirst({
-      where: { pool_id: pool.id, user_id: supabaseUser.id },
-    });
+    const [membership, invite] = await Promise.all([
+      prisma.poolMember.findFirst({
+        where: { pool_id: pool.id, user_id: supabaseUser.id },
+      }),
+      prisma.poolInvite.findFirst({
+        where: {
+          pool_id: pool.id,
+          email: { equals: supabaseUser.email!, mode: "insensitive" },
+          status: "Invited",
+        },
+      }),
+    ]);
     isAlreadyMember = !!membership;
+    hasPendingInvite = !!invite;
   }
 
   return (
@@ -50,6 +61,7 @@ export default async function JoinPage({ params }: JoinPageProps) {
       code={upperCode}
       isAuthenticated={!!supabaseUser}
       isAlreadyMember={isAlreadyMember}
+      hasPendingInvite={hasPendingInvite}
     />
   );
 }

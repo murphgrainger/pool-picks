@@ -232,20 +232,6 @@ export function InviteActions({
             <div className="flex flex-wrap justify-center">
               <button
                 disabled={loadingButtonId !== null}
-                className="button-tertiary bg-green-700"
-                onClick={() => handleInvite(invite, "Accepted")}
-              >
-                {loadingButtonId === `${invite.id}-accept` ? (
-                  <span className="flex items-center justify-center">
-                    <Spinner className="w-6 h-6 mr-1" />
-                    Accepting...
-                  </span>
-                ) : (
-                  <span>Accept</span>
-                )}
-              </button>
-              <button
-                disabled={loadingButtonId !== null}
                 className="button-tertiary bg-red-500"
                 onClick={() => handleInvite(invite, "Rejected")}
               >
@@ -256,6 +242,20 @@ export function InviteActions({
                   </span>
                 ) : (
                   <span>Decline</span>
+                )}
+              </button>
+              <button
+                disabled={loadingButtonId !== null}
+                className="button-tertiary bg-green-700"
+                onClick={() => handleInvite(invite, "Accepted")}
+              >
+                {loadingButtonId === `${invite.id}-accept` ? (
+                  <span className="flex items-center justify-center">
+                    <Spinner className="w-6 h-6 mr-1" />
+                    Accepting...
+                  </span>
+                ) : (
+                  <span>Accept</span>
                 )}
               </button>
             </div>

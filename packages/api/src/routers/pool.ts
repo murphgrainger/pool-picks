@@ -356,10 +356,20 @@ export const poolRouter = router({
       }
 
       if (pool.join_mode !== "OPEN") {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "This pool is invite-only. Ask the commissioner to invite you.",
+        // Allow users with a pending invite to join even if invite-only
+        const pendingInvite = await prisma.poolInvite.findFirst({
+          where: {
+            pool_id: pool.id,
+            email: { equals: ctx.user.email, mode: "insensitive" },
+            status: "Invited",
+          },
         });
+        if (!pendingInvite) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "This pool is invite-only. Ask the commissioner to invite you.",
+          });
+        }
       }
 
       if (pool.status !== "Setup" && pool.status !== "Open") {

@@ -70,6 +70,8 @@ interface SendPoolInviteEmailParams {
   tournamentName: string;
   tournamentDates: string;
   appBaseUrl: string;
+  poolId: number;
+  inviteCode: string;
 }
 
 export async function sendPoolInviteEmail({
@@ -78,6 +80,7 @@ export async function sendPoolInviteEmail({
   tournamentName,
   tournamentDates,
   appBaseUrl,
+  inviteCode,
 }: SendPoolInviteEmailParams): Promise<{ success: boolean; error?: string }> {
   const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
@@ -94,7 +97,7 @@ export async function sendPoolInviteEmail({
 <p style="margin:0 0 32px;color:#555555;font-size:14px;line-height:1.5;">
   Sign in to PoolPicks to accept or decline this invitation.
 </p>
-${buildButton(appBaseUrl, "View Invitation")}`;
+${buildButton(`${appBaseUrl}/join/${inviteCode}`, "View Invitation")}`;
 
   try {
     const resend = getResendClient();

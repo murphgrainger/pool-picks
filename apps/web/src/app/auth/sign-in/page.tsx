@@ -120,8 +120,7 @@ export default function SignInPage() {
       await fetch("/api/auth/ensure-user", { method: "POST" });
     }
 
-    router.push(next);
-    router.refresh();
+    router.replace(next);
   };
 
   const handleResendOtp = async () => {
