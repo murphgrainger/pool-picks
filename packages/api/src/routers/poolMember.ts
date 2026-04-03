@@ -4,7 +4,9 @@ import {
   sumMemberPicks,
   resolveTournamentStatus,
   getEffectivePoolPhase,
+  MAX_A_GROUP_PICKS,
 } from "@pool-picks/utils";
+import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
 import { autoAdvanceScheduledTournaments } from "./tournament";
 import { autoCompleteStaleLockedPools } from "./pool";
@@ -29,7 +31,80 @@ export const poolMemberRouter = router({
         athleteIds: z.array(z.number()).length(6),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      // Verify ownership
+      const poolMember = await prisma.poolMember.findUnique({
+        where: { id: input.poolMemberId },
+        include: { pool: true },
+      });
+
+      if (!poolMember || poolMember.user_id !== ctx.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only submit picks for yourself.",
+        });
+      }
+
+      // Verify pool is open
+      if (poolMember.pool.status !== "Open") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Picks can only be submitted when the pool is open.",
+        });
+      }
+
+      // Check for duplicate athlete IDs
+      const uniqueIds = new Set(input.athleteIds);
+      if (uniqueIds.size !== input.athleteIds.length) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Duplicate picks are not allowed.",
+        });
+      }
+
+      // Verify A Group limit
+      const athletes = await prisma.athlete.findMany({
+        where: { id: { in: input.athleteIds } },
+        select: { id: true, ranking: true },
+      });
+
+      const aGroupCount = athletes.filter(
+        (a) => a.ranking !== null && a.ranking <= 20
+      ).length;
+
+      if (aGroupCount > MAX_A_GROUP_PICKS) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `You can only pick ${MAX_A_GROUP_PICKS} players from the A Group.`,
+        });
+      }
+
+      // Check no other pool member has the exact same 6 picks
+      const otherMembers = await prisma.poolMember.findMany({
+        where: {
+          pool_id: poolMember.pool_id,
+          id: { not: input.poolMemberId },
+          athletes: { some: {} },
+        },
+        select: {
+          athletes: { select: { athlete_id: true } },
+        },
+      });
+
+      const submittedSet = [...input.athleteIds].sort().join(",");
+      const hasDuplicate = otherMembers.some((member) => {
+        const memberSet = member.athletes.map((a) => a.athlete_id).sort().join(",");
+        return memberSet === submittedSet;
+      });
+
+      if (hasDuplicate) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Another pool member already picked the exact same 6 players. Swap at least one player out.",
+        });
+      }
+
       const picks = await Promise.all(
         input.athleteIds.map((athleteId) =>
           prisma.poolMembersAthletes.create({
