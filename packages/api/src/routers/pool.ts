@@ -254,7 +254,7 @@ export const poolRouter = router({
           throw new TRPCError({
             code: "PRECONDITION_FAILED",
             message:
-              "Cannot open this pool — no athletes are associated with the tournament. Scrape the field first.",
+              "Cannot open this pool — no field has been added to the tournament yet. Check back soon.",
           });
         }
 
