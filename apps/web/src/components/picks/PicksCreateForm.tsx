@@ -148,7 +148,7 @@ export function PicksCreateForm({
       >
         <h3>{isEditing ? "Edit Your Picks" : "Submit Your Picks"}</h3>
         <ul className="list-none text-lg">
-          <span className="font-bold">Pick 6, Use 4</span>
+          <span className="font-bold">Pick 6, Count 4</span>
           <li>- Pick 3 players max from the A Group</li>
           <li>- The A Group is the players in the top 20 OWGR</li>
           <li>- The lowest 4 of your 6 player scores is your total score</li>

@@ -7,7 +7,11 @@ import {
   protectedProcedure,
   commissionerProcedure,
 } from "../trpc";
-import { sendPoolOpenEmail, sendPoolAutoCompleteEmail } from "../lib/email";
+import {
+  sendPoolOpenEmail,
+  sendPoolAutoCompleteEmail,
+  sendPoolLockedEmail,
+} from "../lib/email";
 import { generateUniqueInviteCode } from "../lib/inviteCode";
 
 const STALE_POOL_DAYS = 7;
@@ -289,6 +293,49 @@ export const poolRouter = router({
             if (failed.length > 0) {
               console.error(
                 `Failed to send ${failed.length} pool-open emails for pool ${input.pool_id}`
+              );
+            }
+          });
+        }
+
+        return updated;
+      }
+
+      // When moving to Locked, optionally notify all pool members
+      if (input.status === "Locked") {
+        const pool = await prisma.pool.findUnique({
+          where: { id: input.pool_id },
+          select: { name: true },
+        });
+
+        const updated = await prisma.pool.update({
+          where: { id: input.pool_id },
+          data: { status: input.status },
+        });
+
+        if (input.notify && pool) {
+          const members = await prisma.poolMember.findMany({
+            where: { pool_id: input.pool_id },
+            select: { user: { select: { email: true } } },
+          });
+
+          const appBaseUrl =
+            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+          Promise.allSettled(
+            members.map((m) =>
+              sendPoolLockedEmail({
+                to: m.user.email,
+                poolName: pool.name,
+                appBaseUrl,
+                poolId: input.pool_id,
+              })
+            )
+          ).then((results) => {
+            const failed = results.filter((r) => r.status === "rejected");
+            if (failed.length > 0) {
+              console.error(
+                `Failed to send ${failed.length} pool-locked emails for pool ${input.pool_id}`
               );
             }
           });
