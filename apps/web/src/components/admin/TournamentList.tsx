@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { formatTournamentDates, resolveTournamentStatus } from "@pool-picks/utils";
+import { formatTournamentDates, resolveTournamentStatus, getTournamentStatus } from "@pool-picks/utils";
 import { SyncScheduleButton } from "./SyncScheduleButton";
 
 interface Pool {
@@ -211,7 +211,7 @@ function TournamentCard({
 }) {
   const [pastOpen, setPastOpen] = useState(false);
 
-  const resolved = resolveTournamentStatus(tournament);
+  const displayStatus = getTournamentStatus(tournament.start_date, tournament.end_date);
 
   return (
     <li className="bg-white border border-grey-100 rounded-lg shadow-sm p-3 mb-2">
@@ -228,9 +228,9 @@ function TournamentCard({
               {formatTournamentDates(tournament.start_date, tournament.end_date)}
             </p>
             <span
-              className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor(resolved)}`}
+              className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor(displayStatus)}`}
             >
-              {resolved}
+              {displayStatus}
             </span>
           </div>
         </div>
