@@ -8,7 +8,7 @@ function getResendClient(): Resend {
   return new Resend(apiKey);
 }
 
-function buildEmailWrapper(content: string): string {
+function buildEmailWrapper(content: string, preheader: string): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -17,6 +17,9 @@ function buildEmailWrapper(content: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="margin:0;padding:0;background-color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="display:none;font-size:1px;color:#f5f5f5;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+    ${preheader}
+  </div>
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:40px 20px;">
     <tr>
       <td align="center">
@@ -105,7 +108,10 @@ ${buildButton(`${appBaseUrl}/join/${inviteCode}`, "View Invitation")}`;
       from: `PoolPicks <${fromAddress}>`,
       to,
       subject: `You've been invited to join ${poolName} on PoolPicks`,
-      html: buildEmailWrapper(content),
+      html: buildEmailWrapper(
+        content,
+        `You've been invited to join ${poolName} for the ${tournamentName} (${tournamentDates}).`,
+      ),
     });
     return { success: true };
   } catch (err) {
@@ -147,7 +153,10 @@ export async function sendOtpEmail({
       from: `PoolPicks <${fromAddress}>`,
       to,
       subject: "Your PoolPicks sign-in code",
-      html: buildEmailWrapper(content),
+      html: buildEmailWrapper(
+        content,
+        `Your PoolPicks sign-in code is ${otp}. It expires in 10 minutes.`,
+      ),
     });
     return { success: true };
   } catch (err) {
@@ -181,7 +190,10 @@ export async function sendPoolAutoCompleteEmail({
   tournamentName,
   appBaseUrl,
   poolId,
-}: SendPoolAutoCompleteEmailParams): Promise<{ success: boolean; error?: string }> {
+}: SendPoolAutoCompleteEmailParams): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
   const poolUrl = `${appBaseUrl}/pool/${poolId}`;
 
@@ -201,7 +213,10 @@ ${buildButton(poolUrl, "View Results")}`;
       from: `PoolPicks <${fromAddress}>`,
       to,
       subject: `${poolName} has been automatically completed`,
-      html: buildEmailWrapper(content),
+      html: buildEmailWrapper(
+        content,
+        `${poolName} (${tournamentName}) has been automatically completed. View the final results.`,
+      ),
     });
     return { success: true };
   } catch (err) {
@@ -237,7 +252,56 @@ ${buildButton(poolUrl, "Make Your Picks")}`;
       from: `PoolPicks <${fromAddress}>`,
       to,
       subject: `${poolName} is open — time to make your picks!`,
-      html: buildEmailWrapper(content),
+      html: buildEmailWrapper(
+        content,
+        `The field for ${poolName} has been finalized. Make your picks before the pool is locked!`,
+      ),
+    });
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown email error";
+    return { success: false, error: message };
+  }
+}
+
+// --- Pool Locked Notification Email ---
+
+interface SendPoolLockedEmailParams {
+  to: string;
+  poolName: string;
+  appBaseUrl: string;
+  poolId: number;
+}
+
+export async function sendPoolLockedEmail({
+  to,
+  poolName,
+  appBaseUrl,
+  poolId,
+}: SendPoolLockedEmailParams): Promise<{ success: boolean; error?: string }> {
+  const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+  const poolUrl = `${appBaseUrl}/pool/${poolId}`;
+
+  const content = `
+<h2 style="margin:0 0 16px;color:#181818;font-size:20px;">Picks are locked in!</h2>
+<p style="margin:0 0 8px;color:#333333;font-size:16px;line-height:1.5;">
+  <strong>${poolName}</strong> has been locked by the commissioner.
+</p>
+<p style="margin:0 0 32px;color:#555555;font-size:14px;line-height:1.5;">
+  All picks are final. Head over to the pool to see who everyone picked.
+</p>
+${buildButton(poolUrl, "View All Picks")}`;
+
+  try {
+    const resend = getResendClient();
+    await resend.emails.send({
+      from: `PoolPicks <${fromAddress}>`,
+      to,
+      subject: `${poolName} is locked — see who everyone picked!`,
+      html: buildEmailWrapper(
+        content,
+        `${poolName} has been locked. All picks are final — see who everyone picked!`,
+      ),
     });
     return { success: true };
   } catch (err) {

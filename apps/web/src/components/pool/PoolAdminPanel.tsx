@@ -91,7 +91,7 @@ export function PoolAdminPanel({
   const handleStatusChange = async (option: SelectValues | null) => {
     if (!option) return;
 
-    if (option.value === "Open" && currentStatus === "Setup") {
+    if (option.value === "Open" || option.value === "Locked") {
       setPendingStatus(option.value);
       setShowConfirmModal(true);
       return;
@@ -101,12 +101,18 @@ export function PoolAdminPanel({
     updatePool.mutate({
       pool_id: poolId,
       status: option.value as "Setup" | "Open" | "Locked" | "Complete",
+      notify: false,
     });
   };
 
-  const confirmOpen = (notify: boolean) => {
+  const confirmStatusChange = (notify: boolean) => {
+    if (!pendingStatus) return;
     setPendingNotify(notify);
-    updatePool.mutate({ pool_id: poolId, status: "Open", notify });
+    updatePool.mutate({
+      pool_id: poolId,
+      status: pendingStatus as "Setup" | "Open" | "Locked" | "Complete",
+      notify,
+    });
   };
 
   const poolStatuses = ["Setup", "Open", "Locked", "Complete"];
@@ -264,50 +270,67 @@ export function PoolAdminPanel({
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl">
-            <h3 className="text-lg font-bold mb-3">Open this pool?</h3>
-            <p className="text-sm text-grey-75 mb-4">
-              Opening the pool allows members to make their picks. You can also
-              notify the following invitees by email:
-            </p>
-            {existingInviteEmails.length > 0 && (
-              <ul className="text-xs text-grey-75 mb-6 space-y-1">
-                {existingInviteEmails.map((email) => (
-                  <li key={email}>{email}</li>
-                ))}
-              </ul>
-            )}
-            {existingInviteEmails.length === 0 && (
-              <p className="text-xs text-grey-75 italic mb-6">
-                No pending invites.
-              </p>
+            {pendingStatus === "Open" ? (
+              <>
+                <h3 className="text-lg font-bold mb-3">Open this pool?</h3>
+                <p className="text-sm text-grey-75 mb-4">
+                  Opening the pool allows members to make their picks. You can
+                  also notify the following invitees by email:
+                </p>
+                {existingInviteEmails.length > 0 && (
+                  <ul className="text-xs text-grey-75 mb-6 space-y-1">
+                    {existingInviteEmails.map((email) => (
+                      <li key={email}>{email}</li>
+                    ))}
+                  </ul>
+                )}
+                {existingInviteEmails.length === 0 && (
+                  <p className="text-xs text-grey-75 italic mb-6">
+                    No pending invites.
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-bold mb-3">Lock this pool?</h3>
+                <p className="text-sm text-grey-75 mb-4">
+                  Locking the pool finalizes all picks. Members will be able to
+                  see who everyone picked. You can notify all pool members by
+                  email.
+                </p>
+              </>
             )}
             <div className="flex flex-col space-y-2">
               <button
-                onClick={() => confirmOpen(true)}
+                onClick={() => confirmStatusChange(true)}
                 disabled={updatePool.isPending}
                 className="w-full px-4 py-2 rounded bg-green-700 hover:bg-green-900 text-white font-medium"
               >
                 {updatePool.isPending && pendingNotify === true ? (
                   <span className="flex items-center justify-center">
                     <Spinner className="w-4 h-4 mr-2" />
-                    Opening...
+                    {pendingStatus === "Open" ? "Opening..." : "Locking..."}
                   </span>
-                ) : (
+                ) : pendingStatus === "Open" ? (
                   "Open & Notify"
+                ) : (
+                  "Lock & Notify"
                 )}
               </button>
               <button
-                onClick={() => confirmOpen(false)}
+                onClick={() => confirmStatusChange(false)}
                 disabled={updatePool.isPending}
                 className="w-full px-4 py-2 rounded bg-grey-100 hover:bg-grey-300"
               >
                 {updatePool.isPending && pendingNotify === false ? (
                   <span className="flex items-center justify-center">
                     <Spinner className="w-4 h-4 mr-2" />
-                    Opening...
+                    {pendingStatus === "Open" ? "Opening..." : "Locking..."}
                   </span>
-                ) : (
+                ) : pendingStatus === "Open" ? (
                   "Open Without Notifying"
+                ) : (
+                  "Lock Without Notifying"
                 )}
               </button>
               <button

@@ -24,6 +24,136 @@ function formatDateRange(start: Date, end: Date): string {
   return `${startStr} - ${endStr}`;
 }
 
+function ConfigInfoPopover({
+  open,
+  onToggle,
+}: {
+  open: boolean;
+  onToggle: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="mt-2 p-3 bg-white border border-grey-100 rounded-lg shadow-lg text-sm text-grey-75">
+      <p className="font-bold text-black mb-2">Pick 6, Count 4</p>
+      <ul className="space-y-1">
+        <li>- Pick 6 players for the tournament</li>
+        <li>- Max 3 picks from the A Group (top 20 OWGR)</li>
+        <li>- Your best 4 scores count toward your total</li>
+        <li>- Lowest total score wins</li>
+        <li>- DQ if fewer than 4 players make the cut</li>
+      </ul>
+      <div
+        onClick={onToggle}
+        className="mt-3 text-sm text-green-700 hover:text-green-900 font-bold cursor-pointer"
+      >
+        Got it
+      </div>
+    </div>
+  );
+}
+
+function FeatureRequestModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  if (!open) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+    setSending(true);
+    try {
+      const res = await fetch("/api/feature-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      if (res.ok) {
+        setSent(true);
+        setMessage("");
+      } else {
+        toast.error("Failed to send request. Please try again.");
+      }
+    } catch {
+      toast.error("Failed to send request. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl w-full">
+        {sent ? (
+          <>
+            <h3 className="text-lg font-bold mb-3">Request Sent</h3>
+            <p className="text-sm text-grey-75 mb-4">
+              Thanks for the feedback! We&apos;ll review your request and
+              consider it for a future update.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setSent(false);
+                onClose();
+              }}
+              className="w-full px-4 py-2 rounded bg-green-700 hover:bg-green-900 text-white font-medium"
+            >
+              Done
+            </button>
+          </>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <h3 className="text-lg font-bold mb-3">Request a Configuration</h3>
+            <p className="text-sm text-grey-75 mb-4">
+              Describe the pool configuration you&apos;d like to see. For
+              example: number of picks, scoring rules, group restrictions, etc.
+            </p>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="e.g. Pick 4, Count 3 with no group restrictions..."
+              rows={4}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm mb-4"
+            />
+            <div className="flex flex-col space-y-2">
+              <button
+                type="submit"
+                disabled={sending || !message.trim()}
+                className="w-full px-4 py-2 rounded bg-green-700 hover:bg-green-900 text-white font-medium disabled:opacity-50"
+              >
+                {sending ? (
+                  <span className="flex items-center justify-center">
+                    <Spinner className="w-4 h-4 mr-2" />
+                    Sending...
+                  </span>
+                ) : (
+                  "Send Request"
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={sending}
+                className="w-full px-4 py-2 rounded text-grey-75 hover:text-black"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function PoolCreatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -39,6 +169,10 @@ export default function PoolCreatePage() {
     end_date: Date;
   } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const configDropdownRef = useRef<HTMLDivElement>(null);
+  const [showFeatureRequest, setShowFeatureRequest] = useState(false);
+  const [showConfigInfo, setShowConfigInfo] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
 
   const {
     register,
@@ -77,6 +211,12 @@ export default function PoolCreatePage() {
         !dropdownRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false);
+      }
+      if (
+        configDropdownRef.current &&
+        !configDropdownRef.current.contains(e.target as Node)
+      ) {
+        setConfigOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -186,6 +326,62 @@ export default function PoolCreatePage() {
           )}
         </div>
 
+        {/* Pool Configuration */}
+        <div className="block" ref={configDropdownRef}>
+          <span>Pool Configuration</span>
+          <button
+            type="button"
+            onClick={() => setConfigOpen(!configOpen)}
+            className="mt-1 flex items-center justify-between w-full rounded-md border border-gray-300 shadow-sm bg-white px-3 py-2 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <span>Pick 6, Count 4</span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowConfigInfo(!showConfigInfo);
+                }}
+                className="inline-flex items-center justify-center text-grey-75 hover:text-black transition-colors cursor-pointer"
+                aria-label="Learn about this configuration"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
+            </div>
+            <svg className={`w-4 h-4 text-grey-75 transition-transform ${configOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {configOpen && (
+            <ul className="mt-1 rounded-md bg-white border border-grey-300 shadow-lg overflow-hidden">
+              <li
+                onClick={() => setConfigOpen(false)}
+                className="px-3 py-2 cursor-pointer bg-grey-200 font-medium"
+              >
+                Pick 6, Count 4
+              </li>
+              <li
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfigOpen(false);
+                  setShowFeatureRequest(true);
+                }}
+                className="px-3 py-2 cursor-pointer hover:bg-grey-200 text-sm text-grey-75 border-t border-grey-100"
+              >
+                More configurations coming soon.{" "}
+                <span className="text-green-700 font-medium underline">
+                  Request a new one
+                </span>
+              </li>
+            </ul>
+          )}
+          <ConfigInfoPopover
+            open={showConfigInfo}
+            onToggle={() => setShowConfigInfo(false)}
+          />
+        </div>
+
         <label className="block">
           <span>Entry Amount</span>
           <div className="relative mt-1">
@@ -265,6 +461,11 @@ export default function PoolCreatePage() {
           )}
         </button>
       </form>
+
+      <FeatureRequestModal
+        open={showFeatureRequest}
+        onClose={() => setShowFeatureRequest(false)}
+      />
     </div>
   );
 }
