@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
@@ -11,10 +11,23 @@ import {
   type PoolMemberFormatted,
 } from "@pool-picks/utils";
 import { trpc } from "@/lib/trpc/client";
+import { createClient } from "@/lib/supabase/client";
 import { PoolStatusCard } from "./PoolStatusCard";
 import { PoolAdminPanel } from "./PoolAdminPanel";
 import { PoolMemberCard } from "./PoolMemberCard";
 import { Spinner } from "@/components/ui/Spinner";
+
+function scoreFingerprint(members: any[]): string {
+  return members
+    .flatMap((m) =>
+      m.athletes.map((a: any) => {
+        const t = a.athlete.tournaments?.[0];
+        return `${a.athlete.id}:${t?.score_under_par}:${t?.position}:${t?.thru}:${t?.score_today}`;
+      })
+    )
+    .sort()
+    .join("|");
+}
 
 interface PoolDetailClientProps {
   pool: {
@@ -78,7 +91,10 @@ export function PoolDetailClient({
   const [lastRefreshed, setLastRefreshed] = useState<Date>(
     new Date(pool.tournament.updated_at)
   );
+  const [showUpdateIndicator, setShowUpdateIndicator] = useState(false);
+  const [, setTick] = useState(0);
 
+  const isLive = phase === "live";
 
   const totalPotAmount = updatedPoolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = pool.tournament.external_id
@@ -91,7 +107,7 @@ export function PoolDetailClient({
 
   const getScores = trpc.pool.getScores.useQuery(
     { pool_id: pool.id },
-    { enabled: false }
+    { enabled: isLive }
   );
 
   const formatLastRefreshed = useCallback(() => {
@@ -105,6 +121,53 @@ export function PoolDetailClient({
     if (diffHrs === 1) return "1 hr ago";
     return `${diffHrs} hrs ago`;
   }, [lastRefreshed]);
+
+  // Supabase Realtime: subscribe to Tournament updates when live
+  const prevDataRef = useRef<string | null>(null);
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    if (!isLive) return;
+
+    const channel = supabase
+      .channel(`tournament-${pool.tournament_id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "Tournament",
+          filter: `id=eq.${pool.tournament_id}`,
+        },
+        async () => {
+          const result = await getScores.refetch();
+          if (result.data) {
+            const fingerprint = scoreFingerprint(result.data);
+            if (fingerprint !== prevDataRef.current) {
+              prevDataRef.current = fingerprint;
+              setUpdatedPoolMembers(
+                reformatPoolMembers(result.data, pool.tournament.id)
+              );
+              setLastRefreshed(new Date());
+              setShowUpdateIndicator(true);
+              setTimeout(() => setShowUpdateIndicator(false), 3000);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isLive, pool.tournament_id, pool.tournament.id, supabase, getScores]);
+
+  // Tick the "Updated X min ago" timestamp every 30s
+  useEffect(() => {
+    if (!isLive) return;
+    const interval = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(interval);
+  }, [isLive]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -127,6 +190,7 @@ export function PoolDetailClient({
 
       const result = await getScores.refetch();
       if (result.data) {
+        prevDataRef.current = scoreFingerprint(result.data);
         setUpdatedPoolMembers(
           reformatPoolMembers(result.data, pool.tournament.id)
         );
@@ -214,6 +278,11 @@ export function PoolDetailClient({
             </button>
             <p className="text-xs text-grey-75">
               Updated {formatLastRefreshed()}
+              {showUpdateIndicator && (
+                <span className="text-xs text-green-700 animate-pulse ml-1">
+                  Scores updated
+                </span>
+              )}
             </p>
           </div>
         )}
