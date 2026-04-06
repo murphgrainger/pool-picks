@@ -160,7 +160,13 @@ export const poolMemberRouter = router({
                 status: true,
               },
             },
+            _count: {
+              select: { pool_members: true },
+            },
           },
+        },
+        athletes: {
+          select: { athlete_id: true },
         },
         user: {
           select: { email: true },
@@ -248,7 +254,12 @@ export const poolMemberRouter = router({
     }
 
     return memberships.map((m) => ({
-      ...m,
+      id: m.id,
+      role: m.role,
+      pool: m.pool,
+      user: m.user,
+      picksCount: m.athletes.length,
+      memberCount: m.pool._count.pool_members,
       ...(rankMap[m.id] ?? { rank: null, score: null, isTied: false }),
     }));
   }),

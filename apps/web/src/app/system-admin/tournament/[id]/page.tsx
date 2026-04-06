@@ -22,12 +22,18 @@ export default function TournamentAdminPage() {
   const params = useParams();
   const id = Number(params?.id);
 
+  const utils = trpc.useUtils();
+
   const { data: tournament, isLoading: tournamentLoading } =
     trpc.tournament.getById.useQuery({ id });
 
   const tournamentHealth = trpc.tournament.getHealth.useQuery({ id });
 
-  const updateTournament = trpc.tournament.updateStatus.useMutation();
+  const updateTournament = trpc.tournament.updateStatus.useMutation({
+    onSuccess: () => {
+      utils.tournament.getById.invalidate({ id });
+    },
+  });
 
   const [selectedOption, setSelectedOption] = useState<SelectValues>({
     value: "",

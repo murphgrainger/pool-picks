@@ -10,6 +10,7 @@ import {
   ordinalSuffix,
   resolveTournamentStatus,
   getEffectivePoolPhase,
+  PICKS_PER_MEMBER,
   type PoolPhase,
 } from "@pool-picks/utils";
 import { Spinner } from "@/components/ui/Spinner";
@@ -31,6 +32,8 @@ interface PoolMembership {
   rank: number | null;
   score: number | null;
   isTied: boolean;
+  picksCount: number;
+  memberCount: number;
   pool: {
     id: number;
     name: string;
@@ -123,52 +126,91 @@ function ChevronRight({ className }: { className?: string }) {
 function PoolCard({ member }: { member: PoolMembership }) {
   const phase = getMemberPhase(member);
   const showScore = phase === "live" || phase === "completed";
+  const hasPicks = member.picksCount === PICKS_PER_MEMBER;
 
   return (
     <Link
       href={`/pool/${member.pool.id}`}
-      className="flex items-center justify-between p-3 mb-2 bg-white border border-grey-100 rounded shadow-sm hover:shadow-md transition-shadow group"
+      className="block p-4 mb-2 bg-white border border-grey-100 rounded shadow-sm hover:shadow-md transition-shadow group"
     >
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="font-bold text-black">{member.pool.name}</p>
-          {member.role === "COMMISSIONER" && (
-            <span className="relative group/tip inline-flex items-center">
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gold/20 text-yellow text-[10px] leading-none font-bold cursor-default">
-                C
+      <div className="flex items-start justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="font-bold text-black">{member.pool.name}</p>
+            {member.role === "COMMISSIONER" && (
+              <span className="relative group/tip inline-flex items-center">
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gold/20 text-yellow text-[10px] leading-none font-bold cursor-default">
+                  C
+                </span>
+                <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-1 rounded bg-green-700 text-white text-[10px] whitespace-nowrap opacity-0 pointer-events-none group-hover/tip:opacity-100 transition-opacity">
+                  Commissioner
+                </span>
               </span>
-              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-1 rounded bg-green-700 text-white text-[10px] whitespace-nowrap opacity-0 pointer-events-none group-hover/tip:opacity-100 transition-opacity">
-                Commissioner
-              </span>
-            </span>
-          )}
+            )}
+          </div>
+          <p className="text-sm text-grey-75 mt-0.5">
+            {member.pool.tournament.name}
+          </p>
         </div>
-        <p className="text-sm text-grey-75 mt-1">
+        <ChevronRight className="w-5 h-5 text-grey-300 group-hover:text-green-700 shrink-0 ml-2 mt-1" />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs text-grey-75">
+        <span>
           {formatTournamentDates(
             member.pool.tournament.start_date,
-            member.pool.tournament.end_date
+            member.pool.tournament.end_date,
           )}
-        </p>
-        {showScore && member.rank !== null && (
-          <div className="flex items-center gap-4 mt-2 text-sm">
-            <div>
-              <span className="text-grey-75 text-xs">Rank </span>
-              <span className="font-bold text-green-700">
-                {member.isTied ? "T" : ""}
-                {member.rank}
-                {ordinalSuffix(member.rank)}
-              </span>
-            </div>
-            <div>
-              <span className="text-grey-75 text-xs">Score </span>
-              <span className="font-bold text-green-700">
-                {formatToPar(member.score ?? null) ?? "\u2014"}
-              </span>
-            </div>
-          </div>
+        </span>
+        <span>{member.memberCount} members</span>
+        {member.pool.amount_entry > 0 && (
+          <span>${member.pool.amount_entry} entry</span>
         )}
       </div>
-      <ChevronRight className="w-5 h-5 text-grey-300 group-hover:text-green-700 shrink-0 ml-2" />
+
+      {/* Live / Completed: show rank and score */}
+      {showScore && member.rank !== null && (
+        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-grey-100 text-sm">
+          <div>
+            <span className="text-grey-75 text-xs">Rank </span>
+            <span className="font-bold text-green-700">
+              {member.isTied ? "T" : ""}
+              {member.rank}
+              {ordinalSuffix(member.rank)}
+            </span>
+          </div>
+          <div>
+            <span className="text-grey-75 text-xs">Score </span>
+            <span className="font-bold text-green-700">
+              {formatToPar(member.score ?? null) ?? "\u2014"}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Open: show pick status */}
+      {phase === "open" && (
+        <div className="mt-3 pt-3 border-t border-grey-100">
+          <span
+            className={`text-xs font-medium px-2 py-0.5 rounded ${
+              hasPicks
+                ? "bg-green-100 text-green-700"
+                : "bg-gold/20 text-yellow"
+            }`}
+          >
+            {hasPicks ? "Picks submitted" : "Picks needed"}
+          </span>
+        </div>
+      )}
+
+      {/* Locked-awaiting: show picks locked message */}
+      {phase === "locked-awaiting" && (
+        <div className="mt-3 pt-3 border-t border-grey-100">
+          <span className="text-xs text-grey-75">
+            Picks locked — waiting for tournament to start
+          </span>
+        </div>
+      )}
     </Link>
   );
 }
