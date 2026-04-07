@@ -154,7 +154,6 @@ export function PicksCreateForm({
           <li>- The lowest 4 of your 6 player scores is your total score</li>
           <li>- The lowest total score wins</li>
           <li>- You are DQd if less than 4 players make the cut</li>
-          <li>- Picks cannot be changed after submission</li>
         </ul>
         <div className="flex flex-col gap-2">
             {tournamentExternalUrl && (
@@ -196,7 +195,7 @@ export function PicksCreateForm({
               name={`pick-${index}`}
               placeholder={`Pick ${index + 1}`}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-              value={picks[index] ? selectOptions.find((o) => o.value === picks[index]?.id) ?? { value: picks[index]!.id, label: picks[index]!.full_name, isAGroup: picks[index]!.isAGroup, isDisabled: false } : null}
+              value={picks[index] ? selectOptions.find((o) => o.value === picks[index]?.id) ?? { value: picks[index]!.id, label: `${picks[index]!.full_name}${picks[index]!.isAGroup ? " (A Group)" : ""}`, isAGroup: picks[index]!.isAGroup, isDisabled: false } : null}
               onChange={(option) =>
                 handlePickChange(option as SelectValues | null, index)
               }
