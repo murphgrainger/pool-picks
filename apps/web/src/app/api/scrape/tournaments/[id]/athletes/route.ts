@@ -6,7 +6,7 @@ import { prisma } from "@pool-picks/db";
 import { createRouteHandlerClient } from "@/lib/supabase/route";
 import {
   assertValidResponse,
-  validateScoreboardResponse,
+  validateFieldResponse,
 } from "../../../espn-validation";
 
 const ESPN_API_BASE =
@@ -23,18 +23,16 @@ async function fetchAthleteField(id: string): Promise<Athlete[]> {
   if (!tournament || !tournament.external_id)
     throw new Error("Invalid tournament ID requested.");
 
-  const url = `${ESPN_API_BASE}?event=${tournament.external_id}`;
+  const url = `${ESPN_API_BASE}/${tournament.external_id}`;
   const response = await fetch(url);
   if (!response.ok)
     throw new Error(`ESPN API returned ${response.status}`);
 
-  const data = await response.json();
-  await assertValidResponse(data, validateScoreboardResponse, "scoreboard (athletes)");
+  const raw = await response.json();
+  // Path-based URL returns the event directly; query-param URL wraps in { events: [...] }
+  const event = raw.events ? raw.events[0] : raw;
+  await assertValidResponse(event, validateFieldResponse, "scoreboard (field)");
 
-  const event = data.events[0];
-
-  // ESPN silently returns the most recent event when the requested event
-  // doesn't have data yet. Verify we got the right one.
   if (event.id !== String(tournament.external_id)) {
     throw new Error(
       "The field for this tournament hasn't been announced yet. Try again closer to the event."
