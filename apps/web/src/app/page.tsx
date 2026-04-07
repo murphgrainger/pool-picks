@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { createServerCaller } from "@/lib/trpc/server";
 import { InviteActions } from "@/components/pool/InviteActions";
 import { getAuthUser } from "@/lib/supabase/auth";
