@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import {
   reformatPoolMembers,
   formatTournamentDates,
@@ -14,7 +13,18 @@ import { trpc } from "@/lib/trpc/client";
 import { PoolStatusCard } from "./PoolStatusCard";
 import { PoolAdminPanel } from "./PoolAdminPanel";
 import { PoolMemberCard } from "./PoolMemberCard";
-import { Spinner } from "@/components/ui/Spinner";
+
+function scoreFingerprint(members: any[]): string {
+  return members
+    .flatMap((m) =>
+      m.athletes.map((a: any) => {
+        const t = a.athlete.tournaments?.[0];
+        return `${a.athlete.id}:${t?.score_under_par}:${t?.position}:${t?.thru}:${t?.score_today}`;
+      })
+    )
+    .sort()
+    .join("|");
+}
 
 interface PoolDetailClientProps {
   pool: {
@@ -74,11 +84,13 @@ export function PoolDetailClient({
   const [updatedPoolMembers, setUpdatedPoolMembers] =
     useState<PoolMemberFormatted[]>(initialPoolMembers);
   const [poolInvites, setPoolInvites] = useState(pool.pool_invites);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(
     new Date(pool.tournament.updated_at)
   );
+  const [showUpdateIndicator, setShowUpdateIndicator] = useState(false);
+  const [, setTick] = useState(0);
 
+  const isLive = phase === "live";
 
   const totalPotAmount = updatedPoolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = pool.tournament.external_id
@@ -89,10 +101,30 @@ export function PoolDetailClient({
 
   const tournamentDates = formatTournamentDates(pool.tournament.start_date, pool.tournament.end_date);
 
+  const prevDataRef = useRef<string | null>(null);
+
   const getScores = trpc.pool.getScores.useQuery(
     { pool_id: pool.id },
-    { enabled: false }
+    {
+      enabled: isLive,
+      refetchInterval: isLive ? 30_000 : false,
+    }
   );
+
+  // Update UI when polled scores change
+  useEffect(() => {
+    if (!getScores.data) return;
+    const fingerprint = scoreFingerprint(getScores.data);
+    if (prevDataRef.current !== null && fingerprint !== prevDataRef.current) {
+      setUpdatedPoolMembers(
+        reformatPoolMembers(getScores.data, pool.tournament.id)
+      );
+      setLastRefreshed(new Date());
+      setShowUpdateIndicator(true);
+      setTimeout(() => setShowUpdateIndicator(false), 3000);
+    }
+    prevDataRef.current = fingerprint;
+  }, [getScores.data, pool.tournament.id]);
 
   const formatLastRefreshed = useCallback(() => {
     const now = new Date();
@@ -106,39 +138,12 @@ export function PoolDetailClient({
     return `${diffHrs} hrs ago`;
   }, [lastRefreshed]);
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      const response = await fetch(
-        `/api/scrape/tournaments/${pool.tournament_id}/scores`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        toast.error(data?.message || "Failed to refresh scores.");
-        setIsRefreshing(false);
-        return;
-      }
-
-      const result = await getScores.refetch();
-      if (result.data) {
-        setUpdatedPoolMembers(
-          reformatPoolMembers(result.data, pool.tournament.id)
-        );
-      }
-      setLastRefreshed(new Date());
-      toast.success("Scores updated!");
-    } catch {
-      toast.error("Network error refreshing scores.");
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
+  // Tick the "Updated X min ago" timestamp every 30s
+  useEffect(() => {
+    if (!isLive) return;
+    const interval = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(interval);
+  }, [isLive]);
 
   const handleStatusChange = async (newStatus: string) => {
     setPoolStatus(newStatus);
@@ -195,27 +200,16 @@ export function PoolDetailClient({
           </div>
         </div>
 
-        {/* Refresh button — only during active tournament */}
+        {/* Last updated timestamp — only during active tournament */}
         {phase === "live" && tournamentStatus === "Active" && (
-          <div className="flex flex-col items-center mt-4 gap-1">
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="bg-green-700 text-white rounded px-4 py-2 hover:bg-green-900"
-            >
-              {isRefreshing ? (
-                <span className="flex items-center">
-                  <Spinner className="w-4 h-4 mr-2" />
-                  Refreshing...
-                </span>
-              ) : (
-                "Refresh Scores"
-              )}
-            </button>
-            <p className="text-xs text-grey-75">
-              Updated {formatLastRefreshed()}
-            </p>
-          </div>
+          <p className="text-xs text-grey-75 mt-4">
+            Scores last updated {formatLastRefreshed()}
+            {showUpdateIndicator && (
+              <span className="text-xs text-green-700 animate-pulse ml-1">
+                Scores updated
+              </span>
+            )}
+          </p>
         )}
 
         <PoolStatusCard phase={phase} isCommissioner={isCommissioner} />

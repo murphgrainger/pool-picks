@@ -1,25 +1,38 @@
 import { z } from "zod";
 import { prisma } from "@pool-picks/db";
 import { router, protectedProcedure, systemAdminProcedure } from "../trpc";
+import { sendScoreSyncAlertEmail } from "../lib/email";
 
 /**
  * Auto-advances any "Scheduled" tournaments to "Active" if their start_date
  * has passed. This keeps the DB status in sync with reality so the column
  * is always the source of truth. Runs as a fire-and-forget side-effect
- * on key read paths.
+ * on key read paths. Returns the list of tournaments that were advanced.
  */
-export async function autoAdvanceScheduledTournaments() {
+export async function autoAdvanceScheduledTournaments(): Promise<
+  { id: number; name: string }[]
+> {
   const today = new Date();
   const todayDate = new Date(
     Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
   );
-  await prisma.tournament.updateMany({
+
+  const toAdvance = await prisma.tournament.findMany({
     where: {
       status: "Scheduled",
       start_date: { lte: todayDate },
     },
-    data: { status: "Active" },
+    select: { id: true, name: true },
   });
+
+  if (toAdvance.length > 0) {
+    await prisma.tournament.updateMany({
+      where: { id: { in: toAdvance.map((t) => t.id) } },
+      data: { status: "Active" },
+    });
+  }
+
+  return toAdvance;
 }
 
 export const tournamentRouter = router({
@@ -111,9 +124,34 @@ export const tournamentRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return prisma.tournament.update({
+      const existing = await prisma.tournament.findUnique({
+        where: { id: input.id },
+        select: { status: true, name: true },
+      });
+
+      const result = await prisma.tournament.update({
         where: { id: input.id },
         data: { status: input.status },
       });
+
+      // Send admin alert when auto-sync turns on or off
+      const adminEmail = process.env.ADMIN_ALERT_EMAIL;
+      if (adminEmail && existing && existing.status !== input.status) {
+        if (input.status === "Active") {
+          sendScoreSyncAlertEmail({
+            to: adminEmail,
+            tournamentName: existing.name,
+            active: true,
+          }).catch(() => {});
+        } else if (existing.status === "Active") {
+          sendScoreSyncAlertEmail({
+            to: adminEmail,
+            tournamentName: existing.name,
+            active: false,
+          }).catch(() => {});
+        }
+      }
+
+      return result;
     }),
 });

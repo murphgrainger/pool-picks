@@ -165,6 +165,55 @@ export async function sendOtpEmail({
   }
 }
 
+// --- Score Sync Alert Email ---
+
+interface SendScoreSyncAlertEmailParams {
+  to: string;
+  tournamentName: string;
+  active: boolean;
+}
+
+export async function sendScoreSyncAlertEmail({
+  to,
+  tournamentName,
+  active,
+}: SendScoreSyncAlertEmailParams): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+  const status = active ? "ON" : "OFF";
+  const description = active
+    ? "Scores will auto-refresh every 5 minutes during play."
+    : "Automatic score syncing has stopped.";
+
+  const content = `
+<h2 style="margin:0 0 16px;color:#181818;font-size:20px;">Score Auto-Sync ${status}</h2>
+<p style="margin:0 0 8px;color:#333333;font-size:16px;line-height:1.5;">
+  <strong>${tournamentName}</strong>
+</p>
+<p style="margin:0 0 24px;color:#555555;font-size:14px;line-height:1.5;">
+  ${description}
+</p>`;
+
+  try {
+    const resend = getResendClient();
+    await resend.emails.send({
+      from: `PoolPicks <${fromAddress}>`,
+      to,
+      subject: `Score auto-sync ${status}: ${tournamentName}`,
+      html: buildEmailWrapper(
+        content,
+        `Score auto-sync is now ${status} for ${tournamentName}. ${description}`
+      ),
+    });
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown email error";
+    return { success: false, error: message };
+  }
+}
+
 // --- Pool Open Notification Email ---
 
 interface SendPoolOpenEmailParams {
