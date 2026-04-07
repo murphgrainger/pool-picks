@@ -110,18 +110,18 @@ export async function fetchGolfData(id: string) {
   if (!tournament || !tournament.external_id)
     throw new Error("Invalid tournament ID requested.");
 
-  const url = `${ESPN_API_BASE}?event=${tournament.external_id}`;
+  const url = `${ESPN_API_BASE}/${tournament.external_id}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`ESPN API returned ${response.status}`);
 
-  const data = await response.json();
+  const raw = await response.json();
+  // Path-based URL returns the event directly; query-param URL wraps in { events: [...] }
+  const event = raw.events ? raw.events[0] : raw;
   await assertValidResponse(
-    data,
+    event,
     validateScoreboardResponse,
     "scoreboard (scores)"
   );
-
-  const event = data.events[0];
 
   if (event.id !== String(tournament.external_id)) {
     const now = new Date();

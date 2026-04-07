@@ -7,25 +7,15 @@ interface ValidationResult {
 
 // --- Validators ---
 
-export function validateScoreboardResponse(data: any): ValidationResult {
+// Validates a single event object (already unwrapped from events[] if needed)
+export function validateScoreboardResponse(event: any): ValidationResult {
   const errors: string[] = [];
 
-  if (!Array.isArray(data?.events)) {
-    errors.push("Missing or non-array: data.events");
-    return { valid: false, errors };
+  if (typeof event?.id !== "string") {
+    errors.push(`Expected event.id to be string, got ${typeof event?.id}`);
   }
 
-  const event = data.events[0];
-  if (!event) {
-    errors.push("Empty events array");
-    return { valid: false, errors };
-  }
-
-  if (typeof event.id !== "string") {
-    errors.push(`Expected event.id to be string, got ${typeof event.id}`);
-  }
-
-  const competition = event.competitions?.[0];
+  const competition = event?.competitions?.[0];
   if (!competition) {
     errors.push("Missing: event.competitions[0]");
     return { valid: false, errors };
@@ -78,6 +68,38 @@ export function validateScoreboardResponse(data: any): ValidationResult {
           `Expected linescore.displayValue to be string, got ${typeof ls.displayValue}`
         );
       }
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+// Lighter validator for field/athlete updates — no score or linescore checks
+export function validateFieldResponse(event: any): ValidationResult {
+  const errors: string[] = [];
+
+  if (typeof event?.id !== "string") {
+    errors.push(`Expected event.id to be string, got ${typeof event?.id}`);
+  }
+
+  const competition = event?.competitions?.[0];
+  if (!competition) {
+    errors.push("Missing: event.competitions[0]");
+    return { valid: false, errors };
+  }
+
+  const competitors = competition.competitors;
+  if (!Array.isArray(competitors)) {
+    errors.push("Missing or non-array: competition.competitors");
+    return { valid: false, errors };
+  }
+
+  const sample = competitors[0];
+  if (sample) {
+    if (typeof sample.athlete?.fullName !== "string") {
+      errors.push(
+        `Expected competitor.athlete.fullName to be string, got ${typeof sample.athlete?.fullName}`
+      );
     }
   }
 
