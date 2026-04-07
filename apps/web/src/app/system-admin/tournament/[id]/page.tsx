@@ -144,6 +144,15 @@ export default function TournamentAdminPage() {
             {formatTournamentDates(tournament.start_date, tournament.end_date)}
           </p>
           <p>Last Updated: {updatedAt}</p>
+          <span
+            className={`inline-block text-xs font-medium px-2 py-1 rounded mt-1 ${
+              resolvedStatus === "Active"
+                ? "bg-green-100 text-green-700"
+                : "bg-grey-100 text-grey-75"
+            }`}
+          >
+            Score Auto-Sync: {resolvedStatus === "Active" ? "ON" : "OFF"}
+          </span>
           {tournamentHealth.data && (
             <div className="flex gap-3 mt-2">
               <span
