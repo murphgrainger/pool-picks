@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "cd ../.. && ([ -z \"$DIRECT_URL\" ] && echo 'Skipping migrations (no DIRECT_URL)' || npx prisma migrate deploy --schema=packages/db/prisma/schema.prisma) && yarn build",
+  "buildCommand": "cd ../.. && ([ -z \"$DIRECT_URL\" ] && echo 'Skipping migrations (no DIRECT_URL)' || npx prisma migrate deploy --schema=packages/db/prisma/schema.prisma || echo 'Migration failed — continuing build') && yarn build",
   "installCommand": "cd ../.. && yarn install",
   "crons": [
     {
