@@ -318,12 +318,42 @@ export async function updateGolfData(
   return { hasChanges };
 }
 
+const FINISHED_STATUSES = ["CUT", "WD"];
+const STALE_THRESHOLD_MS = 4 * 60 * 60 * 1000; // 4 hours
+
 /**
  * High-level convenience: fetch ESPN data and write changed scores to DB.
+ * Skips the ESPN call when all athletes are done for the day (thru = "F" or
+ * status is CUT/WD), unless it's been over 4 hours since the last update
+ * (to catch the start of the next round).
  */
 export async function syncTournamentScores(
   tournamentId: number
 ): Promise<{ updated: boolean; message: string }> {
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    select: { updated_at: true },
+  });
+
+  const athletes = await prisma.athletesInTournaments.findMany({
+    where: { tournament_id: tournamentId },
+    select: { thru: true, status: true },
+  });
+
+  if (athletes.length > 0 && tournament) {
+    const allDone = athletes.every(
+      (a) => a.thru === "F" || FINISHED_STATUSES.includes(a.status)
+    );
+    const msSinceUpdate = Date.now() - tournament.updated_at.getTime();
+
+    if (allDone && msSinceUpdate < STALE_THRESHOLD_MS) {
+      return {
+        updated: false,
+        message: "All players finished for the day — skipping ESPN sync.",
+      };
+    }
+  }
+
   const golfData = await fetchGolfData(String(tournamentId));
   const { hasChanges } = await updateGolfData(golfData, tournamentId);
   return {

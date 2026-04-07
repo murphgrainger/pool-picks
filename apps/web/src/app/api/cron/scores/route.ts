@@ -4,6 +4,7 @@ export const maxDuration = 60;
 import { NextResponse } from "next/server";
 import { prisma } from "@pool-picks/db";
 import { autoAdvanceScheduledTournaments } from "@pool-picks/api";
+import { sendScoreSyncAlertEmail } from "@pool-picks/api/lib/email";
 import { syncTournamentScores } from "../../scrape/tournaments/score-sync";
 
 export async function GET(request: Request) {
@@ -13,7 +14,21 @@ export async function GET(request: Request) {
   }
 
   // Auto-advance any Scheduled tournaments whose start_date has passed
-  await autoAdvanceScheduledTournaments();
+  const advanced = await autoAdvanceScheduledTournaments();
+
+  // Notify admin when score auto-sync turns on
+  const adminEmail = process.env.ADMIN_ALERT_EMAIL;
+  if (adminEmail && advanced.length > 0) {
+    await Promise.all(
+      advanced.map((t) =>
+        sendScoreSyncAlertEmail({
+          to: adminEmail,
+          tournamentName: t.name,
+          active: true,
+        }).catch(() => {})
+      )
+    );
+  }
 
   const tournaments = await prisma.tournament.findMany({
     where: {
