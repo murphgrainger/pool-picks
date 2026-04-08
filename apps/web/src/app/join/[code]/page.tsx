@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@pool-picks/db";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { JoinPoolClient } from "@/components/pool/JoinPoolClient";
@@ -60,6 +60,10 @@ export default async function JoinPage({ params }: JoinPageProps) {
     ]);
     isAlreadyMember = !!membership;
     hasPendingInvite = !!invite;
+
+    if (isAlreadyMember) {
+      redirect(`/pool/${pool.id}`);
+    }
   }
 
   return (
@@ -67,7 +71,6 @@ export default async function JoinPage({ params }: JoinPageProps) {
       pool={pool}
       code={upperCode}
       isAuthenticated={!!supabaseUser}
-      isAlreadyMember={isAlreadyMember}
       hasPendingInvite={hasPendingInvite}
       commissionerNickname={commissionerNickname}
     />
