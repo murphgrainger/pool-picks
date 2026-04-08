@@ -24,7 +24,6 @@ interface JoinPoolClientProps {
   };
   code: string;
   isAuthenticated: boolean;
-  isAlreadyMember: boolean;
   hasPendingInvite: boolean;
   commissionerNickname: string | null;
 }
@@ -33,7 +32,6 @@ export function JoinPoolClient({
   pool,
   code,
   isAuthenticated,
-  isAlreadyMember,
   hasPendingInvite,
   commissionerNickname,
 }: JoinPoolClientProps) {
@@ -95,21 +93,8 @@ export function JoinPoolClient({
           </>
         )}
 
-        {/* Already a member */}
-        {isAuthenticated && isAlreadyMember && (
-          <>
-            <p className="text-grey-75 mb-4">You&apos;re already in this pool!</p>
-            <a
-              href={`/pool/${pool.id}`}
-              className="w-full bg-green-700 text-white hover:bg-green-900 rounded py-3 px-4 text-center block"
-            >
-              Go to Pool
-            </a>
-          </>
-        )}
-
         {/* Can't join */}
-        {isAuthenticated && !isAlreadyMember && !canJoin && (
+        {isAuthenticated && !canJoin && (
           <p className="text-grey-75">
             {!poolAccepting
               ? "This pool is no longer accepting new members."
@@ -118,7 +103,7 @@ export function JoinPoolClient({
         )}
 
         {/* Can join */}
-        {isAuthenticated && !isAlreadyMember && canJoin && (
+        {isAuthenticated && canJoin && (
           <form onSubmit={handleJoin} className="w-full flex flex-col">
             <input
               type="text"
