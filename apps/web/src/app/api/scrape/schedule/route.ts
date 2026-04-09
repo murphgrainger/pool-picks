@@ -29,7 +29,7 @@ async function fetchEventDetails(
   eventId: string
 ): Promise<{ course: string; city: string; region: string }> {
   try {
-    const response = await fetch(`${ESPN_CORE_API}/${eventId}`);
+    const response = await fetch(`${ESPN_CORE_API}/${eventId}`, { cache: "no-store" });
     if (!response.ok) return { course: "", city: "", region: "" };
 
     const data = await response.json();
@@ -54,7 +54,7 @@ async function fetchEventDetails(
 
 async function fetchSchedule(year: number): Promise<ParsedTournament[]> {
   const url = `${ESPN_SCOREBOARD_API}?dates=${year}0101-${year}1231`;
-  const response = await fetch(url);
+  const response = await fetch(url, { cache: "no-store" });
   if (!response.ok)
     throw new Error(`ESPN API returned ${response.status}`);
 
