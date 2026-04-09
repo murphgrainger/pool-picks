@@ -74,6 +74,67 @@ export async function autoCompleteStaleLockedPools() {
   });
 }
 
+/**
+ * Auto-locks Open pools whose tournament start_date is today or earlier
+ * in the America/Los_Angeles (Pacific) timezone.
+ * Sends lock notification emails to all pool members.
+ */
+export async function autoLockPoolsBeforeTournament() {
+  // Get today's date in Pacific time
+  const nowPT = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" })
+  );
+  const todayPT = new Date(
+    nowPT.getFullYear(),
+    nowPT.getMonth(),
+    nowPT.getDate()
+  );
+
+  const poolsToLock = await prisma.pool.findMany({
+    where: {
+      status: "Open",
+      tournament: {
+        start_date: { lte: todayPT },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      pool_members: {
+        select: { user: { select: { email: true } } },
+      },
+    },
+  });
+
+  if (poolsToLock.length === 0) return [];
+
+  await prisma.pool.updateMany({
+    where: { id: { in: poolsToLock.map((p) => p.id) } },
+    data: { status: "Locked" },
+  });
+
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  Promise.allSettled(
+    poolsToLock.flatMap((pool) =>
+      pool.pool_members.map((m) =>
+        sendPoolLockedEmail({
+          to: m.user.email,
+          poolName: pool.name,
+          appBaseUrl,
+          poolId: pool.id,
+        })
+      )
+    )
+  ).then((results) => {
+    const failed = results.filter((r) => r.status === "rejected");
+    if (failed.length > 0) {
+      console.error(`Failed to send ${failed.length} auto-lock emails`);
+    }
+  });
+
+  return poolsToLock;
+}
+
 export const poolRouter = router({
   list: protectedProcedure.query(async () => {
     return prisma.pool.findMany({

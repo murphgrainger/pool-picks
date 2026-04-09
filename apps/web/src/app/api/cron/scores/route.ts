@@ -3,7 +3,10 @@ export const maxDuration = 60;
 
 import { NextResponse } from "next/server";
 import { prisma } from "@pool-picks/db";
-import { autoAdvanceScheduledTournaments } from "@pool-picks/api";
+import {
+  autoAdvanceScheduledTournaments,
+  autoLockPoolsBeforeTournament,
+} from "@pool-picks/api";
 import { sendScoreSyncAlertEmail } from "@pool-picks/api/lib/email";
 import { syncTournamentScores } from "../../scrape/tournaments/score-sync";
 
@@ -15,6 +18,9 @@ export async function GET(request: Request) {
 
   // Auto-advance any Scheduled tournaments whose start_date has passed
   const advanced = await autoAdvanceScheduledTournaments();
+
+  // Auto-lock Open pools whose tournament starts today or earlier (Pacific time)
+  const locked = await autoLockPoolsBeforeTournament();
 
   // Notify admin when score auto-sync turns on
   const adminEmail = process.env.ADMIN_ALERT_EMAIL;
@@ -43,6 +49,7 @@ export async function GET(request: Request) {
       message: "No active tournaments",
       synced: 0,
       failed: 0,
+      poolsLocked: locked.length,
     });
   }
 
@@ -63,6 +70,7 @@ export async function GET(request: Request) {
     message: `Synced ${synced} tournament(s)${failed > 0 ? `, ${failed} failed` : ""}`,
     synced,
     failed,
+    poolsLocked: locked.length,
     errors: errors.length > 0 ? errors : undefined,
   });
 }
