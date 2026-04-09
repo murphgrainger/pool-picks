@@ -24,7 +24,7 @@ async function fetchAthleteField(id: string): Promise<Athlete[]> {
     throw new Error("Invalid tournament ID requested.");
 
   const url = `${ESPN_API_BASE}/${tournament.external_id}`;
-  const response = await fetch(url);
+  const response = await fetch(url, { cache: "no-store" });
   if (!response.ok)
     throw new Error(`ESPN API returned ${response.status}`);
 
