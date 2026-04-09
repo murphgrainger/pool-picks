@@ -58,14 +58,16 @@ export function validateScoreboardResponse(event: any): ValidationResult {
           `Expected linescore.period to be number, got ${typeof ls.period}`
         );
       }
-      if (typeof ls.value !== "number") {
+      // value and displayValue may be absent for rounds not yet played
+      // (ESPN returns stubs like {"period": 2} for future rounds)
+      if (ls.value !== undefined && typeof ls.value !== "number") {
         errors.push(
-          `Expected linescore.value to be number, got ${typeof ls.value}`
+          `Expected linescore.value to be number or undefined, got ${typeof ls.value}`
         );
       }
-      if (typeof ls.displayValue !== "string") {
+      if (ls.displayValue !== undefined && typeof ls.displayValue !== "string") {
         errors.push(
-          `Expected linescore.displayValue to be string, got ${typeof ls.displayValue}`
+          `Expected linescore.displayValue to be string or undefined, got ${typeof ls.displayValue}`
         );
       }
     }
