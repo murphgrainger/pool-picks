@@ -18,3 +18,4 @@ export type AppRouter = typeof appRouter;
 export { createContext } from "./context";
 export type { UserContext, CreateContextOptions, Context } from "./context";
 export { autoAdvanceScheduledTournaments } from "./routers/tournament";
+export { autoLockPoolsBeforeTournament } from "./routers/pool";

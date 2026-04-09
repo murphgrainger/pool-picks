@@ -183,11 +183,13 @@ export function PoolMemberCard({
             {positionFormatted}
           </p>
           <h3 className="flex items-center">{displayName}{commissionerPill}</h3>
-          <div className="flex-1 flex flex-col items-end pr-6 justify-center">
-            <p className="text-xl rounded-lg bg-green-700 p-2 pr-3 pl-3 font-bold text-white">
-              {underParFormatted}
-            </p>
-          </div>
+          {member.member_sum_under_par !== null && (
+            <div className="flex-1 flex flex-col items-end pr-6 justify-center">
+              <p className="text-xl rounded-lg bg-green-700 p-2 pr-3 pl-3 font-bold text-white">
+                {underParFormatted}
+              </p>
+            </div>
+          )}
         </div>
         <button
           onClick={() => setShowPicks(!showPicks)}

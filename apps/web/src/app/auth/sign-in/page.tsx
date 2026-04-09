@@ -121,6 +121,7 @@ export default function SignInPage() {
     }
 
     router.replace(next);
+    router.refresh();
   };
 
   const handleResendOtp = async () => {

@@ -334,7 +334,7 @@ export async function sendPoolLockedEmail({
   const content = `
 <h2 style="margin:0 0 16px;color:#181818;font-size:20px;">Picks are locked in!</h2>
 <p style="margin:0 0 8px;color:#333333;font-size:16px;line-height:1.5;">
-  <strong>${poolName}</strong> has been locked by the commissioner.
+  <strong>${poolName}</strong> has been locked.
 </p>
 <p style="margin:0 0 32px;color:#555555;font-size:14px;line-height:1.5;">
   All picks are final. Head over to the pool to see who everyone picked.

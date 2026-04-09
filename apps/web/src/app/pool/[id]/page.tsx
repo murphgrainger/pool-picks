@@ -27,8 +27,8 @@ export default async function PoolPage({ params }: PoolPageProps) {
     (member) => member.user_id === supabaseUser.id && member.role === "COMMISSIONER"
   );
 
-  // Non-members and non-commissioners can't see the pool
-  if (!currentUserPoolMember && !isCommissioner) {
+  // Non-members, non-commissioners, and non-admins can't see the pool
+  if (!currentUserPoolMember && !isCommissioner && !isAdmin) {
     redirect("/");
   }
 

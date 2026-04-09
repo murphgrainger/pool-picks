@@ -71,7 +71,9 @@ export function PoolDetailClient({
 }: PoolDetailClientProps) {
   const router = useRouter();
   const [poolStatus, setPoolStatus] = useState(pool.status);
-  const [showAdminPanel, setShowAdminPanel] = useState(isCommissioner);
+  const [showAdminPanel, setShowAdminPanel] = useState(
+    isCommissioner && pool.status !== "Locked" && pool.status !== "Complete"
+  );
 
   const tournamentStatus = useMemo(
     () => resolveTournamentStatus(pool.tournament),
@@ -84,6 +86,15 @@ export function PoolDetailClient({
   const [updatedPoolMembers, setUpdatedPoolMembers] =
     useState<PoolMemberFormatted[]>(initialPoolMembers);
   const [poolInvites, setPoolInvites] = useState(pool.pool_invites);
+
+  // Sync pool members from server when props change (e.g. after router.refresh())
+  useEffect(() => {
+    setUpdatedPoolMembers(initialPoolMembers);
+  }, [initialPoolMembers]);
+
+  useEffect(() => {
+    setPoolInvites(pool.pool_invites);
+  }, [pool.pool_invites]);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(
     new Date(pool.tournament.updated_at)
   );
@@ -200,8 +211,8 @@ export function PoolDetailClient({
           </div>
         </div>
 
-        {/* Last updated timestamp — only during active tournament */}
-        {phase === "live" && tournamentStatus === "Active" && (
+        {/* Last updated timestamp — only when live with actual scores */}
+        {phase === "live" && tournamentStatus === "Active" && updatedPoolMembers.some(m => m.member_sum_under_par !== null) && (
           <p className="text-xs text-grey-75 mt-4">
             Scores last updated {formatLastRefreshed()}
             {showUpdateIndicator && (

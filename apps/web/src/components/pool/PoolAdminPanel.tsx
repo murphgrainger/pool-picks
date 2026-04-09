@@ -137,6 +137,14 @@ export function PoolAdminPanel({
           </div>
         )}
 
+        {currentStatus === "Open" && (
+          <div className="p-3 rounded bg-gold/10 border border-gold/30 mb-2">
+            <p className="text-yellow text-sm">
+              Pool will auto-lock at midnight PT the day the tournament starts.
+            </p>
+          </div>
+        )}
+
         <label>Pool Status</label>
         <Select
           instanceId="status"
