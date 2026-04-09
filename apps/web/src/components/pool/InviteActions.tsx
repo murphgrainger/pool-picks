@@ -48,10 +48,25 @@ interface PoolMembership {
   };
 }
 
+interface AdminPool {
+  id: number;
+  name: string;
+  status: string;
+  amount_entry: number;
+  tournament: {
+    name: string;
+    start_date: Date;
+    end_date: Date;
+    status: string;
+  };
+}
+
 interface InviteActionsProps {
   initialInvites: Invite[];
   poolMembers: PoolMembership[];
   userEmail: string;
+  isAdmin?: boolean;
+  allPools?: AdminPool[];
 }
 
 function phaseColor(phase: PoolPhase) {
@@ -219,6 +234,8 @@ export function InviteActions({
   initialInvites,
   poolMembers,
   userEmail,
+  isAdmin,
+  allPools,
 }: InviteActionsProps) {
   const [poolInvites, setPoolInvites] = useState(initialInvites);
   const [loadingButtonId, setLoadingButtonId] = useState<string | null>(null);
@@ -258,6 +275,11 @@ export function InviteActions({
   const hasActivePools = PHASE_GROUP_ORDER.some(
     (p) => grouped[p] && grouped[p].length > 0
   );
+
+  const memberPoolIds = new Set(poolMembers.map((m) => m.pool.id));
+  const adminOnlyPools = isAdmin && allPools
+    ? allPools.filter((p) => !memberPoolIds.has(p.id))
+    : [];
 
   return (
     <div className="max-w-xl mx-auto w-full px-4 pt-6 pb-8">
@@ -381,6 +403,60 @@ export function InviteActions({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Admin: all other pools */}
+      {adminOnlyPools.length > 0 && (
+        <div className="mt-6">
+          <div className="mb-2">
+            <span className="text-sm font-semibold px-3 py-1 rounded-full bg-red-100 text-red-700">
+              Admin — All Pools
+            </span>
+          </div>
+          {adminOnlyPools.map((pool) => (
+            <Link
+              key={pool.id}
+              href={`/pool/${pool.id}`}
+              className="block p-4 mb-2 bg-white border border-grey-100 rounded shadow-sm hover:shadow-md transition-shadow group"
+            >
+              <div className="flex items-start justify-between">
+                <div className="min-w-0">
+                  <p className="font-bold text-black">{pool.name}</p>
+                  <p className="text-sm text-grey-75 mt-0.5">
+                    {pool.tournament.name}
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-grey-300 group-hover:text-green-700 shrink-0 ml-2 mt-1" />
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs text-grey-75">
+                <span>
+                  {formatTournamentDates(
+                    pool.tournament.start_date,
+                    pool.tournament.end_date,
+                  )}
+                </span>
+                {pool.amount_entry > 0 && (
+                  <span>${pool.amount_entry} entry</span>
+                )}
+                <span
+                  className={`font-semibold px-2 py-0.5 rounded ${phaseColor(
+                    getEffectivePoolPhase(
+                      pool.status,
+                      resolveTournamentStatus(pool.tournament)
+                    )
+                  )}`}
+                >
+                  {phaseLabel(
+                    getEffectivePoolPhase(
+                      pool.status,
+                      resolveTournamentStatus(pool.tournament)
+                    )
+                  )}
+                </span>
+              </div>
+            </Link>
+          ))}
         </div>
       )}
     </div>
