@@ -35,6 +35,8 @@ export function parseScoreToPar(score: string): number | null {
 function getRoundScore(linescores: any[], period: number): number | null {
   const round = linescores.find((ls: any) => ls.period === period);
   if (!round) return null;
+  // ESPN returns value: 0.0 with displayValue: "-" for players who haven't teed off
+  if (!round.displayValue || round.displayValue === "-") return null;
   const value = round.value;
   return typeof value === "number" ? value : null;
 }
@@ -163,8 +165,13 @@ export async function fetchGolfData(id: string) {
     const roundCount = linescores.length;
     const scoreSum = linescores.reduce(
       (sum: number, ls: any) =>
-        typeof ls.value === "number" ? sum + ls.value : sum,
+        typeof ls.value === "number" && ls.displayValue && ls.displayValue !== "-"
+          ? sum + ls.value
+          : sum,
       0
+    );
+    const hasAnyScore = linescores.some(
+      (ls: any) => typeof ls.value === "number" && ls.displayValue && ls.displayValue !== "-"
     );
 
     return {
@@ -177,7 +184,7 @@ export async function fetchGolfData(id: string) {
       score_round_two: getRoundScore(linescores, 2),
       score_round_three: getRoundScore(linescores, 3),
       score_round_four: getRoundScore(linescores, 4),
-      score_sum: roundCount > 0 ? scoreSum : null,
+      score_sum: hasAnyScore ? scoreSum : null,
       status: deriveStatus(roundCount, 4),
     };
   });
