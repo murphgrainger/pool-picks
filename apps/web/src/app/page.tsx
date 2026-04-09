@@ -3,14 +3,15 @@ import { InviteActions } from "@/components/pool/InviteActions";
 import { getAuthUser } from "@/lib/supabase/auth";
 
 export default async function HomePage() {
-  const { email } = await getAuthUser();
+  const { email, isAdmin } = await getAuthUser();
 
   if (!email) return null;
 
   const caller = await createServerCaller();
-  const [invites, poolMembers] = await Promise.all([
+  const [invites, poolMembers, allPools] = await Promise.all([
     caller.poolInvite.listPending(),
     caller.poolMember.listByUser(),
+    isAdmin ? caller.pool.list() : Promise.resolve([]),
   ]);
 
   return (
@@ -18,6 +19,8 @@ export default async function HomePage() {
       initialInvites={invites}
       poolMembers={poolMembers}
       userEmail={email}
+      isAdmin={isAdmin}
+      allPools={allPools}
     />
   );
 }
