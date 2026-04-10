@@ -34,6 +34,68 @@ export interface AthletePickFormatted {
   tournament_id: number | null;
 }
 
+export interface AthletePlayerView extends AthletePickFormatted {
+  pickedBy: {
+    memberId: number;
+    displayName: string;
+    memberPosition?: number;
+    memberScore: number | null;
+    isTied?: boolean;
+    isDQ?: boolean;
+    role?: string;
+  }[];
+}
+
+export function pivotToPlayerView(
+  members: PoolMemberFormatted[]
+): AthletePlayerView[] {
+  const athleteMap = new Map<number, AthletePlayerView>();
+
+  for (const member of members) {
+    const displayName = member.username || member.nickname || "Unknown";
+    for (const pick of member.picks) {
+      const memberInfo = {
+        memberId: member.id,
+        displayName,
+        memberPosition: member.member_position,
+        memberScore: member.member_sum_under_par,
+        isTied: member.isTied,
+        isDQ: member.isDQ,
+        role: member.role,
+      };
+
+      const existing = athleteMap.get(pick.id);
+      if (existing) {
+        existing.pickedBy.push(memberInfo);
+      } else {
+        athleteMap.set(pick.id, {
+          ...pick,
+          pickedBy: [memberInfo],
+        });
+      }
+    }
+  }
+
+  return Array.from(athleteMap.values())
+    .map((athlete) => ({
+      ...athlete,
+      pickedBy: [...athlete.pickedBy].sort((a, b) => {
+        if (a.memberPosition !== undefined && b.memberPosition !== undefined)
+          return a.memberPosition - b.memberPosition;
+        if (a.memberPosition !== undefined) return -1;
+        if (b.memberPosition !== undefined) return 1;
+        return 0;
+      }),
+    }))
+    .sort((a, b) => {
+      if (a.score_under_par !== null && b.score_under_par !== null)
+        return a.score_under_par - b.score_under_par;
+      if (a.score_under_par !== null) return -1;
+      if (b.score_under_par !== null) return 1;
+      return a.full_name.localeCompare(b.full_name);
+    });
+}
+
 export function sumMemberPicks(athleteData: AthletePickData[]): number | null {
   const validPicks = athleteData
     .filter((pick) => pick.status === "Active")

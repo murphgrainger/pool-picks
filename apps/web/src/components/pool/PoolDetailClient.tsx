@@ -7,12 +7,15 @@ import {
   formatTournamentDates,
   resolveTournamentStatus,
   getEffectivePoolPhase,
+  pivotToPlayerView,
   type PoolMemberFormatted,
 } from "@pool-picks/utils";
 import { trpc } from "@/lib/trpc/client";
 import { PoolStatusCard } from "./PoolStatusCard";
 import { PoolAdminPanel } from "./PoolAdminPanel";
 import { PoolMemberCard } from "./PoolMemberCard";
+import { ViewToggle } from "./ViewToggle";
+import { PlayerCardList } from "./PlayerCardList";
 
 function scoreFingerprint(members: any[]): string {
   return members
@@ -83,6 +86,9 @@ export function PoolDetailClient({
     () => getEffectivePoolPhase(poolStatus, tournamentStatus),
     [poolStatus, tournamentStatus]
   );
+  const [view, setView] = useState<"members" | "players">("members");
+  const [expandedMemberIds, setExpandedMemberIds] = useState<Set<number>>(new Set());
+  const [expandedPlayerIds, setExpandedPlayerIds] = useState<Set<number>>(new Set());
   const [updatedPoolMembers, setUpdatedPoolMembers] =
     useState<PoolMemberFormatted[]>(initialPoolMembers);
   const [poolInvites, setPoolInvites] = useState(pool.pool_invites);
@@ -102,6 +108,13 @@ export function PoolDetailClient({
   const [, setTick] = useState(0);
 
   const isLive = phase === "live";
+  const showViewToggle =
+    phase === "locked-awaiting" || phase === "live" || phase === "completed";
+
+  const playerViewData = useMemo(
+    () => pivotToPlayerView(updatedPoolMembers),
+    [updatedPoolMembers]
+  );
 
   const totalPotAmount = updatedPoolMembers.length * pool.amount_entry;
   const tournamentExternalUrl = pool.tournament.external_id
@@ -261,28 +274,91 @@ export function PoolDetailClient({
         )}
       </div>
 
-      {[...updatedPoolMembers]
-        .sort((a, b) => {
-          if (phase === "open") {
-            const aIsCurrentUser = a.id === currentUserPoolMemberId ? 0 : 1;
-            const bIsCurrentUser = b.id === currentUserPoolMemberId ? 0 : 1;
-            if (aIsCurrentUser !== bIsCurrentUser) return aIsCurrentUser - bIsCurrentUser;
-            const aHasPicks = a.picks?.length ? 0 : 1;
-            const bHasPicks = b.picks?.length ? 0 : 1;
-            return aHasPicks - bHasPicks;
-          }
-          return 0;
-        })
-        .map((member) => (
-          <PoolMemberCard
-            key={member.id}
-            member={member}
-            currentMemberId={currentUserPoolMemberId}
-            phase={phase}
-            tournamentId={pool.tournament.id}
-            tournamentExternalUrl={tournamentExternalUrl}
-          />
-        ))}
+      {showViewToggle && (() => {
+        const membersWithPicks = updatedPoolMembers.filter(m => m.picks?.length);
+        const allMembersExpanded = membersWithPicks.length > 0 && membersWithPicks.every(m => expandedMemberIds.has(m.id));
+        const allPlayersExpanded = playerViewData.length > 0 && expandedPlayerIds.size === playerViewData.length;
+        const allExpanded = view === "players" ? allPlayersExpanded : allMembersExpanded;
+
+        return (
+          <div className="flex items-center justify-between mt-4 w-full">
+            <ViewToggle view={view} onViewChange={setView} />
+            <button
+              onClick={() => {
+                if (view === "players") {
+                  if (allPlayersExpanded) {
+                    setExpandedPlayerIds(new Set());
+                  } else {
+                    setExpandedPlayerIds(new Set(playerViewData.map(a => a.id)));
+                  }
+                } else {
+                  if (allMembersExpanded) {
+                    setExpandedMemberIds(new Set());
+                  } else {
+                    setExpandedMemberIds(new Set(membersWithPicks.map(m => m.id)));
+                  }
+                }
+              }}
+              className="text-xs font-medium text-green-700 hover:text-green-900 transition-colors"
+            >
+              {allExpanded ? "Collapse All" : "Expand All"}
+            </button>
+          </div>
+        );
+      })()}
+
+      {view === "players" && showViewToggle ? (
+        <PlayerCardList
+          athletes={playerViewData}
+          expandedIds={expandedPlayerIds}
+          onToggle={(id) => {
+            setExpandedPlayerIds((prev) => {
+              const next = new Set(prev);
+              if (next.has(id)) {
+                next.delete(id);
+              } else {
+                next.add(id);
+              }
+              return next;
+            });
+          }}
+        />
+      ) : (
+        [...updatedPoolMembers]
+          .sort((a, b) => {
+            if (phase === "open") {
+              const aIsCurrentUser = a.id === currentUserPoolMemberId ? 0 : 1;
+              const bIsCurrentUser = b.id === currentUserPoolMemberId ? 0 : 1;
+              if (aIsCurrentUser !== bIsCurrentUser) return aIsCurrentUser - bIsCurrentUser;
+              const aHasPicks = a.picks?.length ? 0 : 1;
+              const bHasPicks = b.picks?.length ? 0 : 1;
+              return aHasPicks - bHasPicks;
+            }
+            return 0;
+          })
+          .map((member) => (
+            <PoolMemberCard
+              key={member.id}
+              member={member}
+              currentMemberId={currentUserPoolMemberId}
+              phase={phase}
+              tournamentId={pool.tournament.id}
+              tournamentExternalUrl={tournamentExternalUrl}
+              isExpanded={showViewToggle ? expandedMemberIds.has(member.id) : undefined}
+              onToggleExpand={showViewToggle ? () => {
+                setExpandedMemberIds((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(member.id)) {
+                    next.delete(member.id);
+                  } else {
+                    next.add(member.id);
+                  }
+                  return next;
+                });
+              } : undefined}
+            />
+          ))
+      )}
 
       {poolInvites.map((invite) => (
         <div
