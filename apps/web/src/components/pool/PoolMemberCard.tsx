@@ -22,6 +22,8 @@ interface PoolMemberCardProps {
   phase: PoolPhase;
   tournamentId: number;
   tournamentExternalUrl: string | null;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 export function PoolMemberCard({
@@ -30,13 +32,17 @@ export function PoolMemberCard({
   phase,
   tournamentId,
   tournamentExternalUrl,
+  isExpanded,
+  onToggleExpand,
 }: PoolMemberCardProps) {
   const currentUserCard = member.id === currentMemberId;
   const pickStatus = member.picks?.length
     ? "Picks Submitted"
     : "Awaiting Picks";
 
-  const [showPicks, setShowPicks] = useState(false);
+  const [showPicksLocal, setShowPicksLocal] = useState(false);
+  const showPicks = isExpanded !== undefined ? isExpanded : showPicksLocal;
+  const setShowPicks = onToggleExpand || (() => setShowPicksLocal((prev) => !prev));
   const [isEditingPicks, setIsEditingPicks] = useState(false);
   const [hasSubmittedUsername, setHasSubmittedUsername] = useState(
     !!member.username
@@ -192,7 +198,7 @@ export function PoolMemberCard({
           )}
         </div>
         <button
-          onClick={() => setShowPicks(!showPicks)}
+          onClick={() => onToggleExpand ? onToggleExpand() : setShowPicksLocal((prev) => !prev)}
           className="p-1"
         >
           <svg

@@ -2,8 +2,13 @@ export {
   sumMemberPicks,
   reformatPoolMembers,
   calculateMemberPosition,
+  pivotToPlayerView,
 } from "./scoring";
-export type { PoolMemberFormatted, AthletePickFormatted } from "./scoring";
+export type {
+  PoolMemberFormatted,
+  AthletePickFormatted,
+  AthletePlayerView,
+} from "./scoring";
 
 export {
   formatToPar,
