@@ -21,10 +21,6 @@ export interface ParsedAthleteData {
   status: string;
 }
 
-export interface ParsedTournamentData {
-  cut_line: number | null;
-}
-
 export function parseScoreToPar(score: string): number | null {
   if (!score || score === "--") return null;
   if (score === "E") return 0;
@@ -39,36 +35,6 @@ function getRoundScore(linescores: any[], period: number): number | null {
   if (!round.displayValue || round.displayValue === "-") return null;
   const value = round.value;
   return typeof value === "number" ? value : null;
-}
-
-function deriveStatus(roundCount: number, totalRounds: number): string {
-  if (totalRounds >= 4) return "Active";
-  if (roundCount === 2) return "CUT";
-  return "WD";
-}
-
-function deriveCutLine(competitors: any[]): number | null {
-  let worstR2ToPar: number | null = null;
-
-  for (const c of competitors) {
-    const linescores = c.linescores || [];
-    if (linescores.length < 4) continue;
-
-    const r1 = linescores.find((ls: any) => ls.period === 1);
-    const r2 = linescores.find((ls: any) => ls.period === 2);
-    if (!r1 || !r2) continue;
-
-    const r1ToPar = parseScoreToPar(r1.displayValue);
-    const r2ToPar = parseScoreToPar(r2.displayValue);
-    if (r1ToPar === null || r2ToPar === null) continue;
-
-    const afterR2 = r1ToPar + r2ToPar;
-    if (worstR2ToPar === null || afterR2 > worstR2ToPar) {
-      worstR2ToPar = afterR2;
-    }
-  }
-
-  return worstR2ToPar;
 }
 
 function deriveThru(competitor: any, competitionStatus: any): string | null {
@@ -185,15 +151,11 @@ export async function fetchGolfData(id: string) {
       score_round_three: getRoundScore(linescores, 3),
       score_round_four: getRoundScore(linescores, 4),
       score_sum: hasAnyScore ? scoreSum : null,
-      status: deriveStatus(roundCount, 4),
+      status: "Active",
     };
   });
 
-  const parsedTournamentData: ParsedTournamentData = {
-    cut_line: deriveCutLine(competitors),
-  };
-
-  return { parsedAthleteData, parsedTournamentData };
+  return { parsedAthleteData };
 }
 
 interface ScoreFields {
@@ -230,10 +192,8 @@ function scoreFieldsChanged(
 export async function updateGolfData(
   {
     parsedAthleteData,
-    parsedTournamentData,
   }: {
     parsedAthleteData: ParsedAthleteData[];
-    parsedTournamentData: ParsedTournamentData;
   },
   tournamentId: number
 ): Promise<{ hasChanges: boolean }> {
@@ -268,7 +228,11 @@ export async function updateGolfData(
           score_today: athleteData.score_today,
           position: athleteData.position,
           thru: athleteData.thru,
-          status: athleteData.status,
+          // Preserve CUT/WD status — these are set by cut_line logic, not ESPN
+          status:
+            existing && (existing.status === "CUT" || existing.status === "WD")
+              ? existing.status
+              : athleteData.status,
         };
 
         // New athlete or scores changed — write to DB
@@ -300,22 +264,30 @@ export async function updateGolfData(
     );
   }
 
-  // Check if cut_line changed
-  const cutLineChanged =
-    parsedTournamentData.cut_line !== null &&
-    (await prisma.tournament
-      .findUnique({ where: { id: tournamentId }, select: { cut_line: true } })
-      .then((t) => t?.cut_line !== parsedTournamentData.cut_line));
+  // Apply commissioner-set cut line: mark players above cut as "CUT"
+  // Only targets Active players with R2 complete but no R3 score yet
+  const tournamentRecord = await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    select: { cut_line: true },
+  });
 
-  const hasChanges = rowsWritten > 0 || cutLineChanged;
-
-  if (cutLineChanged) {
-    await prisma.tournament.update({
-      where: { id: tournamentId },
-      data: { cut_line: parsedTournamentData.cut_line },
+  if (tournamentRecord?.cut_line != null) {
+    const cutResult = await prisma.athletesInTournaments.updateMany({
+      where: {
+        tournament_id: tournamentId,
+        status: "Active",
+        score_round_two: { not: null },
+        score_round_three: null,
+        score_under_par: { gt: tournamentRecord.cut_line },
+      },
+      data: { status: "CUT", updated_at: new Date() },
     });
-  } else if (hasChanges) {
-    // Touch updated_at only if scores changed
+    rowsWritten += cutResult.count;
+  }
+
+  const hasChanges = rowsWritten > 0;
+
+  if (hasChanges) {
     await prisma.tournament.update({
       where: { id: tournamentId },
       data: { updated_at: new Date() },
