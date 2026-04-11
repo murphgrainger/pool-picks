@@ -31,8 +31,8 @@ export function PickCard({ pick, index }: PickCardProps) {
     pick.thru && (pick.thru.includes("AM") || pick.thru.includes("PM"));
   const thruFormatted = thruIsTeeTime ? null : pick.thru;
 
-  const showStatus =
-    pick.status === "CUT" || pick.status === "WD" ? pick.status : "--";
+  const isCutOrWD = pick.status === "CUT" || pick.status === "WD";
+  const showStatus = isCutOrWD ? pick.status : "--";
   const bgColorClass =
     index > 3 || pick.score_under_par === null
       ? "bg-grey-200 border border-grey-100 opacity-60"
@@ -44,7 +44,7 @@ export function PickCard({ pick, index }: PickCardProps) {
         <p className="flex-1 font-semibold text-base">{pick.full_name}</p>
         <div className="flex-1 flex flex-col items-center justify-center">
           <span className="text-xs text-grey-75">Pos</span>
-          <p className="text-xl">{pick.position || showStatus}</p>
+          <p className="text-xl">{isCutOrWD ? showStatus : (pick.position || showStatus)}</p>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center">
           <span className="text-xs text-grey-75">Score</span>
