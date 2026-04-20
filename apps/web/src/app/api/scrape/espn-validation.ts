@@ -144,6 +144,35 @@ export function validateScheduleResponse(data: any): ValidationResult {
   return { valid: errors.length === 0, errors };
 }
 
+export function validateCoreEventResponse(event: any): ValidationResult {
+  const errors: string[] = [];
+
+  if (typeof event?.id !== "string") {
+    errors.push(`Expected event.id to be string, got ${typeof event?.id}`);
+  }
+  if (typeof event?.tournament?.$ref !== "string") {
+    errors.push("Missing: event.tournament.$ref");
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+export function validateCoreTournamentResponse(data: any): ValidationResult {
+  const errors: string[] = [];
+
+  if (typeof data?.cutRound !== "number") {
+    errors.push(`Expected cutRound to be number, got ${typeof data?.cutRound}`);
+  }
+  if (typeof data?.cutScore !== "number") {
+    errors.push(`Expected cutScore to be number, got ${typeof data?.cutScore}`);
+  }
+  if (typeof data?.cutCount !== "number") {
+    errors.push(`Expected cutCount to be number, got ${typeof data?.cutCount}`);
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 export function validateEventDetailsResponse(data: any): ValidationResult {
   const errors: string[] = [];
 
