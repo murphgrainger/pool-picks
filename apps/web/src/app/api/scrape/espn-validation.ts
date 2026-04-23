@@ -1,8 +1,16 @@
 import { Resend } from "resend";
+import { prisma } from "@pool-picks/db";
 
 interface ValidationResult {
   valid: boolean;
   errors: string[];
+}
+
+// Returns midnight UTC for the given date — matches Prisma @db.Date column
+// semantics so the (endpoint, alert_date) unique index collapses all same-day
+// failures to a single row.
+function startOfUTCDay(d: Date): Date {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 
 // --- Validators ---
@@ -218,6 +226,25 @@ export async function sendSchemaAlert(
       "Cannot send schema alert — ADMIN_ALERT_EMAIL or RESEND_API_KEY not set"
     );
     return;
+  }
+
+  // Dedupe: at most one email per endpoint per UTC day. Insert first; if the
+  // unique (endpoint, alert_date) constraint fires we've already alerted today.
+  try {
+    await prisma.schemaAlert.create({
+      data: {
+        endpoint,
+        alert_date: startOfUTCDay(new Date()),
+      },
+    });
+  } catch (err: any) {
+    if (err?.code === "P2002") {
+      // Already alerted today — skip the Resend send.
+      return;
+    }
+    // Any other DB error: log and fall through. A duplicate email beats silence
+    // when the database is flaking and we can't tell if we've alerted yet.
+    console.error("SchemaAlert dedupe write failed:", err);
   }
 
   try {
