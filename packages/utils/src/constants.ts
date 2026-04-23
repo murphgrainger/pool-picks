@@ -5,7 +5,12 @@ export const MAX_A_GROUP_PICKS = 3;
 export const POOL_STATUSES = ["Setup", "Open", "Locked", "Complete"] as const;
 export type PoolStatus = (typeof POOL_STATUSES)[number];
 
-export const TOURNAMENT_STATUSES = ["Scheduled", "Active", "Completed"] as const;
+export const TOURNAMENT_STATUSES = [
+  "Scheduled",
+  "Active",
+  "Completed",
+  "Excluded",
+] as const;
 export type TournamentStatus = (typeof TOURNAMENT_STATUSES)[number];
 
 export const INVITE_STATUSES = ["Invited", "Accepted", "Rejected"] as const;
