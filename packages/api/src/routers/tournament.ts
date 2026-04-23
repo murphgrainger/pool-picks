@@ -86,7 +86,10 @@ export const tournamentRouter = router({
 
   listSelectable: protectedProcedure.query(async () => {
     return prisma.tournament.findMany({
-      where: { end_date: { gte: new Date() } },
+      where: {
+        end_date: { gte: new Date() },
+        status: { notIn: ["Excluded", "Completed"] },
+      },
       orderBy: { start_date: "asc" },
       select: {
         id: true,
@@ -120,7 +123,7 @@ export const tournamentRouter = router({
     .input(
       z.object({
         id: z.number(),
-        status: z.enum(["Scheduled", "Active", "Completed"]),
+        status: z.enum(["Scheduled", "Active", "Completed", "Excluded"]),
       })
     )
     .mutation(async ({ input }) => {

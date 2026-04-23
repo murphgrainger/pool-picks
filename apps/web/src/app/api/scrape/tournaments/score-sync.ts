@@ -177,7 +177,7 @@ export async function fetchGolfData(id: string) {
   await assertValidResponse(
     event,
     validateScoreboardResponse,
-    "scoreboard (scores)"
+    `scoreboard (scores) #${tournament.id}`
   );
 
   if (event.id !== String(tournament.external_id)) {

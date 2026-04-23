@@ -78,11 +78,11 @@ export default function TournamentAdminPage() {
     setSelectedOption(option);
     updateTournament.mutate({
       id: tournament.id,
-      status: option.value as "Scheduled" | "Active" | "Completed",
+      status: option.value as "Scheduled" | "Active" | "Completed" | "Excluded",
     });
   };
 
-  const tournamentStatuses = ["Scheduled", "Active", "Completed"];
+  const tournamentStatuses = ["Scheduled", "Active", "Completed", "Excluded"];
   const selectOptions: SelectValues[] = tournamentStatuses.map((el) => ({
     value: el,
     label: el,
@@ -153,6 +153,11 @@ export default function TournamentAdminPage() {
           >
             Score Auto-Sync: {resolvedStatus === "Active" ? "ON" : "OFF"}
           </span>
+          {resolvedStatus === "Excluded" && (
+            <span className="inline-block text-xs font-medium px-2 py-1 rounded mt-1 ml-2 bg-grey-100 text-grey-75">
+              Excluded — hidden from pool creation, skipped by cron
+            </span>
+          )}
           {tournamentHealth.data && (
             <div className="flex gap-3 mt-2">
               <span

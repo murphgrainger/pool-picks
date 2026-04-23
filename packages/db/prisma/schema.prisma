@@ -126,3 +126,12 @@ model PoolMembersAthletes {
 
   @@id([poolMember_id, athlete_id])
 }
+
+model SchemaAlert {
+  id         Int      @id @default(autoincrement())
+  endpoint   String
+  alert_date DateTime @db.Date
+  created_at DateTime @default(now())
+
+  @@unique([endpoint, alert_date])
+}
