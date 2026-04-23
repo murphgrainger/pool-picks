@@ -165,4 +165,19 @@ describe("resolveTournamentStatus", () => {
       })
     ).toBe("Active");
   });
+
+  it("respects Excluded status even when start_date has passed", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(utcDate(2026, 4, 12)); // Mid-tournament
+
+    // Excluded means the admin manually turned off auto-sync for this tournament
+    // (e.g. Pro-Am format that breaks ESPN validator). Must not auto-advance.
+    expect(
+      resolveTournamentStatus({
+        start_date: utcDate(2026, 4, 10),
+        end_date: utcDate(2026, 4, 13),
+        status: "Excluded",
+      })
+    ).toBe("Excluded");
+  });
 });

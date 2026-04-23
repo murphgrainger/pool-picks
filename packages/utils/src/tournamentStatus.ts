@@ -46,7 +46,8 @@ export function resolveTournamentStatus(tournament: {
   end_date: Date;
   status: string;
 }): TournamentStatus {
-  // Completed and Active are always respected — admin set them explicitly
+  // Admin-set terminal/suspended statuses are always respected — never auto-advance
+  if (tournament.status === "Excluded") return "Excluded";
   if (tournament.status === "Completed") return "Completed";
   if (tournament.status === "Active") return "Active";
 
