@@ -1,4 +1,5 @@
-import { useState } from "react";
+import * as AppleAuthentication from "expo-apple-authentication";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/theme";
+import { signInWithApple } from "@/lib/apple-sign-in";
 import { supabase } from "@/lib/supabase";
 
 type Step = "email" | "code";
@@ -22,6 +24,20 @@ export default function SignInScreen() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
+  const [appleSubmitting, setAppleSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS !== "ios") return;
+    AppleAuthentication.isAvailableAsync().then(setAppleAvailable);
+  }, []);
+
+  async function handleAppleSignIn() {
+    setAppleSubmitting(true);
+    const { error } = await signInWithApple();
+    setAppleSubmitting(false);
+    if (error) Alert.alert("Sign in with Apple failed", error);
+  }
 
   async function sendCode() {
     if (!email.trim()) {
@@ -70,6 +86,35 @@ export default function SignInScreen() {
             <Text style={styles.brand}>PoolPicks</Text>
             <Text style={styles.tagline}>Golf pools with your friends</Text>
           </View>
+
+          {step === "email" && appleAvailable && (
+            <View style={styles.appleBlock}>
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={
+                  AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+                }
+                buttonStyle={
+                  AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+                }
+                cornerRadius={10}
+                style={styles.appleBtn}
+                onPress={() => {
+                  if (!appleSubmitting) handleAppleSignIn();
+                }}
+              />
+              {appleSubmitting && (
+                <ActivityIndicator
+                  color={Colors.light.muted}
+                  style={styles.appleSpinner}
+                />
+              )}
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or</Text>
+                <View style={styles.dividerLine} />
+              </View>
+            </View>
+          )}
 
           {step === "email" ? (
             <View style={styles.formBlock}>
@@ -185,4 +230,20 @@ const styles = StyleSheet.create({
   btnDisabled: { opacity: 0.6 },
   linkBtn: { paddingVertical: 12, alignItems: "center" },
   linkBtnText: { color: Colors.light.tint, fontSize: 14, fontWeight: "500" },
+  appleBlock: { marginBottom: 8 },
+  appleBtn: { width: "100%", height: 48 },
+  appleSpinner: { marginTop: 8 },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  dividerLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.light.border,
+  },
+  dividerText: { color: Colors.light.muted, fontSize: 12 },
 });
