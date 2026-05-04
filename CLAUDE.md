@@ -13,7 +13,7 @@ Pool Picks is a golf pool/wagering application. Users create pools for PGA tourn
 - **Auth:** Supabase Auth (Google OAuth + Email OTP)
 - **Styling:** Tailwind CSS with custom golf-themed color palette
 - **Scraping:** Axios + Cheerio (ESPN leaderboard/rankings data)
-- **Transactional email:** Resend (admin alerts when ESPN schema changes; sends from `send.poolpicks.com`)
+- **Transactional email:** Resend (admin alerts when ESPN schema changes; sends from `send.poolpicks.app`)
 - **Testing:** Vitest (scoring logic + tRPC routers)
 
 ## Commands
@@ -46,10 +46,12 @@ Migrations run automatically on deploy via the web app's build step (`prisma mig
 
 ## Deployment
 
-- **Hosting:** Vercel (production web app at `poolpicks.com`)
+- **Production domain:** `poolpicks.app` (not `.com` — we don't own `poolpicks.com`)
+- **Hosting:** Vercel (production web app at `https://poolpicks.app`)
 - **Build config:** `apps/web/vercel.json` — runs `prisma migrate deploy` before `next build`
 - **Cron:** Vercel cron triggers `/api/cron/scores` every 5 minutes between 9:00–23:00 UTC for live score refresh during tournaments
-- **Domain registrar / DNS:** Squarespace (manages `poolpicks.com`, points at Vercel)
+- **Domain registrar:** Squarespace (registrar for `poolpicks.app`)
+- **DNS:** Cloudflare (nameservers for `poolpicks.app`, DNS-only mode pointing at Vercel; also runs Cloudflare Email Routing for `play@poolpicks.app` → personal Gmail)
 
 ## Monorepo Structure
 

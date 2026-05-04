@@ -8,6 +8,10 @@
       "apps/*"
     ],
     "nohoist": [
+      "**/react",
+      "**/react/**",
+      "**/react-dom",
+      "**/react-dom/**",
       "**/expo",
       "**/expo/**",
       "**/expo-*",
