@@ -13,6 +13,7 @@ Pool Picks is a golf pool/wagering application. Users create pools for PGA tourn
 - **Auth:** Supabase Auth (Google OAuth + Email OTP)
 - **Styling:** Tailwind CSS with custom golf-themed color palette
 - **Scraping:** Axios + Cheerio (ESPN leaderboard/rankings data)
+- **Transactional email:** Resend (admin alerts when ESPN schema changes; sends from `send.poolpicks.com`)
 - **Testing:** Vitest (scoring logic + tRPC routers)
 
 ## Commands
@@ -42,6 +43,13 @@ Migrations run automatically on deploy via the web app's build step (`prisma mig
 **Do not use `prisma db push` for schema changes** — it doesn't create migration files and leads to drift between environments. Use `prisma migrate dev` instead.
 
 **Environment note:** The root `.env` has `DATABASE_URL` and `DIRECT_URL`. Make sure these point to your **local** Supabase project for development, not production.
+
+## Deployment
+
+- **Hosting:** Vercel (production web app at `poolpicks.com`)
+- **Build config:** `apps/web/vercel.json` — runs `prisma migrate deploy` before `next build`
+- **Cron:** Vercel cron triggers `/api/cron/scores` every 5 minutes between 9:00–23:00 UTC for live score refresh during tournaments
+- **Domain registrar / DNS:** Squarespace (manages `poolpicks.com`, points at Vercel)
 
 ## Monorepo Structure
 

@@ -2,10 +2,25 @@
   "name": "pool-picks",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "apps/*"
+    ],
+    "nohoist": [
+      "**/expo",
+      "**/expo/**",
+      "**/expo-*",
+      "**/expo-*/**",
+      "**/react-native",
+      "**/react-native/**",
+      "**/react-native-*",
+      "**/react-native-*/**",
+      "**/@expo/**",
+      "**/@react-native/**",
+      "**/@react-navigation/**"
+    ]
+  },
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
