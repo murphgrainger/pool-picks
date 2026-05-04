@@ -34,7 +34,11 @@ export default function AppLayout() {
           ),
         }}
       />
-      <Stack.Screen name="pool/[id]" options={{ title: "Pool" }} />
+      <Stack.Screen name="pool/[id]/index" options={{ title: "Pool" }} />
+      <Stack.Screen
+        name="pool/[id]/picks"
+        options={{ title: "Picks" }}
+      />
       <Stack.Screen
         name="pool/create"
         options={{ title: "New pool", presentation: "modal" }}

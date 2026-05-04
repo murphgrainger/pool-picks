@@ -3,12 +3,12 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 
-export default function PoolDetailScreen() {
+export default function PicksScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Pool #{id}</Text>
-      <Text style={styles.note}>Detail screen — coming next.</Text>
+      <Text style={styles.title}>Pool #{id} — picks</Text>
+      <Text style={styles.note}>Picks form coming next.</Text>
     </View>
   );
 }
