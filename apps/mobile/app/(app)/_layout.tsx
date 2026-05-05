@@ -1,6 +1,7 @@
 import { Redirect, Stack, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text } from "react-native";
 
+import { PushRationaleModal } from "@/components/push-rationale-modal";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/lib/auth-context";
 
@@ -12,6 +13,8 @@ export default function AppLayout() {
   if (!session) return <Redirect href="/(auth)/sign-in" />;
 
   return (
+    <>
+    <PushRationaleModal />
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: Colors.light.background },
@@ -48,6 +51,7 @@ export default function AppLayout() {
         options={{ title: "New pool", presentation: "modal" }}
       />
     </Stack>
+    </>
   );
 }
 
