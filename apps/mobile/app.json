@@ -46,6 +46,13 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "msmurph",
+          "project": "poolpicks-mobile"
+        }
       ]
     ],
     "experiments": {
