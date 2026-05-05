@@ -40,6 +40,10 @@ export default function AppLayout() {
         options={{ title: "Picks" }}
       />
       <Stack.Screen
+        name="pool/[id]/admin"
+        options={{ title: "Commissioner" }}
+      />
+      <Stack.Screen
         name="pool/create"
         options={{ title: "New pool", presentation: "modal" }}
       />

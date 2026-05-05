@@ -273,7 +273,12 @@ export default function PoolDetailScreen() {
       {isCommissioner && (
         <Pressable
           style={styles.adminLinkBtn}
-          onPress={() => Alert.alert("Coming up", "Commissioner panel is next.")}
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/pool/[id]/admin",
+              params: { id: String(poolId) },
+            })
+          }
         >
           <Text style={styles.adminLinkText}>Commissioner panel</Text>
         </Pressable>
