@@ -24,7 +24,7 @@ export default function CreatePoolScreen() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
-  const [entryAmount, setEntryAmount] = useState("0");
+  const [entryAmount, setEntryAmount] = useState("");
   const [tournamentId, setTournamentId] = useState<number | null>(null);
   const [joinMode, setJoinMode] = useState<JoinMode>("OPEN");
   const [tournamentPickerOpen, setTournamentPickerOpen] = useState(false);
@@ -52,7 +52,7 @@ export default function CreatePoolScreen() {
       );
       return;
     }
-    const amount = Number(entryAmount);
+    const amount = entryAmount.trim() === "" ? 0 : Number(entryAmount);
     if (Number.isNaN(amount) || amount < 0) {
       Alert.alert("Invalid entry amount", "Enter 0 or a positive dollar amount.");
       return;

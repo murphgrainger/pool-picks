@@ -510,13 +510,13 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    gap: 24,
     marginTop: 14,
     paddingTop: 14,
     borderTopWidth: 1,
     borderTopColor: Colors.light.border,
   },
-  stat: { alignItems: "center" },
+  stat: {},
   statLabel: { fontSize: 11, color: Colors.light.muted },
   statValue: {
     fontSize: 16,

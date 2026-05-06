@@ -39,7 +39,7 @@ export function Spinner({ size = 24, color = Colors.light.tint }: Props) {
   }, [rotation]);
 
   const animatedProps = useAnimatedProps(() => ({
-    transform: `rotate(${rotation.value} 20 20)`,
+    rotation: rotation.value,
   }));
 
   return (
@@ -60,7 +60,7 @@ export function Spinner({ size = 24, color = Colors.light.tint }: Props) {
         strokeLinecap="round"
         opacity={0.1}
       />
-      <AnimatedG animatedProps={animatedProps}>
+      <AnimatedG animatedProps={animatedProps} originX={20} originY={20}>
         <Path
           d="M 20 5 A 15 15 0 0 1 35 20"
           fill="none"
