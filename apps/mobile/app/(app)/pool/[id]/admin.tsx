@@ -126,12 +126,17 @@ export default function CommissionerScreen() {
         <View style={styles.statusList}>
           {POOL_STATUSES.map((status) => {
             const isCurrent = status === currentStatus;
+            const isUpdatingThis =
+              updateStatus.isPending &&
+              (pendingStatus === status ||
+                (pendingStatus === null && status !== currentStatus));
             return (
               <Pressable
                 key={status}
-                style={[
+                style={({ pressed }) => [
                   styles.statusOption,
                   isCurrent && styles.statusOptionActive,
+                  pressed && styles.statusOptionPressed,
                 ]}
                 onPress={() => chooseStatus(status)}
                 disabled={updateStatus.isPending}
@@ -149,7 +154,11 @@ export default function CommissionerScreen() {
                     {STATUS_DESCRIPTIONS[status]}
                   </Text>
                 </View>
-                {isCurrent && <Text style={styles.checkmark}>✓</Text>}
+                {isUpdatingThis ? (
+                  <ActivityIndicator size="small" color={Palette.green[700]} />
+                ) : isCurrent ? (
+                  <Text style={styles.checkmark}>✓</Text>
+                ) : null}
               </Pressable>
             );
           })}
@@ -329,6 +338,10 @@ const styles = StyleSheet.create({
   },
   statusOptionActive: {
     borderColor: Palette.green[700],
+    backgroundColor: Palette.green[50],
+  },
+  statusOptionPressed: {
+    opacity: 0.6,
     backgroundColor: Palette.green[50],
   },
   statusTextBlock: { flex: 1 },
