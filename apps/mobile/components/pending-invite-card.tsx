@@ -1,11 +1,6 @@
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { Spinner } from "@/components/spinner";
 import { Colors, Palette } from "@/constants/theme";
 
 export type PendingInvite = {
@@ -45,7 +40,7 @@ export function PendingInviteCard({
           disabled={disabled}
         >
           {busyAction === "decline" ? (
-            <ActivityIndicator color={Colors.light.card} />
+            <Spinner size={18} color={Colors.light.card} />
           ) : (
             <Text style={styles.declineText}>Decline</Text>
           )}
@@ -59,7 +54,7 @@ export function PendingInviteCard({
           disabled={disabled}
         >
           {busyAction === "accept" ? (
-            <ActivityIndicator color={Colors.light.card} />
+            <Spinner size={18} color={Colors.light.card} />
           ) : (
             <Text style={styles.acceptText}>Accept</Text>
           )}

@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Modal,
@@ -15,6 +14,7 @@ import {
 } from "react-native";
 import { POOL_STATUSES, type PoolStatus } from "@pool-picks/utils";
 
+import { Spinner } from "@/components/spinner";
 import { Colors, Palette } from "@/constants/theme";
 import { trpc } from "@/lib/trpc";
 
@@ -64,7 +64,7 @@ export default function CommissionerScreen() {
   if (poolQuery.isPending) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={Colors.light.tint} />
+        <Spinner size={36} />
       </View>
     );
   }
@@ -155,7 +155,7 @@ export default function CommissionerScreen() {
                   </Text>
                 </View>
                 {isUpdatingThis ? (
-                  <ActivityIndicator size="small" color={Palette.green[700]} />
+                  <Spinner size={18} color={Palette.green[700]} />
                 ) : isCurrent ? (
                   <Text style={styles.checkmark}>✓</Text>
                 ) : null}
@@ -197,7 +197,7 @@ export default function CommissionerScreen() {
               disabled={createInvite.isPending}
             >
               {createInvite.isPending ? (
-                <ActivityIndicator color={Colors.light.card} />
+                <Spinner size={18} color={Colors.light.card} />
               ) : (
                 <Text style={styles.primaryBtnText}>Send invite</Text>
               )}
@@ -263,7 +263,7 @@ export default function CommissionerScreen() {
               disabled={updateStatus.isPending}
             >
               {updateStatus.isPending && confirmingNotify ? (
-                <ActivityIndicator color={Colors.light.card} />
+                <Spinner size={18} color={Colors.light.card} />
               ) : (
                 <Text style={styles.primaryBtnText}>
                   {pendingStatus === "Open" ? "Open & notify" : "Lock & notify"}
@@ -276,7 +276,7 @@ export default function CommissionerScreen() {
               disabled={updateStatus.isPending}
             >
               {updateStatus.isPending && !confirmingNotify ? (
-                <ActivityIndicator color={Colors.light.text} />
+                <Spinner size={18} color={Colors.light.text} />
               ) : (
                 <Text style={styles.secondaryBtnText}>
                   {pendingStatus === "Open"

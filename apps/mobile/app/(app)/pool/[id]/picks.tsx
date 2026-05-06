@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   FlatList,
   KeyboardAvoidingView,
@@ -17,6 +16,7 @@ import {
   PICKS_PER_MEMBER,
 } from "@pool-picks/utils";
 
+import { Spinner } from "@/components/spinner";
 import { Colors, Palette } from "@/constants/theme";
 import { useAuth } from "@/lib/auth-context";
 import { trpc } from "@/lib/trpc";
@@ -147,7 +147,7 @@ export default function PicksScreen() {
   if (poolQuery.isPending || athletesQuery.isPending) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={Colors.light.tint} />
+        <Spinner size={36} />
       </View>
     );
   }
@@ -244,7 +244,7 @@ export default function PicksScreen() {
           disabled={!allReady || submitPicks.isPending}
         >
           {submitPicks.isPending ? (
-            <ActivityIndicator color={Colors.light.card} />
+            <Spinner size={20} color={Colors.light.card} />
           ) : (
             <Text style={styles.submitText}>
               {currentMember.athletes.length === PICKS_PER_MEMBER

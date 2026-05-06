@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Pressable,
   RefreshControl,
@@ -24,6 +23,7 @@ import {
 } from "@pool-picks/utils";
 
 import { PhaseBadge } from "@/components/phase-badge";
+import { Spinner } from "@/components/spinner";
 import { Colors, Palette } from "@/constants/theme";
 import { useAuth } from "@/lib/auth-context";
 import { trpc } from "@/lib/trpc";
@@ -95,7 +95,7 @@ export default function PoolDetailScreen() {
   if (poolQuery.isPending) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={Colors.light.tint} />
+        <Spinner size={36} />
       </View>
     );
   }
@@ -191,7 +191,7 @@ export default function PoolDetailScreen() {
             disabled={refreshingScores}
           >
             {refreshingScores ? (
-              <ActivityIndicator size="small" color={Colors.light.card} />
+              <Spinner size={16} color={Colors.light.card} />
             ) : (
               <Text style={styles.refreshBtnText}>Refresh scores</Text>
             )}

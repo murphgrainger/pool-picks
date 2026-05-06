@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Modal,
@@ -15,6 +14,7 @@ import {
 } from "react-native";
 import { formatTournamentDates } from "@pool-picks/utils";
 
+import { Spinner } from "@/components/spinner";
 import { Colors, Palette } from "@/constants/theme";
 import { trpc } from "@/lib/trpc";
 
@@ -101,7 +101,7 @@ export default function CreatePoolScreen() {
 
         <Text style={styles.label}>Tournament</Text>
         {tournamentsQuery.isPending ? (
-          <ActivityIndicator color={Colors.light.tint} />
+          <Spinner size={24} />
         ) : tournaments.length === 0 ? (
           <Text style={styles.helper}>
             No upcoming tournaments are available right now.
@@ -195,7 +195,7 @@ export default function CreatePoolScreen() {
           disabled={submitting}
         >
           {submitting ? (
-            <ActivityIndicator color={Colors.light.card} />
+            <Spinner size={20} color={Colors.light.card} />
           ) : (
             <Text style={styles.submitText}>Create pool</Text>
           )}

@@ -1,7 +1,6 @@
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -13,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Spinner } from "@/components/spinner";
 import { Colors } from "@/constants/theme";
 import { signInWithApple } from "@/lib/apple-sign-in";
 import { supabase } from "@/lib/supabase";
@@ -103,10 +103,9 @@ export default function SignInScreen() {
                 }}
               />
               {appleSubmitting && (
-                <ActivityIndicator
-                  color={Colors.light.muted}
-                  style={styles.appleSpinner}
-                />
+                <View style={styles.appleSpinner}>
+                  <Spinner size={20} color={Colors.light.muted} />
+                </View>
               )}
               <View style={styles.divider}>
                 <View style={styles.dividerLine} />
@@ -139,7 +138,7 @@ export default function SignInScreen() {
                 disabled={submitting}
               >
                 {submitting ? (
-                  <ActivityIndicator color={Colors.light.card} />
+                  <Spinner size={20} color={Colors.light.card} />
                 ) : (
                   <Text style={styles.primaryBtnText}>Send sign-in code</Text>
                 )}
@@ -167,7 +166,7 @@ export default function SignInScreen() {
                 disabled={submitting}
               >
                 {submitting ? (
-                  <ActivityIndicator color={Colors.light.card} />
+                  <Spinner size={20} color={Colors.light.card} />
                 ) : (
                   <Text style={styles.primaryBtnText}>Verify and sign in</Text>
                 )}

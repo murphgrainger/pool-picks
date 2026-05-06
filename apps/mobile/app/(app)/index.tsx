@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Pressable,
   RefreshControl,
@@ -21,6 +20,7 @@ import {
   type PendingInvite,
 } from "@/components/pending-invite-card";
 import { PoolCard, type PoolCardData } from "@/components/pool-card";
+import { Spinner } from "@/components/spinner";
 import { Colors, Palette } from "@/constants/theme";
 import { useAuth } from "@/lib/auth-context";
 import { trpc } from "@/lib/trpc";
@@ -92,7 +92,7 @@ export default function HomeScreen() {
   if (invitesQuery.isPending || poolsQuery.isPending) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={Colors.light.tint} />
+        <Spinner size={36} />
       </View>
     );
   }

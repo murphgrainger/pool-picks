@@ -1,6 +1,7 @@
 import { Redirect } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
 
+import { Spinner } from "@/components/spinner";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/lib/auth-context";
 
@@ -17,7 +18,7 @@ export default function Index() {
           backgroundColor: Colors.light.background,
         }}
       >
-        <ActivityIndicator color={Colors.light.tint} />
+        <Spinner size={36} />
       </View>
     );
   }
