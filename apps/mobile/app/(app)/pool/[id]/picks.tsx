@@ -104,6 +104,7 @@ export default function PicksScreen() {
   function toggleAthlete(athlete: Athlete) {
     setSelectedIds((prev) => {
       if (prev.includes(athlete.id)) {
+        setSearch("");
         return prev.filter((id) => id !== athlete.id);
       }
       if (prev.length >= PICKS_PER_MEMBER) {
@@ -123,6 +124,7 @@ export default function PicksScreen() {
         );
         return prev;
       }
+      setSearch("");
       return [...prev, athlete.id];
     });
   }

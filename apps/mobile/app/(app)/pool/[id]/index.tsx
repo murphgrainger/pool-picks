@@ -27,13 +27,22 @@ import { Colors, Palette } from "@/constants/theme";
 import { useAuth } from "@/lib/auth-context";
 import { trpc } from "@/lib/trpc";
 
-const phaseDescription: Record<PoolPhase, string> = {
-  setup: "Commissioner is still setting up. Invite members before opening.",
-  open: "Picks are open. Choose 6 athletes before the tournament starts.",
-  "locked-awaiting": "Picks are locked. Tournament hasn't started yet.",
-  live: "Tournament is underway. Pull down to refresh live scores.",
-  completed: "Tournament complete. Final standings below.",
-};
+function getPhaseDescription(phase: PoolPhase, isCommissioner: boolean): string {
+  switch (phase) {
+    case "setup":
+      return isCommissioner
+        ? "Invite members, then open the pool to collect picks."
+        : "Commissioner is still setting up. Invite members before opening.";
+    case "open":
+      return "Picks are open. Choose 6 athletes before the tournament starts.";
+    case "locked-awaiting":
+      return "Picks are locked. Tournament hasn't started yet.";
+    case "live":
+      return "Tournament is underway. Pull down to refresh live scores.";
+    case "completed":
+      return "Tournament complete. Final standings below.";
+  }
+}
 
 export default function PoolDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -171,7 +180,9 @@ export default function PoolDetailScreen() {
       </View>
 
       <View style={styles.statusCard}>
-        <Text style={styles.statusDesc}>{phaseDescription[phase]}</Text>
+        <Text style={styles.statusDesc}>
+          {getPhaseDescription(phase, isCommissioner)}
+        </Text>
         {(phase === "live" || phase === "locked-awaiting") && (
           <Pressable
             style={[styles.refreshBtn, refreshingScores && styles.btnDisabled]}
@@ -218,6 +229,20 @@ export default function PoolDetailScreen() {
             <Text style={styles.successLink}>Edit picks</Text>
           </Pressable>
         </View>
+      )}
+
+      {isCommissioner && (
+        <Pressable
+          style={styles.adminLinkBtn}
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/pool/[id]/admin",
+              params: { id: String(poolId) },
+            })
+          }
+        >
+          <Text style={styles.adminLinkText}>Commissioner panel</Text>
+        </Pressable>
       )}
 
       {showLeaderboard && (
@@ -268,20 +293,6 @@ export default function PoolDetailScreen() {
             </View>
           ))}
         </View>
-      )}
-
-      {isCommissioner && (
-        <Pressable
-          style={styles.adminLinkBtn}
-          onPress={() =>
-            router.push({
-              pathname: "/(app)/pool/[id]/admin",
-              params: { id: String(poolId) },
-            })
-          }
-        >
-          <Text style={styles.adminLinkText}>Commissioner panel</Text>
-        </Pressable>
       )}
     </ScrollView>
   );
@@ -389,13 +400,13 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: "row",
-    gap: 24,
+    justifyContent: "space-around",
     marginTop: 14,
     paddingTop: 14,
     borderTopWidth: 1,
     borderTopColor: Colors.light.border,
   },
-  stat: {},
+  stat: { alignItems: "center" },
   statLabel: { fontSize: 11, color: Colors.light.muted },
   statValue: {
     fontSize: 16,
