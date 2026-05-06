@@ -77,7 +77,7 @@ export default function CreatePoolScreen() {
           style={styles.input}
           value={name}
           onChangeText={setName}
-          placeholder="e.g. Sunday Pints Masters Pool"
+          placeholder="i.e. Grainger Masters 2025"
           placeholderTextColor={Colors.light.muted}
           editable={!submitting}
           maxLength={60}
@@ -88,7 +88,7 @@ export default function CreatePoolScreen() {
           style={styles.input}
           value={username}
           onChangeText={setUsername}
-          placeholder="What your friends will see in this pool"
+          placeholder="e.g. MurphMoney"
           placeholderTextColor={Colors.light.muted}
           autoCapitalize="none"
           editable={!submitting}

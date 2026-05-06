@@ -156,8 +156,6 @@ export default function SignInScreen() {
                 value={code}
                 onChangeText={setCode}
                 keyboardType="number-pad"
-                placeholder="123456"
-                placeholderTextColor={Colors.light.muted}
                 maxLength={6}
                 editable={!submitting}
                 returnKeyType="done"
@@ -218,7 +216,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
   },
-  codeInput: { letterSpacing: 8, fontSize: 22, textAlign: "center" },
+  codeInput: { fontSize: 22, textAlign: "center" },
   primaryBtn: {
     marginTop: 8,
     backgroundColor: Colors.light.tint,

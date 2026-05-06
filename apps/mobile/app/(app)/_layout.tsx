@@ -26,7 +26,7 @@ export default function AppLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "PoolPicks",
+          title: "Home",
           headerRight: () => (
             <Pressable
               hitSlop={12}

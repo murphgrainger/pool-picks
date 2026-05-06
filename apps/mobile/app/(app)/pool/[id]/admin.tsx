@@ -20,7 +20,7 @@ import { trpc } from "@/lib/trpc";
 
 const STATUS_DESCRIPTIONS: Record<PoolStatus, string> = {
   Setup: "Invite members. Picks aren't open yet.",
-  Open: "Members can submit and edit picks.",
+  Open: "Field is finalized. Members can submit picks.",
   Locked: "Picks are final. Awaiting tournament start.",
   Complete: "Tournament finished, results visible.",
 };
@@ -160,7 +160,7 @@ export default function CommissionerScreen() {
             <Text style={styles.sectionHeading}>Invite a member</Text>
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder="Enter email address"
               placeholderTextColor={Colors.light.muted}
               value={inviteEmail}
               onChangeText={setInviteEmail}
@@ -171,7 +171,7 @@ export default function CommissionerScreen() {
             />
             <TextInput
               style={[styles.input, styles.inputSpaced]}
-              placeholder="Nickname (shown until they pick a username)"
+              placeholder="Nickname"
               placeholderTextColor={Colors.light.muted}
               value={inviteNickname}
               onChangeText={setInviteNickname}
