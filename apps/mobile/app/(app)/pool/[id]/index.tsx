@@ -18,6 +18,7 @@ import {
   PICKS_PER_MEMBER,
   reformatPoolMembers,
   resolveTournamentStatus,
+  type AthletePickFormatted,
   type PoolMemberFormatted,
   type PoolPhase,
 } from "@pool-picks/utils";
@@ -305,31 +306,140 @@ function LeaderboardRow({
   member: PoolMemberFormatted;
   isCurrentUser: boolean;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const position = member.member_position;
   const positionLabel =
     position == null
       ? "—"
       : `${member.isTied ? "T" : ""}${position}${ordinalSuffix(position)}`;
 
+  const sortedPicks = useMemo(() => {
+    return [...member.picks].sort((a, b) => {
+      if (a.score_under_par !== null && b.score_under_par !== null) {
+        return a.score_under_par - b.score_under_par;
+      }
+      if (a.score_under_par !== null) return -1;
+      if (b.score_under_par !== null) return 1;
+      return a.full_name.localeCompare(b.full_name);
+    });
+  }, [member.picks]);
+
+  const hasPicks = sortedPicks.length > 0;
+
   return (
-    <View style={[styles.lbRow, isCurrentUser && styles.lbRowCurrent]}>
-      <View style={styles.lbPosBlock}>
-        <Text style={styles.lbPos}>{positionLabel}</Text>
-      </View>
-      <View style={styles.lbNameBlock}>
-        <Text
-          style={[styles.lbName, isCurrentUser && styles.lbNameCurrent]}
-          numberOfLines={1}
-        >
-          {member.username || member.nickname || "—"}
+    <View style={[styles.lbCard, isCurrentUser && styles.lbCardCurrent]}>
+      <Pressable
+        style={({ pressed }) => [styles.lbRow, pressed && styles.lbRowPressed]}
+        onPress={() => hasPicks && setExpanded((v) => !v)}
+        disabled={!hasPicks}
+      >
+        <View style={styles.lbPosBlock}>
+          <Text style={styles.lbPos}>{positionLabel}</Text>
+        </View>
+        <View style={styles.lbNameBlock}>
+          <Text
+            style={[styles.lbName, isCurrentUser && styles.lbNameCurrent]}
+            numberOfLines={1}
+          >
+            {member.username || member.nickname || "—"}
+          </Text>
+          {member.role === "COMMISSIONER" && (
+            <Text style={styles.lbCommish}>Commish</Text>
+          )}
+        </View>
+        <Text style={styles.lbScore}>
+          {formatToPar(member.member_sum_under_par) ?? "—"}
         </Text>
-        {member.role === "COMMISSIONER" && (
-          <Text style={styles.lbCommish}>Commish</Text>
+        {hasPicks && (
+          <Text style={[styles.lbChevron, expanded && styles.lbChevronOpen]}>
+            ▾
+          </Text>
         )}
-      </View>
-      <Text style={styles.lbScore}>
-        {formatToPar(member.member_sum_under_par) ?? "—"}
-      </Text>
+      </Pressable>
+      {expanded &&
+        sortedPicks.map((pick, index) => (
+          <PickRow key={pick.id} pick={pick} index={index} />
+        ))}
+    </View>
+  );
+}
+
+function PickRow({
+  pick,
+  index,
+}: {
+  pick: AthletePickFormatted;
+  index: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const isCutOrWD = pick.status === "CUT" || pick.status === "WD";
+  const positionDisplay = isCutOrWD
+    ? pick.status
+    : pick.position != null
+    ? String(pick.position)
+    : "—";
+  const scoreDisplay = formatToPar(pick.score_under_par) ?? "—";
+  const dimmed = index > 3 || pick.score_under_par === null;
+  const thruIsTeeTime =
+    pick.thru !== null &&
+    (pick.thru.includes("AM") || pick.thru.includes("PM"));
+
+  return (
+    <View style={[styles.pickCard, dimmed && styles.pickCardDimmed]}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.pickHeaderRow,
+          pressed && styles.pickHeaderPressed,
+        ]}
+        onPress={() => setOpen((v) => !v)}
+      >
+        <Text style={styles.pickName} numberOfLines={1}>
+          {pick.full_name}
+        </Text>
+        <View style={styles.pickStatBlock}>
+          <Text style={styles.pickStatLabel}>Pos</Text>
+          <Text style={styles.pickStatValue}>{positionDisplay}</Text>
+        </View>
+        <View style={styles.pickStatBlock}>
+          <Text style={styles.pickStatLabel}>Score</Text>
+          <Text style={styles.pickStatValue}>{scoreDisplay}</Text>
+        </View>
+        <Text style={[styles.pickChevron, open && styles.pickChevronOpen]}>
+          ▾
+        </Text>
+      </Pressable>
+      {open && (
+        <View style={styles.pickDetailRow}>
+          <PickDetailStat label="Today" value={formatToPar(pick.score_today)} />
+          {pick.thru !== null && (
+            <PickDetailStat
+              label={thruIsTeeTime ? "Tee Time" : "Thru"}
+              value={pick.thru}
+            />
+          )}
+          <PickDetailStat label="R1" value={pick.score_round_one} />
+          <PickDetailStat label="R2" value={pick.score_round_two} />
+          <PickDetailStat label="R3" value={pick.score_round_three} />
+          <PickDetailStat label="R4" value={pick.score_round_four} />
+        </View>
+      )}
+    </View>
+  );
+}
+
+function PickDetailStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number | null;
+}) {
+  const display =
+    value === null || value === undefined || value === "" ? "—" : String(value);
+  return (
+    <View style={styles.detailStat}>
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailValue}>{display}</Text>
     </View>
   );
 }
@@ -479,21 +589,25 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 4,
   },
-  lbRow: {
-    flexDirection: "row",
-    alignItems: "center",
+  lbCard: {
     backgroundColor: Colors.light.card,
     borderColor: Colors.light.border,
     borderWidth: 1,
     borderRadius: 10,
-    padding: 12,
     marginBottom: 6,
-    gap: 12,
+    overflow: "hidden",
   },
-  lbRowCurrent: {
+  lbCardCurrent: {
     borderColor: Palette.green[700],
     backgroundColor: Palette.green[50],
   },
+  lbRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    gap: 12,
+  },
+  lbRowPressed: { opacity: 0.6 },
   lbPosBlock: { width: 50 },
   lbPos: { fontSize: 14, fontWeight: "700", color: Colors.light.tint },
   lbNameBlock: { flex: 1, minWidth: 0 },
@@ -513,6 +627,63 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: Colors.light.text,
+  },
+  lbChevron: { color: Colors.light.muted, fontSize: 14, marginLeft: 4 },
+  lbChevronOpen: { transform: [{ rotate: "180deg" }] },
+  pickCard: {
+    backgroundColor: Colors.light.background,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border,
+  },
+  pickCardDimmed: { opacity: 0.6 },
+  pickHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    gap: 8,
+  },
+  pickHeaderPressed: { opacity: 0.6 },
+  pickName: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "600",
+    color: Colors.light.text,
+  },
+  pickStatBlock: {
+    alignItems: "center",
+    minWidth: 44,
+  },
+  pickStatLabel: { fontSize: 10, color: Colors.light.muted },
+  pickStatValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.light.text,
+    marginTop: 1,
+  },
+  pickChevron: { color: Colors.light.muted, fontSize: 12, marginLeft: 4 },
+  pickChevronOpen: { transform: [{ rotate: "180deg" }] },
+  pickDetailRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    backgroundColor: Palette.grey[100],
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border,
+  },
+  detailStat: {
+    flex: 1,
+    minWidth: 60,
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  detailLabel: { fontSize: 10, color: Colors.light.muted },
+  detailValue: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: Colors.light.text,
+    marginTop: 1,
   },
   section: { marginTop: 4 },
   memberRow: {
