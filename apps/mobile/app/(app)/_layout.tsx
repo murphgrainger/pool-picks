@@ -1,7 +1,7 @@
-import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Stack, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { Pressable } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
 import { PushRationaleModal } from "@/components/push-rationale-modal";
 import { Colors } from "@/constants/theme";
@@ -16,14 +16,16 @@ export default function AppLayout() {
       <Pressable
         hitSlop={12}
         onPress={() => router.push("/(app)/pool/create")}
-        style={{
-          width: 32,
-          height: 32,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        style={{ width: 44, alignItems: "center" }}
       >
-        <Ionicons name="add" size={28} color={Colors.light.tint} />
+        <Svg width={26} height={26} viewBox="0 0 24 24">
+          <Path
+            d="M12 5 V19 M5 12 H19"
+            stroke={Colors.light.tint}
+            strokeWidth={2.5}
+            strokeLinecap="round"
+          />
+        </Svg>
       </Pressable>
     ),
     [router]
