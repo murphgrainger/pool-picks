@@ -15,6 +15,7 @@ import {
   getEffectivePoolPhase,
   ordinalSuffix,
   PICKS_PER_MEMBER,
+  pivotToPlayerView,
   reformatPoolMembers,
   resolveTournamentStatus,
   type AthletePickFormatted,
@@ -23,10 +24,13 @@ import {
 } from "@pool-picks/utils";
 
 import { PhaseBadge } from "@/components/phase-badge";
+import { PlayerCard } from "@/components/player-card";
 import { Spinner } from "@/components/spinner";
 import { Colors, Palette } from "@/constants/theme";
 import { useAuth } from "@/lib/auth-context";
 import { trpc } from "@/lib/trpc";
+
+type PoolView = "members" | "players";
 
 function getPhaseDescription(phase: PoolPhase, isCommissioner: boolean): string {
   switch (phase) {
@@ -51,6 +55,7 @@ export default function PoolDetailScreen() {
   const router = useRouter();
   const { session } = useAuth();
   const [refreshingScores, setRefreshingScores] = useState(false);
+  const [view, setView] = useState<PoolView>("members");
 
   const poolQuery = trpc.pool.getById.useQuery({ id: poolId }, {
     refetchInterval: (query) => {
@@ -84,6 +89,11 @@ export default function PoolDetailScreen() {
     );
   }, [poolQuery.data]);
 
+  const playerViewData = useMemo(
+    () => pivotToPlayerView(formattedMembers),
+    [formattedMembers]
+  );
+
   const currentUserMember = poolQuery.data?.pool_members.find(
     (m) => m.user.email === session?.user.email
   );
@@ -116,6 +126,10 @@ export default function PoolDetailScreen() {
 
   const pool = poolQuery.data;
   const showLeaderboard = phase === "live" || phase === "completed";
+  const showViewToggle =
+    phase === "locked-awaiting" ||
+    phase === "live" ||
+    phase === "completed";
   const totalPot = pool.amount_entry * pool.pool_members.length;
   const userHasPicks =
     currentUserMember?.athletes.length === PICKS_PER_MEMBER;
@@ -246,7 +260,18 @@ export default function PoolDetailScreen() {
         </Pressable>
       )}
 
-      {showLeaderboard && (
+      {showViewToggle && (
+        <ViewToggle view={view} onChange={setView} />
+      )}
+
+      {view === "players" && showViewToggle ? (
+        <View style={styles.leaderboard}>
+          <Text style={styles.sectionHeading}>Players Picked</Text>
+          {playerViewData.map((athlete) => (
+            <PlayerCard key={athlete.id} athlete={athlete} />
+          ))}
+        </View>
+      ) : showLeaderboard ? (
         <View style={styles.leaderboard}>
           <Text style={styles.sectionHeading}>Leaderboard</Text>
           {formattedMembers
@@ -264,9 +289,7 @@ export default function PoolDetailScreen() {
               />
             ))}
         </View>
-      )}
-
-      {!showLeaderboard && (
+      ) : (
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Members</Text>
           {pool.pool_members.map((m) => (
@@ -298,6 +321,79 @@ export default function PoolDetailScreen() {
     </ScrollView>
   );
 }
+
+function ViewToggle({
+  view,
+  onChange,
+}: {
+  view: PoolView;
+  onChange: (v: PoolView) => void;
+}) {
+  return (
+    <View style={toggleStyles.container}>
+      <Pressable
+        onPress={() => onChange("members")}
+        style={[toggleStyles.btn, view === "members" && toggleStyles.btnActive]}
+      >
+        <Text
+          style={[
+            toggleStyles.text,
+            view === "members" && toggleStyles.textActive,
+          ]}
+        >
+          Pool Members
+        </Text>
+      </Pressable>
+      <Pressable
+        onPress={() => onChange("players")}
+        style={[toggleStyles.btn, view === "players" && toggleStyles.btnActive]}
+      >
+        <Text
+          style={[
+            toggleStyles.text,
+            view === "players" && toggleStyles.textActive,
+          ]}
+        >
+          Players Picked
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+const toggleStyles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignSelf: "flex-end",
+    backgroundColor: Palette.grey[200],
+    borderRadius: 999,
+    padding: 2,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  btn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  btnActive: {
+    backgroundColor: Colors.light.card,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  text: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: Colors.light.muted,
+  },
+  textActive: {
+    color: Colors.light.text,
+    fontWeight: "600",
+  },
+});
 
 function LeaderboardRow({
   member,
