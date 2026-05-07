@@ -35,9 +35,6 @@ export default function AppLayout() {
         headerTintColor: Colors.light.tint,
         headerTitleStyle: { color: Colors.light.text, fontWeight: "700" },
         headerShadowVisible: false,
-        headerTransparent: false,
-        headerBlurEffect: undefined,
-        headerLargeTitle: false,
       }}
     >
       <Stack.Screen
