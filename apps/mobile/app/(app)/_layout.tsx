@@ -16,6 +16,12 @@ export default function AppLayout() {
       <Pressable
         hitSlop={12}
         onPress={() => router.push("/(app)/pool/create")}
+        style={{
+          width: 32,
+          height: 32,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
         <Ionicons name="add" size={28} color={Colors.light.tint} />
       </Pressable>
