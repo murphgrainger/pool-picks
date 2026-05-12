@@ -1,5 +1,4 @@
 import * as AppleAuthentication from "expo-apple-authentication";
-import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -15,6 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { GoogleLogo } from "@/components/google-logo";
 import { Spinner } from "@/components/spinner";
 import { Colors } from "@/constants/theme";
 import { signInWithApple } from "@/lib/apple-sign-in";
@@ -176,48 +176,59 @@ export default function SignInScreen() {
 
               {(appleAvailable || googleAvailable) && (
                 <View style={styles.socialBlock}>
-                  {appleAvailable && (
-                    <View style={styles.socialBtnWrapper}>
-                      <AppleAuthentication.AppleAuthenticationButton
-                        buttonType={
-                          AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
-                        }
-                        buttonStyle={
-                          AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-                        }
-                        cornerRadius={10}
-                        style={styles.socialBtn}
-                        onPress={() => {
-                          if (!appleSubmitting) handleAppleSignIn();
-                        }}
-                      />
-                      {appleSubmitting && (
-                        <View
-                          style={styles.socialSpinnerOverlay}
-                          pointerEvents="none"
-                        >
-                          <Spinner size={20} color="#ffffff" />
-                        </View>
-                      )}
-                    </View>
-                  )}
                   {googleAvailable && (
                     <View style={styles.socialBtnWrapper}>
-                      <GoogleSigninButton
-                        size={GoogleSigninButton.Size.Wide}
-                        color={GoogleSigninButton.Color.Dark}
-                        style={styles.googleBtn}
-                        disabled={googleSubmitting}
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.googleBtn,
+                          pressed && styles.googleBtnPressed,
+                          googleSubmitting && styles.btnDisabled,
+                        ]}
                         onPress={() => {
                           if (!googleSubmitting) handleGoogleSignIn();
                         }}
-                      />
+                        disabled={googleSubmitting}
+                      >
+                        <View style={styles.googleBtnContent}>
+                          <GoogleLogo size={18} />
+                          <Text style={styles.googleBtnText}>
+                            Sign in with Google
+                          </Text>
+                        </View>
+                      </Pressable>
                       {googleSubmitting && (
                         <View
                           style={styles.socialSpinnerOverlay}
                           pointerEvents="none"
                         >
-                          <Spinner size={20} color="#ffffff" />
+                          <Spinner size={20} color={Colors.light.text} />
+                        </View>
+                      )}
+                    </View>
+                  )}
+                  {appleAvailable && (
+                    <View style={styles.socialBtnWrapper}>
+                      <View style={styles.appleBtnBorder}>
+                        <AppleAuthentication.AppleAuthenticationButton
+                          buttonType={
+                            AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+                          }
+                          buttonStyle={
+                            AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+                          }
+                          cornerRadius={10}
+                          style={styles.appleBtnInner}
+                          onPress={() => {
+                            if (!appleSubmitting) handleAppleSignIn();
+                          }}
+                        />
+                      </View>
+                      {appleSubmitting && (
+                        <View
+                          style={styles.socialSpinnerOverlay}
+                          pointerEvents="none"
+                        >
+                          <Spinner size={20} color={Colors.light.text} />
                         </View>
                       )}
                     </View>
@@ -386,7 +397,37 @@ const styles = StyleSheet.create({
   socialBlock: { marginBottom: 8, gap: 10 },
   socialBtnWrapper: { position: "relative" },
   socialBtn: { width: "100%", height: 48 },
-  googleBtn: { width: "100%", height: 48 },
+  appleBtnBorder: {
+    width: "100%",
+    height: 48,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    overflow: "hidden",
+  },
+  appleBtnInner: { width: "100%", height: "100%" },
+  googleBtn: {
+    width: "100%",
+    height: 48,
+    borderRadius: 10,
+    backgroundColor: Colors.light.card,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  googleBtnPressed: { opacity: 0.7 },
+  googleBtnContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  googleBtnText: {
+    color: Colors.light.text,
+    fontSize: 17,
+    fontWeight: "600",
+    letterSpacing: -0.2,
+  },
   socialSpinnerOverlay: {
     position: "absolute",
     top: 0,
