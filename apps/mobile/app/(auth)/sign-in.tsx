@@ -164,24 +164,29 @@ export default function SignInScreen() {
 
               {appleAvailable && (
                 <View style={styles.appleBlock}>
-                  <AppleAuthentication.AppleAuthenticationButton
-                    buttonType={
-                      AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
-                    }
-                    buttonStyle={
-                      AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-                    }
-                    cornerRadius={10}
-                    style={styles.appleBtn}
-                    onPress={() => {
-                      if (!appleSubmitting) handleAppleSignIn();
-                    }}
-                  />
-                  {appleSubmitting && (
-                    <View style={styles.appleSpinner}>
-                      <Spinner size={20} color={Colors.light.muted} />
-                    </View>
-                  )}
+                  <View style={styles.appleBtnWrapper}>
+                    <AppleAuthentication.AppleAuthenticationButton
+                      buttonType={
+                        AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+                      }
+                      buttonStyle={
+                        AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+                      }
+                      cornerRadius={10}
+                      style={styles.appleBtn}
+                      onPress={() => {
+                        if (!appleSubmitting) handleAppleSignIn();
+                      }}
+                    />
+                    {appleSubmitting && (
+                      <View
+                        style={styles.appleSpinnerOverlay}
+                        pointerEvents="none"
+                      >
+                        <Spinner size={20} color="#ffffff" />
+                      </View>
+                    )}
+                  </View>
                   <View style={styles.divider}>
                     <View style={styles.dividerLine} />
                     <Text style={styles.dividerText}>or</Text>
@@ -344,8 +349,16 @@ const styles = StyleSheet.create({
   },
   linkBtnDisabled: { textDecorationLine: "none", opacity: 0.6 },
   appleBlock: { marginBottom: 8 },
+  appleBtnWrapper: { position: "relative" },
   appleBtn: { width: "100%", height: 48 },
-  appleSpinner: { marginTop: 8, alignItems: "center" },
+  appleSpinnerOverlay: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    right: 16,
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
   divider: {
     flexDirection: "row",
     alignItems: "center",
