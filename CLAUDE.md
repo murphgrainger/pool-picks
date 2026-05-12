@@ -30,14 +30,37 @@ Pool Picks is a golf pool/wagering application. Users create pools for PGA tourn
 - `npx prisma db seed` — Seed database
 
 ### Mobile (from `apps/mobile/`):
-- `yarn start` — Start Metro for the dev client (LAN mode default; add `--clear` after editing `.env`)
-- `eas build --profile development --platform ios` — New EAS dev-client iOS build. Run this any time you change native config: `app.json` (plugins, `associatedDomains`, etc.), `expo-*` packages with native modules, or add a new RN package with iOS code. Takes ~15-25 min; install link appears on the EAS build page.
-- `eas build --profile preview --platform ios` — Internal-distribution build with embedded bundle (no Metro). Use for sharing pre-TestFlight.
-- `eas build --profile production --platform ios` — Production build for TestFlight / App Store.
 
-**Mobile env vars** live in two places:
-1. **Local `/.env`** (`EXPO_PUBLIC_*` keys near the bottom) — used when Metro builds the JS locally.
-2. **EAS environment variables** (https://expo.dev → project → Environment Variables) — used when EAS builds the binary. Mirror every `EXPO_PUBLIC_*` you have locally to EAS under the `development`, `preview`, and `production` environments. Set visibility to **Plaintext** for `EXPO_PUBLIC_*` values (they end up in the shipped bundle anyway, so Secret is over-protection and prevents you from reading them back).
+**Daily dev (no native changes):**
+```bash
+yarn dev                          # terminal 1, from repo root: web app for tRPC
+cd apps/mobile && yarn start      # terminal 2: Metro
+```
+Add `--clear` to `yarn start` after editing `.env` — `EXPO_PUBLIC_*` vars are baked at bundle start, not hot-reloaded.
+
+Then on the phone, open **PoolPicks Dev** → tap the recent Metro URL in the dev launcher. Or use Expo Go for JS-only changes that don't need native features.
+
+**Type-check and lint:**
+- `yarn type-check` — `tsc --noEmit`
+- `yarn lint` — Expo lint
+
+**EAS builds** (only when native config changes — see "When to rebuild" below):
+- `eas build --profile development --platform ios` — Dev-client binary that can connect to Metro. ~15-25 min.
+- `eas build --profile preview --platform ios` — Internal share, embedded bundle, no Metro.
+- `eas build --profile production --platform ios` — TestFlight / App Store.
+
+**When to rebuild** (anything else is JS-only, no rebuild needed):
+- `app.json` plugin entries, `iosUrlScheme`, `associatedDomains`, or bundle ID change
+- New/upgraded package with native iOS code (anything shipping an `ios/` folder or Expo config plugin)
+- Anything edited under `apps/mobile/ios/`
+
+**Mobile env vars** live in two places — **mirror every `EXPO_PUBLIC_*` to both:**
+1. **Local `/.env`** (repo root, `EXPO_PUBLIC_*` keys near the bottom) — used by Metro when bundling locally.
+2. **EAS environment variables** (https://expo.dev → poolpicks → Environment Variables) — used when EAS builds the binary's embedded bundle. Add the var to **all three** environments (development, preview, production). Use **Plaintext** visibility for `EXPO_PUBLIC_*` since those values ship in the JS bundle anyway, and Plaintext lets you read them back later. EAS env vars persist across builds — you only need to add a var the first time it's introduced.
+
+**`EXPO_PUBLIC_TRPC_URL` must be reachable from the phone.** Default is the Mac's LAN IP (e.g. `http://192.168.5.15:3000/api/trpc`). If LAN is flaky, switch to `ngrok http 3000` and update the URL.
+
+See `apps/mobile/README.md` for full setup details, three-dev-loop comparison, and troubleshooting.
 
 ## Database Migrations
 
