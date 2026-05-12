@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -33,6 +33,29 @@ import { trpc } from "@/lib/trpc";
 type PoolView = "members" | "players";
 
 type StatusInfo = { text: string; tappable: boolean } | null;
+
+function scoreFingerprint(members: PoolMemberFormatted[]): string {
+  return members
+    .flatMap((m) =>
+      m.picks.map(
+        (p) =>
+          `${p.id}:${p.score_under_par}:${p.position}:${p.thru}:${p.score_today}`
+      )
+    )
+    .sort()
+    .join("|");
+}
+
+function formatRelativeTime(date: Date): string {
+  const diffMs = Date.now() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  if (diffMin < 1) return "just now";
+  if (diffMin === 1) return "1 min ago";
+  if (diffMin < 60) return `${diffMin} min ago`;
+  const diffHrs = Math.floor(diffMin / 60);
+  if (diffHrs === 1) return "1 hr ago";
+  return `${diffHrs} hrs ago`;
+}
 
 function getStatusInfo(
   phase: PoolPhase,
@@ -72,6 +95,10 @@ export default function PoolDetailScreen() {
   const { session } = useAuth();
   const [refreshingScores, setRefreshingScores] = useState(false);
   const [view, setView] = useState<PoolView>("members");
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const [showUpdateIndicator, setShowUpdateIndicator] = useState(false);
+  const [, setTick] = useState(0);
+  const prevFingerprintRef = useRef<string | null>(null);
 
   const poolQuery = trpc.pool.getById.useQuery({ id: poolId }, {
     refetchInterval: (query) => {
@@ -89,13 +116,18 @@ export default function PoolDetailScreen() {
     await poolQuery.refetch();
   }, [poolQuery]);
 
+  const tournamentStatus = useMemo(
+    () =>
+      poolQuery.data
+        ? resolveTournamentStatus(poolQuery.data.tournament)
+        : null,
+    [poolQuery.data]
+  );
+
   const phase: PoolPhase | null = useMemo(() => {
-    if (!poolQuery.data) return null;
-    return getEffectivePoolPhase(
-      poolQuery.data.status,
-      resolveTournamentStatus(poolQuery.data.tournament)
-    );
-  }, [poolQuery.data]);
+    if (!poolQuery.data || !tournamentStatus) return null;
+    return getEffectivePoolPhase(poolQuery.data.status, tournamentStatus);
+  }, [poolQuery.data, tournamentStatus]);
 
   const formattedMembers: PoolMemberFormatted[] = useMemo(() => {
     if (!poolQuery.data) return [];
@@ -109,6 +141,35 @@ export default function PoolDetailScreen() {
     () => pivotToPlayerView(formattedMembers),
     [formattedMembers]
   );
+
+  const tournamentUpdatedAt = poolQuery.data?.tournament.updated_at;
+  useEffect(() => {
+    if (tournamentUpdatedAt && lastRefreshed === null) {
+      setLastRefreshed(new Date(tournamentUpdatedAt));
+    }
+  }, [tournamentUpdatedAt, lastRefreshed]);
+
+  useEffect(() => {
+    if (!formattedMembers.length) return;
+    const fingerprint = scoreFingerprint(formattedMembers);
+    if (
+      prevFingerprintRef.current !== null &&
+      fingerprint !== prevFingerprintRef.current
+    ) {
+      setLastRefreshed(new Date());
+      setShowUpdateIndicator(true);
+      const t = setTimeout(() => setShowUpdateIndicator(false), 3000);
+      prevFingerprintRef.current = fingerprint;
+      return () => clearTimeout(t);
+    }
+    prevFingerprintRef.current = fingerprint;
+  }, [formattedMembers]);
+
+  useEffect(() => {
+    if (phase !== "live") return;
+    const interval = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(interval);
+  }, [phase]);
 
   const currentUserMember = poolQuery.data?.pool_members.find(
     (m) => m.user.email === session?.user.email
@@ -208,6 +269,20 @@ export default function PoolDetailScreen() {
             </>
           )}
         </View>
+
+        {phase === "live" &&
+          tournamentStatus === "Active" &&
+          lastRefreshed &&
+          formattedMembers.some((m) => m.member_sum_under_par !== null) && (
+            <Text style={styles.scoresUpdated}>
+              Scores last updated {formatRelativeTime(lastRefreshed)}
+              {showUpdateIndicator && (
+                <Text style={styles.scoresUpdatedPulse}>
+                  {"  "}Scores updated
+                </Text>
+              )}
+            </Text>
+          )}
       </View>
 
       {isCommissioner && phase === "setup" && (
@@ -663,6 +738,15 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     borderTopWidth: 1,
     borderTopColor: Colors.light.border,
+  },
+  scoresUpdated: {
+    fontSize: 11,
+    color: Colors.light.muted,
+    marginTop: 12,
+  },
+  scoresUpdatedPulse: {
+    color: Palette.green[700],
+    fontWeight: "600",
   },
   stat: {},
   statLabel: { fontSize: 11, color: Colors.light.muted },
