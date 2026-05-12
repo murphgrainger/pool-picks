@@ -32,20 +32,36 @@ import { trpc } from "@/lib/trpc";
 
 type PoolView = "members" | "players";
 
-function getPhaseDescription(phase: PoolPhase, isCommissioner: boolean): string {
+type StatusInfo = { text: string; tappable: boolean } | null;
+
+function getStatusInfo(
+  phase: PoolPhase,
+  isCommissioner: boolean,
+  isMember: boolean,
+  hasPicks: boolean
+): StatusInfo {
   switch (phase) {
     case "setup":
-      return isCommissioner
-        ? "Invite members, then open the pool to collect picks."
-        : "Commissioner is still setting up. Invite members before opening.";
+      if (isCommissioner) return null;
+      return {
+        text: "Commissioner is setting up the pool. Picks open once the field is finalized.",
+        tappable: false,
+      };
     case "open":
-      return "Picks are open. Choose 6 athletes before the tournament starts.";
+      if (!isMember || hasPicks) return null;
+      return { text: "Field finalized. Make your picks.", tappable: true };
     case "locked-awaiting":
-      return "Picks are locked. Tournament hasn't started yet.";
+      return {
+        text: "Picks are locked. Tournament hasn't started yet.",
+        tappable: false,
+      };
     case "live":
-      return "Tournament is underway. Pull down to refresh live scores.";
+      return { text: "Tournament is underway.", tappable: false };
     case "completed":
-      return "Tournament complete. Final standings below.";
+      return {
+        text: "Tournament complete. Final standings below.",
+        tappable: false,
+      };
   }
 }
 
@@ -194,39 +210,75 @@ export default function PoolDetailScreen() {
         </View>
       </View>
 
-      <View style={styles.statusCard}>
-        <Text style={styles.statusDesc}>
-          {getPhaseDescription(phase, isCommissioner)}
-        </Text>
-        {(phase === "live" || phase === "locked-awaiting") && (
-          <Pressable
-            style={[styles.refreshBtn, refreshingScores && styles.btnDisabled]}
-            onPress={triggerRefreshScores}
-            disabled={refreshingScores}
-          >
-            {refreshingScores ? (
-              <Spinner size={16} color={Colors.light.card} />
-            ) : (
-              <Text style={styles.refreshBtnText}>Refresh scores</Text>
-            )}
-          </Pressable>
-        )}
-      </View>
-
-      {phase === "open" && currentUserMember && !userHasPicks && (
+      {isCommissioner && phase === "setup" && (
         <Pressable
-          style={styles.ctaBtn}
+          style={styles.commishCta}
           onPress={() =>
             router.push({
-              pathname: "/(app)/pool/[id]/picks",
+              pathname: "/(app)/pool/[id]/admin",
               params: { id: String(poolId) },
             })
           }
         >
-          <Text style={styles.ctaText}>Make your picks</Text>
-          <Text style={styles.ctaSubtext}>Pick 6 athletes to compete</Text>
+          <View style={styles.commishCtaText}>
+            <Text style={styles.commishCtaTitle}>Set up your pool</Text>
+            <Text style={styles.commishCtaSubtitle}>
+              Invite members and open picks when ready.
+            </Text>
+          </View>
+          <Text style={styles.commishCtaChevron}>›</Text>
         </Pressable>
       )}
+
+      {(() => {
+        const info = getStatusInfo(
+          phase,
+          isCommissioner,
+          !!currentUserMember,
+          userHasPicks
+        );
+        if (!info) return null;
+        const showRefresh =
+          phase === "live" || phase === "locked-awaiting";
+        const body = (
+          <View style={styles.statusBody}>
+            <Text style={styles.statusDesc}>{info.text}</Text>
+            {showRefresh && (
+              <Pressable
+                style={[
+                  styles.refreshBtn,
+                  refreshingScores && styles.btnDisabled,
+                ]}
+                onPress={triggerRefreshScores}
+                disabled={refreshingScores}
+              >
+                {refreshingScores ? (
+                  <Spinner size={16} color={Colors.light.card} />
+                ) : (
+                  <Text style={styles.refreshBtnText}>Refresh scores</Text>
+                )}
+              </Pressable>
+            )}
+          </View>
+        );
+        if (info.tappable) {
+          return (
+            <Pressable
+              style={styles.statusCard}
+              onPress={() =>
+                router.push({
+                  pathname: "/(app)/pool/[id]/picks",
+                  params: { id: String(poolId) },
+                })
+              }
+            >
+              {body}
+              <Text style={styles.statusChevron}>›</Text>
+            </Pressable>
+          );
+        }
+        return <View style={styles.statusCard}>{body}</View>;
+      })()}
 
       {phase === "open" && currentUserMember && userHasPicks && (
         <View style={styles.successPill}>
@@ -246,7 +298,7 @@ export default function PoolDetailScreen() {
         </View>
       )}
 
-      {isCommissioner && (
+      {isCommissioner && phase !== "setup" && (
         <Pressable
           style={styles.adminLinkBtn}
           onPress={() =>
@@ -621,18 +673,31 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   statusCard: {
-    backgroundColor: Palette.green[50],
-    borderColor: Palette.green[100],
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.light.tint,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     marginBottom: 12,
+    gap: 12,
+  },
+  statusBody: {
+    flex: 1,
     gap: 10,
   },
   statusDesc: {
-    color: Palette.green[700],
+    color: Colors.light.text,
     fontSize: 13,
     lineHeight: 18,
+  },
+  statusChevron: {
+    color: Colors.light.tint,
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 24,
   },
   refreshBtn: {
     alignSelf: "flex-start",
@@ -643,19 +708,6 @@ const styles = StyleSheet.create({
   },
   refreshBtnText: { color: Colors.light.card, fontSize: 13, fontWeight: "600" },
   btnDisabled: { opacity: 0.6 },
-  ctaBtn: {
-    backgroundColor: Palette.green[700],
-    padding: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  ctaText: { color: Colors.light.card, fontSize: 16, fontWeight: "700" },
-  ctaSubtext: {
-    color: `${Colors.light.card}cc`,
-    fontSize: 12,
-    marginTop: 2,
-  },
   successPill: {
     backgroundColor: Palette.green[100],
     borderRadius: 8,
@@ -825,5 +877,32 @@ const styles = StyleSheet.create({
     color: Colors.light.tint,
     fontWeight: "600",
     fontSize: 14,
+  },
+  commishCta: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Palette.green[700],
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    gap: 12,
+  },
+  commishCtaText: { flex: 1 },
+  commishCtaTitle: {
+    color: Colors.light.card,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  commishCtaSubtitle: {
+    color: `${Colors.light.card}cc`,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  commishCtaChevron: {
+    color: Colors.light.card,
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 24,
   },
 });
