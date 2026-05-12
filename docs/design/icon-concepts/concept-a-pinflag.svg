@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" shape-rendering="geometricPrecision">
+  <!-- Forest green field -->
+  <rect width="1024" height="1024" fill="#006747"/>
+
+  <!-- Subtle horizon line (gold hairline) -->
+  <line x1="120" y1="890" x2="904" y2="890" stroke="#C8A951" stroke-width="2" opacity="0.35"/>
+
+  <!-- Base mound where pin meets ground -->
+  <ellipse cx="343" cy="888" rx="95" ry="14" fill="#C8A951" opacity="0.65"/>
+
+  <!-- Flagstaff (gold vertical bar) -->
+  <rect x="318" y="180" width="50" height="700" fill="#C8A951"/>
+
+  <!-- Top finial (gold ball cap) -->
+  <circle cx="343" cy="170" r="32" fill="#C8A951"/>
+
+  <!-- Flag: P-loop D-shape, attached to upper half of staff -->
+  <path d="M 368 230 L 368 720 A 245 245 0 0 1 368 230 Z" fill="#FAF9F6"/>
+</svg>

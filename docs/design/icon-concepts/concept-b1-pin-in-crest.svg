@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" shape-rendering="geometricPrecision">
+  <!-- Forest green field -->
+  <rect width="1024" height="1024" fill="#006747"/>
+
+  <!-- Crest ring (single thick gold) -->
+  <circle cx="512" cy="512" r="420" fill="none" stroke="#C8A951" stroke-width="10"/>
+
+  <!-- Flagstaff (slim gold vertical bar, centered, NOT touching the ring) -->
+  <rect x="503" y="170" width="18" height="700" fill="#C8A951"/>
+
+  <!-- Top finial (gold ball cap) -->
+  <circle cx="512" cy="170" r="20" fill="#C8A951"/>
+
+  <!-- Pennant flag (cream, triangular pointing right, soft drape on bottom edge) -->
+  <path d="M 521 192 L 760 315 Q 645 380 521 425 Z" fill="#FAF9F6"/>
+</svg>
