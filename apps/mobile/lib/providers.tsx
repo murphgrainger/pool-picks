@@ -34,7 +34,13 @@ export function Providers({ children }: { children: ReactNode }) {
           async headers() {
             const { data } = await supabase.auth.getSession();
             const token = data.session?.access_token;
-            return token ? { authorization: `Bearer ${token}` } : {};
+            const base: Record<string, string> = {
+              // Bypass ngrok-free-tier browser interstitial in dev. No-op
+              // against non-ngrok endpoints (prod), so safe to always send.
+              "ngrok-skip-browser-warning": "true",
+            };
+            if (token) base.authorization = `Bearer ${token}`;
+            return base;
           },
         }),
       ],
