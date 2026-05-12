@@ -107,6 +107,9 @@ export default function HomeScreen() {
         <Pressable style={styles.retryBtn} onPress={onRefresh}>
           <Text style={styles.retryText}>Try again</Text>
         </Pressable>
+        <Pressable style={styles.signOutBtn} onPress={signOut}>
+          <Text style={styles.signOutText}>Sign out</Text>
+        </Pressable>
       </View>
     );
   }
