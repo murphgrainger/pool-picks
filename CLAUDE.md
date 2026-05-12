@@ -29,6 +29,16 @@ Pool Picks is a golf pool/wagering application. Users create pools for PGA tourn
 - `npx prisma studio` — Open Prisma database browser
 - `npx prisma db seed` — Seed database
 
+### Mobile (from `apps/mobile/`):
+- `yarn start` — Start Metro for the dev client (LAN mode default; add `--clear` after editing `.env`)
+- `eas build --profile development --platform ios` — New EAS dev-client iOS build. Run this any time you change native config: `app.json` (plugins, `associatedDomains`, etc.), `expo-*` packages with native modules, or add a new RN package with iOS code. Takes ~15-25 min; install link appears on the EAS build page.
+- `eas build --profile preview --platform ios` — Internal-distribution build with embedded bundle (no Metro). Use for sharing pre-TestFlight.
+- `eas build --profile production --platform ios` — Production build for TestFlight / App Store.
+
+**Mobile env vars** live in two places:
+1. **Local `/.env`** (`EXPO_PUBLIC_*` keys near the bottom) — used when Metro builds the JS locally.
+2. **EAS environment variables** (https://expo.dev → project → Environment Variables) — used when EAS builds the binary. Mirror every `EXPO_PUBLIC_*` you have locally to EAS under the `development`, `preview`, and `production` environments. Set visibility to **Plaintext** for `EXPO_PUBLIC_*` values (they end up in the shipped bundle anyway, so Secret is over-protection and prevents you from reading them back).
+
 ## Database Migrations
 
 Migrations run automatically on deploy via the web app's build step (`prisma migrate deploy`). You should never need to manually run migrations in production.

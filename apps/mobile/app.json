@@ -12,6 +12,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.murphgrainger.poolpicks",
       "usesAppleSignIn": true,
+      "associatedDomains": ["applinks:poolpicks.app"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -34,6 +35,12 @@
       "expo-router",
       "expo-secure-store",
       "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.281472842056-q603g8ru4cem7ks3svc1jvtrahslrv63"
+        }
+      ],
       [
         "expo-splash-screen",
         {
