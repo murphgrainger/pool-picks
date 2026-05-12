@@ -34,6 +34,7 @@ export default function CommissionerScreen() {
   const utils = trpc.useUtils();
 
   const [pendingStatus, setPendingStatus] = useState<PoolStatus | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<PoolStatus | null>(null);
   const [confirmingNotify, setConfirmingNotify] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 
@@ -41,11 +42,13 @@ export default function CommissionerScreen() {
     onSuccess: async () => {
       await utils.pool.getById.invalidate({ id: poolId });
       setPendingStatus(null);
+      setUpdatingStatus(null);
       setConfirmingNotify(false);
     },
     onError: (err) => {
       Alert.alert("Couldn't update status", err.message);
       setPendingStatus(null);
+      setUpdatingStatus(null);
       setConfirmingNotify(false);
     },
   });
@@ -88,12 +91,14 @@ export default function CommissionerScreen() {
       setPendingStatus(status);
       return;
     }
+    setUpdatingStatus(status);
     updateStatus.mutate({ pool_id: poolId, status, notify: false });
   }
 
   function confirmStatusUpdate(notify: boolean) {
     if (!pendingStatus) return;
     setConfirmingNotify(notify);
+    setUpdatingStatus(pendingStatus);
     updateStatus.mutate({ pool_id: poolId, status: pendingStatus, notify });
   }
 
@@ -162,9 +167,7 @@ export default function CommissionerScreen() {
           {POOL_STATUSES.map((status) => {
             const isCurrent = status === currentStatus;
             const isUpdatingThis =
-              updateStatus.isPending &&
-              (pendingStatus === status ||
-                (pendingStatus === null && status !== currentStatus));
+              updateStatus.isPending && updatingStatus === status;
             return (
               <Pressable
                 key={status}
