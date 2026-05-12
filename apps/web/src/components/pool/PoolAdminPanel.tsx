@@ -50,6 +50,7 @@ export function PoolAdminPanel({
   const [joinMode, setJoinMode] = useState(initialJoinMode);
   const [linkCopied, setLinkCopied] = useState(false);
   const [showEmailInvites, setShowEmailInvites] = useState(initialJoinMode !== "OPEN");
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const tournamentHealth = trpc.tournament.getHealth.useQuery({
     id: tournamentId,
@@ -127,6 +128,61 @@ export function PoolAdminPanel({
   return (
     <div className="shadow-sm rounded-lg bg-grey-200 border border-grey-100 w-full m-2">
       <div className="p-5 flex flex-col space-y-2">
+        {/* Help disclosure */}
+        <div className="bg-white border border-grey-100 rounded">
+          <button
+            type="button"
+            onClick={() => setHelpOpen((v) => !v)}
+            className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-black"
+          >
+            <span>What being commissioner means</span>
+            <svg
+              className={`w-4 h-4 text-grey-75 transition-transform ${helpOpen ? "" : "-rotate-90"}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+          {helpOpen && (
+            <ul className="px-4 pb-3 pt-1 text-xs leading-relaxed text-black space-y-2 list-disc list-outside ml-4">
+              <li>
+                <span className="font-bold">You decide when picks open.</span>{" "}
+                Open the pool once the field is finalized.
+              </li>
+              <li>
+                <span className="font-bold">
+                  You can invite members anytime up to lock.
+                </span>{" "}
+                Members can keep joining after picks are open.
+              </li>
+              <li>
+                <span className="font-bold">
+                  The pool auto-locks at midnight Pacific
+                </span>{" "}
+                the day the tournament starts. You can lock earlier if you
+                want.
+              </li>
+              <li>
+                <span className="font-bold">Pool auto-completes</span> a week
+                after the tournament finishes. You can mark it complete
+                sooner.
+              </li>
+              <li>
+                <span className="font-bold">Payments are on you.</span> Pool
+                Picks tracks scores and standings — collecting entry fees and
+                paying out the winner happens outside the app.
+              </li>
+            </ul>
+          )}
+        </div>
+
         {/* Completion alert */}
         {showCompletionAlert && (
           <div className="p-3 rounded bg-green-50 border border-green-100 mb-2">
@@ -201,7 +257,7 @@ export function PoolAdminPanel({
         )}
 
         {/* Email Invite Form */}
-        {selectedOption.value === "Setup" && (
+        {(selectedOption.value === "Setup" || selectedOption.value === "Open") && (
           joinMode === "OPEN" ? (
             <>
               <button

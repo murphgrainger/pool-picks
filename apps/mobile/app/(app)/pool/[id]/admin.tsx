@@ -35,6 +35,7 @@ export default function CommissionerScreen() {
 
   const [pendingStatus, setPendingStatus] = useState<PoolStatus | null>(null);
   const [confirmingNotify, setConfirmingNotify] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const updateStatus = trpc.pool.updateStatus.useMutation({
     onSuccess: async () => {
@@ -122,6 +123,40 @@ export default function CommissionerScreen() {
         <Text style={styles.poolName}>{pool.name}</Text>
         <Text style={styles.tournamentName}>{pool.tournament.name}</Text>
 
+        <Pressable
+          style={styles.helpToggle}
+          onPress={() => setHelpOpen((v) => !v)}
+        >
+          <Text style={styles.helpToggleText}>What being commissioner means</Text>
+          <Text style={[styles.helpChevron, helpOpen && styles.helpChevronOpen]}>
+            ▾
+          </Text>
+        </Pressable>
+        {helpOpen && (
+          <View style={styles.helpBody}>
+            <HelpBullet
+              title="You decide when picks open."
+              body="Open the pool once the field is finalized."
+            />
+            <HelpBullet
+              title="You can invite members anytime up to lock."
+              body="Members can keep joining after picks are open."
+            />
+            <HelpBullet
+              title="The pool auto-locks at midnight Pacific"
+              body="the day the tournament starts. You can lock earlier if you want."
+            />
+            <HelpBullet
+              title="Pool auto-completes"
+              body="a week after the tournament finishes. You can mark it complete sooner."
+            />
+            <HelpBullet
+              title="Payments are on you."
+              body="Pool Picks tracks scores and standings — collecting entry fees and paying out the winner happens outside the app."
+            />
+          </View>
+        )}
+
         <Text style={styles.sectionHeading}>Pool status</Text>
         <View style={styles.statusList}>
           {POOL_STATUSES.map((status) => {
@@ -164,7 +199,7 @@ export default function CommissionerScreen() {
           })}
         </View>
 
-        {currentStatus === "Setup" && (
+        {(currentStatus === "Setup" || currentStatus === "Open") && (
           <>
             <Text style={styles.sectionHeading}>Invite a member</Text>
             <TextInput
@@ -299,6 +334,17 @@ export default function CommissionerScreen() {
   );
 }
 
+function HelpBullet({ title, body }: { title: string; body: string }) {
+  return (
+    <View style={styles.helpBullet}>
+      <Text style={styles.helpDot}>•</Text>
+      <Text style={styles.helpText}>
+        <Text style={styles.helpTextBold}>{title}</Text> {body}
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: Colors.light.background },
   center: {
@@ -325,6 +371,61 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     marginTop: 16,
     marginBottom: 10,
+  },
+  helpToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: Colors.light.card,
+    borderColor: Colors.light.border,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  helpToggleText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: Colors.light.text,
+  },
+  helpChevron: {
+    color: Colors.light.muted,
+    fontSize: 14,
+    transform: [{ rotate: "-90deg" }],
+  },
+  helpChevronOpen: { transform: [{ rotate: "0deg" }] },
+  helpBody: {
+    backgroundColor: Colors.light.card,
+    borderColor: Colors.light.border,
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    marginTop: -8,
+    paddingTop: 4,
+    paddingBottom: 12,
+    paddingHorizontal: 14,
+    gap: 8,
+  },
+  helpBullet: {
+    flexDirection: "row",
+    gap: 8,
+    paddingTop: 8,
+  },
+  helpDot: {
+    color: Colors.light.tint,
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: "700",
+  },
+  helpText: {
+    flex: 1,
+    color: Colors.light.text,
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  helpTextBold: {
+    fontWeight: "700",
   },
   statusList: { gap: 6 },
   statusOption: {
