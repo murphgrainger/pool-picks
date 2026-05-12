@@ -7,6 +7,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -14,9 +15,19 @@ import {
 } from "react-native";
 import { POOL_STATUSES, type PoolStatus } from "@pool-picks/utils";
 
+type JoinMode = "OPEN" | "INVITE_ONLY";
+
 import { Spinner } from "@/components/spinner";
 import { Colors, Palette } from "@/constants/theme";
 import { trpc } from "@/lib/trpc";
+
+// Derive the public app base URL from EXPO_PUBLIC_TRPC_URL. In dev this
+// points at the LAN/ngrok web server, in prod at https://poolpicks.app.
+// Mirrors what web does with window.location.origin.
+const APP_BASE_URL = (process.env.EXPO_PUBLIC_TRPC_URL ?? "").replace(
+  /\/api\/trpc\/?$/,
+  ""
+);
 
 const STATUS_DESCRIPTIONS: Record<PoolStatus, string> = {
   Setup: "Invite members. Picks aren't open yet.",
@@ -55,6 +66,9 @@ export default function CommissionerScreen() {
 
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteNickname, setInviteNickname] = useState("");
+  const [optimisticJoinMode, setOptimisticJoinMode] = useState<JoinMode | null>(
+    null
+  );
 
   const createInvite = trpc.poolInvite.create.useMutation({
     onSuccess: async () => {
@@ -63,6 +77,17 @@ export default function CommissionerScreen() {
       setInviteNickname("");
     },
     onError: (err) => Alert.alert("Couldn't send invite", err.message),
+  });
+
+  const updateJoinMode = trpc.pool.updateJoinMode.useMutation({
+    onSuccess: async () => {
+      await utils.pool.getById.invalidate({ id: poolId });
+      setOptimisticJoinMode(null);
+    },
+    onError: (err) => {
+      Alert.alert("Couldn't update join mode", err.message);
+      setOptimisticJoinMode(null);
+    },
   });
 
   if (poolQuery.isPending) {
@@ -114,6 +139,32 @@ export default function CommissionerScreen() {
       email,
       nickname,
     });
+  }
+
+  const inviteUrl =
+    pool.invite_code && APP_BASE_URL
+      ? `${APP_BASE_URL}/join/${pool.invite_code}`
+      : null;
+
+  const effectiveJoinMode: JoinMode =
+    optimisticJoinMode ?? (pool.join_mode as JoinMode);
+
+  function chooseJoinMode(next: JoinMode) {
+    if (next === effectiveJoinMode) return;
+    setOptimisticJoinMode(next);
+    updateJoinMode.mutate({ pool_id: poolId, join_mode: next });
+  }
+
+  async function shareInviteLink() {
+    if (!inviteUrl) return;
+    try {
+      await Share.share({
+        message: `Join my PoolPicks pool: ${inviteUrl}`,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      Alert.alert("Couldn't share", message);
+    }
   }
 
   return (
@@ -204,42 +255,59 @@ export default function CommissionerScreen() {
 
         {(currentStatus === "Setup" || currentStatus === "Open") && (
           <>
-            <Text style={styles.sectionHeading}>Invite a member</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter email address"
-              placeholderTextColor={Colors.light.muted}
-              value={inviteEmail}
-              onChangeText={setInviteEmail}
-              autoCapitalize="none"
-              autoComplete="email"
-              keyboardType="email-address"
-              editable={!createInvite.isPending}
-            />
-            <TextInput
-              style={[styles.input, styles.inputSpaced]}
-              placeholder="Nickname"
-              placeholderTextColor={Colors.light.muted}
-              value={inviteNickname}
-              onChangeText={setInviteNickname}
-              autoCapitalize="words"
-              maxLength={30}
-              editable={!createInvite.isPending}
-            />
-            <Pressable
-              style={[
-                styles.primaryBtn,
-                createInvite.isPending && styles.btnDimmed,
-              ]}
-              onPress={submitInvite}
-              disabled={createInvite.isPending}
-            >
-              {createInvite.isPending ? (
-                <Spinner size={18} color={Colors.light.card} />
-              ) : (
-                <Text style={styles.primaryBtnText}>Send invite</Text>
-              )}
-            </Pressable>
+            <Text style={styles.sectionHeading}>Pool access</Text>
+            <View style={styles.radioList}>
+              <RadioOption
+                selected={effectiveJoinMode === "OPEN"}
+                onPress={() => chooseJoinMode("OPEN")}
+                label="Anyone with the invite link"
+              />
+              <RadioOption
+                selected={effectiveJoinMode === "INVITE_ONLY"}
+                onPress={() => chooseJoinMode("INVITE_ONLY")}
+                label="Only people I invite by email"
+              />
+            </View>
+
+            {effectiveJoinMode === "INVITE_ONLY" ? (
+              <>
+                <EmailInviteBlock
+                  inviteEmail={inviteEmail}
+                  setInviteEmail={setInviteEmail}
+                  inviteNickname={inviteNickname}
+                  setInviteNickname={setInviteNickname}
+                  submitInvite={submitInvite}
+                  createInvitePending={createInvite.isPending}
+                />
+                {inviteUrl && (
+                  <InviteLinkBlock
+                    code={pool.invite_code!}
+                    inviteUrl={inviteUrl}
+                    onShare={shareInviteLink}
+                    showInviteOnlyNote
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                {inviteUrl && (
+                  <InviteLinkBlock
+                    code={pool.invite_code!}
+                    inviteUrl={inviteUrl}
+                    onShare={shareInviteLink}
+                    showInviteOnlyNote={false}
+                  />
+                )}
+                <EmailInviteBlock
+                  inviteEmail={inviteEmail}
+                  setInviteEmail={setInviteEmail}
+                  inviteNickname={inviteNickname}
+                  setInviteNickname={setInviteNickname}
+                  submitInvite={submitInvite}
+                  createInvitePending={createInvite.isPending}
+                />
+              </>
+            )}
           </>
         )}
 
@@ -345,6 +413,123 @@ function HelpBullet({ title, body }: { title: string; body: string }) {
         <Text style={styles.helpTextBold}>{title}</Text> {body}
       </Text>
     </View>
+  );
+}
+
+function RadioOption({
+  selected,
+  onPress,
+  disabled,
+  label,
+}: {
+  selected: boolean;
+  onPress: () => void;
+  disabled?: boolean;
+  label: string;
+}) {
+  return (
+    <Pressable style={styles.radioRow} onPress={onPress} disabled={disabled}>
+      <View
+        style={[styles.radioOuter, selected && styles.radioOuterSelected]}
+      >
+        {selected && <View style={styles.radioInner} />}
+      </View>
+      <Text style={styles.radioLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function InviteLinkBlock({
+  code,
+  inviteUrl,
+  onShare,
+  showInviteOnlyNote,
+}: {
+  code: string;
+  inviteUrl: string;
+  onShare: () => void;
+  showInviteOnlyNote: boolean;
+}) {
+  return (
+    <>
+      <Text style={styles.sectionHeading}>Invite link</Text>
+      {showInviteOnlyNote && (
+        <Text style={styles.inviteNote}>
+          Once you've invited people by email, you can also share this link.
+        </Text>
+      )}
+      <View style={styles.inviteCard}>
+        <Text style={styles.inviteCodeLabel}>JOIN CODE</Text>
+        <Text style={styles.inviteCode} selectable>
+          {code}
+        </Text>
+        <Text
+          style={styles.inviteUrl}
+          numberOfLines={1}
+          ellipsizeMode="middle"
+          selectable
+        >
+          {inviteUrl}
+        </Text>
+        <Pressable style={styles.shareBtn} onPress={onShare}>
+          <Text style={styles.shareBtnText}>Share invite</Text>
+        </Pressable>
+      </View>
+    </>
+  );
+}
+
+function EmailInviteBlock({
+  inviteEmail,
+  setInviteEmail,
+  inviteNickname,
+  setInviteNickname,
+  submitInvite,
+  createInvitePending,
+}: {
+  inviteEmail: string;
+  setInviteEmail: (v: string) => void;
+  inviteNickname: string;
+  setInviteNickname: (v: string) => void;
+  submitInvite: () => void;
+  createInvitePending: boolean;
+}) {
+  return (
+    <>
+      <Text style={styles.sectionHeading}>Invite a member via email</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter email address"
+        placeholderTextColor={Colors.light.muted}
+        value={inviteEmail}
+        onChangeText={setInviteEmail}
+        autoCapitalize="none"
+        autoComplete="email"
+        keyboardType="email-address"
+        editable={!createInvitePending}
+      />
+      <TextInput
+        style={[styles.input, styles.inputSpaced]}
+        placeholder="Nickname"
+        placeholderTextColor={Colors.light.muted}
+        value={inviteNickname}
+        onChangeText={setInviteNickname}
+        autoCapitalize="words"
+        maxLength={30}
+        editable={!createInvitePending}
+      />
+      <Pressable
+        style={[styles.primaryBtn, createInvitePending && styles.btnDimmed]}
+        onPress={submitInvite}
+        disabled={createInvitePending}
+      >
+        {createInvitePending ? (
+          <Spinner size={18} color={Colors.light.card} />
+        ) : (
+          <Text style={styles.primaryBtnText}>Send invite</Text>
+        )}
+      </Pressable>
+    </>
   );
 }
 
@@ -468,6 +653,87 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   inputSpaced: { marginTop: 10 },
+  inviteNote: {
+    fontSize: 12,
+    color: Colors.light.muted,
+    lineHeight: 16,
+    marginBottom: 10,
+    marginTop: -4,
+  },
+  inviteCard: {
+    backgroundColor: Colors.light.card,
+    borderColor: Colors.light.border,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    alignItems: "center",
+  },
+  inviteCodeLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: Colors.light.muted,
+    letterSpacing: 1.2,
+  },
+  inviteCode: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: Colors.light.tint,
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    letterSpacing: 2,
+    marginTop: 4,
+  },
+  inviteUrl: {
+    fontSize: 12,
+    color: Colors.light.muted,
+    marginTop: 6,
+    width: "100%",
+    textAlign: "center",
+  },
+  shareBtn: {
+    backgroundColor: Palette.green[700],
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 12,
+    alignSelf: "stretch",
+    alignItems: "center",
+  },
+  shareBtnText: {
+    color: Colors.light.card,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  radioList: { gap: 10, marginTop: 4 },
+  radioRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    gap: 12,
+  },
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: Colors.light.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioOuterSelected: {
+    borderColor: Colors.light.tint,
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.light.tint,
+  },
+  radioLabel: {
+    flex: 1,
+    fontSize: 15,
+    color: Colors.light.text,
+  },
   primaryBtn: {
     backgroundColor: Colors.light.tint,
     paddingVertical: 12,
