@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" shape-rendering="geometricPrecision">
+  <!-- Forest green field -->
+  <rect width="1024" height="1024" fill="#006747"/>
+
+  <!-- Cup hole: very dark interior so it reads as a hole -->
+  <circle cx="450" cy="600" r="230" fill="#04261A"/>
+
+  <!-- Cup rim (gold) -->
+  <circle cx="450" cy="600" r="230" fill="none" stroke="#C8A951" stroke-width="9"/>
+
+  <!-- Golf ball: cream, perched on upper-right lip of cup -->
+  <circle cx="610" cy="440" r="175" fill="#FAF9F6"/>
+
+  <!-- Subtle dimples on ball (3x3 grid, low-opacity green) -->
+  <g fill="#006747" opacity="0.14">
+    <circle cx="560" cy="390" r="7"/>
+    <circle cx="610" cy="390" r="7"/>
+    <circle cx="660" cy="390" r="7"/>
+    <circle cx="560" cy="440" r="7"/>
+    <circle cx="610" cy="440" r="7"/>
+    <circle cx="660" cy="440" r="7"/>
+    <circle cx="560" cy="490" r="7"/>
+    <circle cx="610" cy="490" r="7"/>
+    <circle cx="660" cy="490" r="7"/>
+  </g>
+</svg>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" shape-rendering="geometricPrecision">
+  <!-- Forest green field -->
+  <rect width="1024" height="1024" fill="#006747"/>
+
+  <!-- Outer crest ring (thick gold) -->
+  <circle cx="512" cy="512" r="420" fill="none" stroke="#C8A951" stroke-width="10"/>
+
+  <!-- Inner crest ring (thin gold hairline) -->
+  <circle cx="512" cy="512" r="395" fill="none" stroke="#C8A951" stroke-width="2"/>
+
+  <!-- Compass-point tick marks -->
+  <rect x="508" y="78" width="8" height="22" fill="#C8A951"/>
+  <rect x="508" y="924" width="8" height="22" fill="#C8A951"/>
+  <rect x="78" y="508" width="22" height="8" fill="#C8A951"/>
+  <rect x="924" y="508" width="22" height="8" fill="#C8A951"/>
+
+  <!-- Golf ball (cream, centered) -->
+  <circle cx="512" cy="512" r="220" fill="#FAF9F6"/>
+
+  <!-- Dimples (subtle 5x5 grid, low-opacity green) -->
+  <g fill="#006747" opacity="0.13">
+    <circle cx="432" cy="432" r="9"/>
+    <circle cx="472" cy="432" r="9"/>
+    <circle cx="512" cy="432" r="9"/>
+    <circle cx="552" cy="432" r="9"/>
+    <circle cx="592" cy="432" r="9"/>
+
+    <circle cx="432" cy="472" r="9"/>
+    <circle cx="472" cy="472" r="9"/>
+    <circle cx="512" cy="472" r="9"/>
+    <circle cx="552" cy="472" r="9"/>
+    <circle cx="592" cy="472" r="9"/>
+
+    <circle cx="432" cy="512" r="9"/>
+    <circle cx="472" cy="512" r="9"/>
+    <circle cx="512" cy="512" r="9"/>
+    <circle cx="552" cy="512" r="9"/>
+    <circle cx="592" cy="512" r="9"/>
+
+    <circle cx="432" cy="552" r="9"/>
+    <circle cx="472" cy="552" r="9"/>
+    <circle cx="512" cy="552" r="9"/>
+    <circle cx="552" cy="552" r="9"/>
+    <circle cx="592" cy="552" r="9"/>
+
+    <circle cx="432" cy="592" r="9"/>
+    <circle cx="472" cy="592" r="9"/>
+    <circle cx="512" cy="592" r="9"/>
+    <circle cx="552" cy="592" r="9"/>
+    <circle cx="592" cy="592" r="9"/>
+  </g>
+</svg>

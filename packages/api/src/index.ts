@@ -4,6 +4,7 @@ import { tournamentRouter } from "./routers/tournament";
 import { athleteRouter } from "./routers/athlete";
 import { poolInviteRouter } from "./routers/poolInvite";
 import { poolMemberRouter } from "./routers/poolMember";
+import { userRouter } from "./routers/user";
 
 export const appRouter = router({
   pool: poolRouter,
@@ -11,6 +12,7 @@ export const appRouter = router({
   athlete: athleteRouter,
   poolInvite: poolInviteRouter,
   poolMember: poolMemberRouter,
+  user: userRouter,
 });
 
 export type AppRouter = typeof appRouter;

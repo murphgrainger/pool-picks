@@ -13,9 +13,16 @@ const handler = (req: Request) =>
     createContext: async () => {
       const supabase = createRouteHandlerClient();
 
+      const authHeader = req.headers.get("authorization");
+      const bearerToken = authHeader?.toLowerCase().startsWith("bearer ")
+        ? authHeader.slice(7)
+        : null;
+
       const {
         data: { user: supabaseUser },
-      } = await supabase.auth.getUser();
+      } = bearerToken
+        ? await supabase.auth.getUser(bearerToken)
+        : await supabase.auth.getUser();
 
       if (!supabaseUser?.email) {
         return createContext({ user: null });

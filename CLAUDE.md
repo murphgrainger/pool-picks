@@ -13,6 +13,7 @@ Pool Picks is a golf pool/wagering application. Users create pools for PGA tourn
 - **Auth:** Supabase Auth (Google OAuth + Email OTP)
 - **Styling:** Tailwind CSS with custom golf-themed color palette
 - **Scraping:** Axios + Cheerio (ESPN leaderboard/rankings data)
+- **Transactional email:** Resend (admin alerts when ESPN schema changes; sends from `send.poolpicks.app`)
 - **Testing:** Vitest (scoring logic + tRPC routers)
 
 ## Commands
@@ -28,6 +29,39 @@ Pool Picks is a golf pool/wagering application. Users create pools for PGA tourn
 - `npx prisma studio` — Open Prisma database browser
 - `npx prisma db seed` — Seed database
 
+### Mobile (from `apps/mobile/`):
+
+**Daily dev (no native changes):**
+```bash
+yarn dev                          # terminal 1, from repo root: web app for tRPC
+cd apps/mobile && yarn start      # terminal 2: Metro
+```
+Add `--clear` to `yarn start` after editing `.env` — `EXPO_PUBLIC_*` vars are baked at bundle start, not hot-reloaded.
+
+Then on the phone, open **PoolPicks Dev** → tap the recent Metro URL in the dev launcher. Or use Expo Go for JS-only changes that don't need native features.
+
+**Type-check and lint:**
+- `yarn type-check` — `tsc --noEmit`
+- `yarn lint` — Expo lint
+
+**EAS builds** (only when native config changes — see "When to rebuild" below):
+- `eas build --profile development --platform ios` — Dev-client binary that can connect to Metro. ~15-25 min.
+- `eas build --profile preview --platform ios` — Internal share, embedded bundle, no Metro.
+- `eas build --profile production --platform ios` — TestFlight / App Store.
+
+**When to rebuild** (anything else is JS-only, no rebuild needed):
+- `app.json` plugin entries, `iosUrlScheme`, `associatedDomains`, or bundle ID change
+- New/upgraded package with native iOS code (anything shipping an `ios/` folder or Expo config plugin)
+- Anything edited under `apps/mobile/ios/`
+
+**Mobile env vars** live in two places — **mirror every `EXPO_PUBLIC_*` to both:**
+1. **Local `/.env`** (repo root, `EXPO_PUBLIC_*` keys near the bottom) — used by Metro when bundling locally.
+2. **EAS environment variables** (https://expo.dev → poolpicks → Environment Variables) — used when EAS builds the binary's embedded bundle. Add the var to **all three** environments (development, preview, production). Use **Plaintext** visibility for `EXPO_PUBLIC_*` since those values ship in the JS bundle anyway, and Plaintext lets you read them back later. EAS env vars persist across builds — you only need to add a var the first time it's introduced.
+
+**`EXPO_PUBLIC_TRPC_URL` must be reachable from the phone.** Default is the Mac's LAN IP (e.g. `http://192.168.5.15:3000/api/trpc`). If LAN is flaky, switch to `ngrok http 3000` and update the URL.
+
+See `apps/mobile/README.md` for full setup details, three-dev-loop comparison, and troubleshooting.
+
 ## Database Migrations
 
 Migrations run automatically on deploy via the web app's build step (`prisma migrate deploy`). You should never need to manually run migrations in production.
@@ -42,6 +76,15 @@ Migrations run automatically on deploy via the web app's build step (`prisma mig
 **Do not use `prisma db push` for schema changes** — it doesn't create migration files and leads to drift between environments. Use `prisma migrate dev` instead.
 
 **Environment note:** The root `.env` has `DATABASE_URL` and `DIRECT_URL`. Make sure these point to your **local** Supabase project for development, not production.
+
+## Deployment
+
+- **Production domain:** `poolpicks.app` (not `.com` — we don't own `poolpicks.com`)
+- **Hosting:** Vercel (production web app at `https://poolpicks.app`)
+- **Build config:** `apps/web/vercel.json` — runs `prisma migrate deploy` before `next build`
+- **Cron:** Vercel cron triggers `/api/cron/scores` every 5 minutes between 9:00–23:00 UTC for live score refresh during tournaments
+- **Domain registrar:** Squarespace (registrar for `poolpicks.app`)
+- **DNS:** Cloudflare (nameservers for `poolpicks.app`, DNS-only mode pointing at Vercel; also runs Cloudflare Email Routing for `play@poolpicks.app` → personal Gmail)
 
 ## Monorepo Structure
 

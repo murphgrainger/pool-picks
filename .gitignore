@@ -42,3 +42,4 @@ package-lock.json
 # internal docs
 API-OPTIONS.md
 ESPN-JSON-API.md
+.claude/scheduled_tasks.lock

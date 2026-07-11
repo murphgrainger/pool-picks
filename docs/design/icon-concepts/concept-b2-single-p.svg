@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" shape-rendering="geometricPrecision">
+  <!-- Forest green field -->
+  <rect width="1024" height="1024" fill="#006747"/>
+
+  <!-- Outer crest ring (thick gold) -->
+  <circle cx="512" cy="512" r="420" fill="none" stroke="#C8A951" stroke-width="10"/>
+
+  <!-- Inner crest ring (thin gold hairline) -->
+  <circle cx="512" cy="512" r="395" fill="none" stroke="#C8A951" stroke-width="2"/>
+
+  <!-- Compass-point tick marks -->
+  <rect x="508" y="78" width="8" height="22" fill="#C8A951"/>
+  <rect x="508" y="924" width="8" height="22" fill="#C8A951"/>
+  <rect x="78" y="508" width="22" height="8" fill="#C8A951"/>
+  <rect x="924" y="508" width="22" height="8" fill="#C8A951"/>
+
+  <!-- Single serif P (cream) -->
+  <text x="512" y="680" font-family="Georgia, 'Times New Roman', serif" font-size="540" font-weight="700" fill="#FAF9F6" text-anchor="middle">P</text>
+</svg>

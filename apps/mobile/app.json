@@ -1,0 +1,73 @@
+{
+  "expo": {
+    "name": "PoolPicks",
+    "slug": "poolpicks",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "poolpicks",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.murphgrainger.poolpicks",
+      "usesAppleSignIn": true,
+      "associatedDomains": ["applinks:poolpicks.app"],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.murphgrainger.poolpicks",
+      "adaptiveIcon": {
+        "backgroundColor": "#006747",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.281472842056-q603g8ru4cem7ks3svc1jvtrahslrv63"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 600,
+          "resizeMode": "contain",
+          "backgroundColor": "#006747"
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "msmurph",
+          "project": "poolpicks-mobile"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5b7e9ffa-ca54-4fe2-aaa2-fef65559763c"
+      }
+    },
+    "owner": "murphgrainger"
+  }
+}

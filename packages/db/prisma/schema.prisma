@@ -9,13 +9,14 @@ generator client {
 }
 
 model User {
-  id           String       @id // Supabase Auth UUID
-  created_at   DateTime     @default(now())
-  updated_at   DateTime     @default(now()) @updatedAt
-  email        String       @unique
-  nickname     String?      @unique
-  is_admin     Boolean      @default(false)
-  pool_members PoolMember[]
+  id              String       @id // Supabase Auth UUID
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @default(now()) @updatedAt
+  email           String       @unique
+  nickname        String?      @unique
+  is_admin        Boolean      @default(false)
+  expo_push_token String?
+  pool_members    PoolMember[]
 }
 
 enum PoolRole {

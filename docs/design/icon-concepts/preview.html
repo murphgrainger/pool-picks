@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PoolPicks — icon concepts preview</title>
+<style>
+  :root {
+    --cream: #FAF9F6;
+    --ink: #1a1a1a;
+    --mute: #6b7280;
+    --green: #006747;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--cream); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; padding: 60px 40px; }
+  h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  h2 { font-size: 20px; font-weight: 600; margin: 56px 0 20px; color: var(--mute); text-transform: uppercase; letter-spacing: 1.5px; }
+  p.lede { color: var(--mute); margin-bottom: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; max-width: 1400px; margin: 0 auto; }
+  .concept { background: white; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden; }
+  .recommended { outline: 3px solid #C8A951; outline-offset: 2px; }
+  .concept-name { padding: 18px 22px 4px; font-size: 13px; font-weight: 600; color: var(--mute); text-transform: uppercase; letter-spacing: 1px; }
+  .concept-title { padding: 0 22px 16px; font-size: 20px; font-weight: 700; }
+  .recommended .concept-title::after { content: " · pick"; color: #C8A951; font-weight: 500; }
+  .icon-large { display: block; width: 100%; aspect-ratio: 1/1; }
+  .sizes { display: flex; gap: 16px; padding: 20px; align-items: center; justify-content: center; background: #f3f4f6; border-top: 1px solid #e5e7eb; }
+  .size { text-align: center; }
+  .size svg, .size object { display: block; border-radius: 22%; }
+  .size-label { font-size: 11px; color: var(--mute); margin-top: 8px; }
+  .notes { padding: 18px 22px; font-size: 13px; line-height: 1.55; color: var(--mute); border-top: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+  <h1>PoolPicks — icon concepts</h1>
+  <p class="lede">Three crest variants based on your feedback (drop "PP", try simpler inner mark). Each preview shows the icon at 1024×1024 and at App Store / home-screen / Spotlight sizes with the iOS rounded-corner mask applied.</p>
+
+  <h2>Crest variants</h2>
+  <div class="grid">
+    <div class="concept recommended">
+      <div class="concept-name">Concept B1</div>
+      <div class="concept-title">Pin in Crest</div>
+      <object class="icon-large" type="image/svg+xml" data="concept-b1-pin-in-crest.svg"></object>
+      <div class="sizes">
+        <div class="size"><object type="image/svg+xml" data="concept-b1-pin-in-crest.svg" width="180" height="180"></object><div class="size-label">180px</div></div>
+        <div class="size"><object type="image/svg+xml" data="concept-b1-pin-in-crest.svg" width="120" height="120"></object><div class="size-label">120px</div></div>
+        <div class="size"><object type="image/svg+xml" data="concept-b1-pin-in-crest.svg" width="60" height="60"></object><div class="size-label">60px</div></div>
+      </div>
+      <div class="notes">Combines your two favorites: crest framing + pin/flag/cup symbol. The pin reads at every size; the crest sells the "country club" mood without leaning on letterforms.</div>
+    </div>
+
+    <div class="concept">
+      <div class="concept-name">Concept B2</div>
+      <div class="concept-title">Single Serif P</div>
+      <object class="icon-large" type="image/svg+xml" data="concept-b2-single-p.svg"></object>
+      <div class="sizes">
+        <div class="size"><object type="image/svg+xml" data="concept-b2-single-p.svg" width="180" height="180"></object><div class="size-label">180px</div></div>
+        <div class="size"><object type="image/svg+xml" data="concept-b2-single-p.svg" width="120" height="120"></object><div class="size-label">120px</div></div>
+        <div class="size"><object type="image/svg+xml" data="concept-b2-single-p.svg" width="60" height="60"></object><div class="size-label">60px</div></div>
+      </div>
+      <div class="notes">Simplest path. Risk: single-letter app icons (P, M, T, etc.) are extremely common — Pinterest, Medium, Twitter (RIP), Pocket all live here. The serif and crest framing help distinguish, but you're swimming against a crowded pond.</div>
+    </div>
+
+    <div class="concept">
+      <div class="concept-name">Concept B3</div>
+      <div class="concept-title">Golf Ball</div>
+      <object class="icon-large" type="image/svg+xml" data="concept-b3-ball.svg"></object>
+      <div class="sizes">
+        <div class="size"><object type="image/svg+xml" data="concept-b3-ball.svg" width="180" height="180"></object><div class="size-label">180px</div></div>
+        <div class="size"><object type="image/svg+xml" data="concept-b3-ball.svg" width="120" height="120"></object><div class="size-label">120px</div></div>
+        <div class="size"><object type="image/svg+xml" data="concept-b3-ball.svg" width="60" height="60"></object><div class="size-label">60px</div></div>
+      </div>
+      <div class="notes">Most golf-literal of the three. Reads at every size. Risk: a ball inside a circle inside a circle is concentric overload — too many circles. Could work if you replace the outer crest with something less circular.</div>
+    </div>
+  </div>
+
+  <h2>Original three (for reference)</h2>
+  <div class="grid">
+    <div class="concept">
+      <div class="concept-name">Concept A</div>
+      <div class="concept-title">Pin Flag Monogram</div>
+      <object class="icon-large" type="image/svg+xml" data="concept-a-pinflag.svg"></object>
+    </div>
+    <div class="concept">
+      <div class="concept-name">Concept B (original)</div>
+      <div class="concept-title">PP Monogram</div>
+      <object class="icon-large" type="image/svg+xml" data="concept-b-crest.svg"></object>
+    </div>
+    <div class="concept">
+      <div class="concept-name">Concept C</div>
+      <div class="concept-title">Ball-in-Cup</div>
+      <object class="icon-large" type="image/svg+xml" data="concept-c-ballincup.svg"></object>
+    </div>
+  </div>
+</body>
+</html>
