@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@pool-picks/db";
 import { createRouteHandlerClient } from "@/lib/supabase/route";
 import {
+  assertSupportedFormat,
   assertValidResponse,
   validateFieldResponse,
 } from "../../../espn-validation";
@@ -31,6 +32,7 @@ async function fetchAthleteField(id: string): Promise<Athlete[]> {
   const raw = await response.json();
   // Path-based URL returns the event directly; query-param URL wraps in { events: [...] }
   const event = raw.events ? raw.events[0] : raw;
+  assertSupportedFormat(event);
   await assertValidResponse(event, validateFieldResponse, "scoreboard (field)");
 
   if (event.id !== String(tournament.external_id)) {

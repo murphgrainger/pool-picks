@@ -1,5 +1,6 @@
 import { prisma } from "@pool-picks/db";
 import {
+  assertSupportedFormat,
   assertValidResponse,
   validateCoreEventResponse,
   validateCoreTournamentResponse,
@@ -174,6 +175,9 @@ export async function fetchGolfData(id: string) {
   const raw = await response.json();
   // Path-based URL returns the event directly; query-param URL wraps in { events: [...] }
   const event = raw.events ? raw.events[0] : raw;
+  // Team events have no per-athlete data and would fail the validator below.
+  // Reject them explicitly so they don't look like an ESPN schema change.
+  assertSupportedFormat(event);
   await assertValidResponse(
     event,
     validateScoreboardResponse,
