@@ -10,6 +10,10 @@ import {
 import { sendScoreSyncAlertEmail } from "@pool-picks/api/lib/email";
 import { syncTournamentScores } from "../../scrape/tournaments/score-sync";
 
+// Keep syncing for this many days after a tournament's end_date. Covers Monday
+// finishes from weather delays plus one final pass to capture the last scores.
+const SYNC_GRACE_DAYS = 2;
+
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -36,10 +40,23 @@ export async function GET(request: Request) {
     );
   }
 
+  // Tournaments never auto-complete, so without a date window every past
+  // event stays Active and gets re-fetched from ESPN every five minutes.
+  // end_date is a @db.Date (midnight UTC), so compare against midnight UTC.
+  const now = new Date();
+  const syncCutoff = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() - SYNC_GRACE_DAYS
+    )
+  );
+
   const tournaments = await prisma.tournament.findMany({
     where: {
       status: "Active",
       external_id: { not: null },
+      end_date: { gte: syncCutoff },
     },
     select: { id: true, name: true },
   });
