@@ -9,6 +9,11 @@ import {
 } from "@pool-picks/api";
 import { sendScoreSyncAlertEmail } from "@pool-picks/api/lib/email";
 import { syncTournamentScores } from "../../scrape/tournaments/score-sync";
+import { UnsupportedTournamentFormatError } from "../../scrape/espn-validation";
+
+// Keep syncing for this many days after a tournament's end_date. Covers Monday
+// finishes from weather delays plus one final pass to capture the last scores.
+const SYNC_GRACE_DAYS = 2;
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -36,10 +41,23 @@ export async function GET(request: Request) {
     );
   }
 
+  // Tournaments never auto-complete, so without a date window every past
+  // event stays Active and gets re-fetched from ESPN every five minutes.
+  // end_date is a @db.Date (midnight UTC), so compare against midnight UTC.
+  const now = new Date();
+  const syncCutoff = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() - SYNC_GRACE_DAYS
+    )
+  );
+
   const tournaments = await prisma.tournament.findMany({
     where: {
       status: "Active",
       external_id: { not: null },
+      end_date: { gte: syncCutoff },
     },
     select: { id: true, name: true },
   });
@@ -53,10 +71,33 @@ export async function GET(request: Request) {
     });
   }
 
+  const excluded: string[] = [];
+
   const results = await Promise.allSettled(
     tournaments.map(async (t) => {
-      const result = await syncTournamentScores(t.id);
-      return { name: t.name, ...result };
+      try {
+        const result = await syncTournamentScores(t.id);
+        return { name: t.name, ...result };
+      } catch (err) {
+        if (!(err instanceof UnsupportedTournamentFormatError)) throw err;
+
+        // Team event — mark it Excluded so the cron stops retrying it every
+        // five minutes, and let the admin know auto-sync turned off.
+        await prisma.tournament.update({
+          where: { id: t.id },
+          data: { status: "Excluded" },
+        });
+        console.warn(`Excluded "${t.name}": ${err.message}`);
+        excluded.push(t.name);
+        if (adminEmail) {
+          await sendScoreSyncAlertEmail({
+            to: adminEmail,
+            tournamentName: t.name,
+            active: false,
+          }).catch(() => {});
+        }
+        return { name: t.name, updated: false, message: err.message };
+      }
     })
   );
 
@@ -71,6 +112,7 @@ export async function GET(request: Request) {
     synced,
     failed,
     poolsLocked: locked.length,
+    excluded: excluded.length > 0 ? excluded : undefined,
     errors: errors.length > 0 ? errors : undefined,
   });
 }

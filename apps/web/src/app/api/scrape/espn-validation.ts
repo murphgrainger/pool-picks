@@ -13,6 +13,36 @@ function startOfUTCDay(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 
+// --- Unsupported formats ---
+
+// Thrown when ESPN returns a tournament PoolPicks can't score — currently team
+// events (Zurich Classic, Presidents Cup, Ryder Cup). ESPN puts a `team` object
+// on each competitor instead of `athlete`, so this is a known format, not a
+// schema change, and it must never trigger the schema alert email.
+export class UnsupportedTournamentFormatError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnsupportedTournamentFormatError";
+  }
+}
+
+export function isTeamEvent(competitors: unknown): boolean {
+  if (!Array.isArray(competitors) || competitors.length === 0) return false;
+  return competitors.some(
+    (c: any) => c?.type === "team" || (c?.team && !c?.athlete)
+  );
+}
+
+export function assertSupportedFormat(event: any): void {
+  const competitors = event?.competitions?.[0]?.competitors;
+  if (isTeamEvent(competitors)) {
+    const name = event?.name ? ` (${event.name})` : "";
+    throw new UnsupportedTournamentFormatError(
+      `This is a team event${name}. PoolPicks only scores individual stroke-play tournaments.`
+    );
+  }
+}
+
 // --- Validators ---
 
 // Validates a single event object (already unwrapped from events[] if needed)
